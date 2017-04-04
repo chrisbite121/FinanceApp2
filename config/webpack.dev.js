@@ -10,9 +10,9 @@ module.exports = {
     devtool: 'cheap-module-eval-source-map',
 
     entry: {
-        'polyfills': './app/polyfills.ts',
-        'vendor': './app/vendor.ts',
-        'app': './app/boot.ts'
+        'polyfills': './src/polyfills.ts',
+        'vendor': './src/vendor.ts',
+        'app': './src/boot.ts'
     },
 
     output: {

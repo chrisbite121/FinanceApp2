@@ -13,7 +13,7 @@ const ENV = process.env.NODE_ENV = process.env.ENV = 'production';
 // workaround https://github.com/angular/angular-cli/issues/5329
 var aotPlugin = new ngToolsWebpack.AotPlugin({
     tsConfigPath: "./tsconfig.aot.json",
-    entryModule: helpers.root('app/app.module#AppModule'),
+    entryModule: helpers.root('src/app/app.module#AppModule'),
 });
 aotPlugin._compilerHost._resolve = function(path_to_resolve) {
     path_1 = require("path");
@@ -33,9 +33,9 @@ module.exports = {
     devtool: 'source-map',
 
     entry: {
-        polyfills: './app/polyfills.ts',
-        vendor: './app/vendor-aot.ts',
-        app: './app/boot-aot.ts'
+        polyfills: './src/polyfills.ts',
+        vendor: './src/vendor-aot.ts',
+        app: './src/boot-aot.ts'
     },
 
     output: {
