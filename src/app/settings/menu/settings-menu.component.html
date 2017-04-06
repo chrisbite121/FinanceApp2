@@ -1,0 +1,26 @@
+<ul class="sidebar-nav">
+    <li>
+        <a [routerLink]="['/settings', 
+            {outlets: { settingsContent: ['settings'] }} ]">Main</a>
+    </li>
+    <li>
+        <a [routerLink]="['/settings', 
+            {outlets: { settingsContent: ['calendar'] }} ]">Calendar</a>
+    </li>    
+    <li>
+        <a [routerLink]="['/settings', 
+            {outlets: { settingsContent: ['provision'] }} ]">Provisioner</a>
+    </li>
+    <li>
+        <a [routerLink]="['/settings', 
+            {outlets: { settingsContent: ['reset'] }} ]">Reset</a>
+    </li>
+    <li>
+        <a [routerLink]="['/settings', 
+            {outlets: { settingsContent: ['logger'] }} ]">Logs</a>
+    </li>
+    <li>
+        <a [routerLink]="['/settings', 
+            {outlets: { settingsContent: ['map'] }} ]">Mapping</a>
+    </li>          
+</ul>

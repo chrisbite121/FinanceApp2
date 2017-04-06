@@ -66,14 +66,14 @@ module.exports = {
             {
                 // site wide css (excluding all css under the app dir)
                 test: /\.css$/,
-                exclude: helpers.root('app'),
+                exclude: helpers.root('src/app'),
                 loader: ExtractTextPlugin.extract({fallback: 'style-loader', use: 'css-loader?sourceMap'})
             },
             {
                 // included styles under the app directory - these are for styles included
                 // with styleUrls
                 test: /\.css$/,
-                include: helpers.root('app'),
+                include: helpers.root('src/app'),
                 loader: 'raw-loader'
             }
         ]

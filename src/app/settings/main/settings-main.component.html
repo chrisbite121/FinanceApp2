@@ -1,0 +1,74 @@
+<h3>settings main</h3>
+{{year}}
+<div>
+    Region: {{region? region.value: 'none'}}
+    <a href="javascript:void(0)" (click)="smModal.show()">change</a>
+</div>
+
+<!--<select [(ngModel)]="selectedYear" (change)='selectYear($event.target.value)'>
+    <option *ngFor='let year of years' [value]='year'>{{year}}</option>
+</select>
+<button (click)='saveYearSelect();'>Set Year</button>-->
+
+<div class="btn-group" dropdown>
+  <button dropdownToggle type="button" class="btn btn-default btn-xs">
+    Select Year <span class="caret"></span>
+  </button>
+  <ul *dropdownMenu class="dropdown-menu" role="menu">
+    <li *ngFor='let year of years' [value]='year' role="menuitem">
+        <span style="cursor: pointer; cursor: hand;" class="dropdown-item" (click)='saveYearSelect(year)'>{{year}}</span>
+    </li>
+  </ul>
+</div>
+
+<div bsModal #smModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title pull-left">Change Region</h3>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="smModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div>
+            <select (change)='selectRegion($event.target.value)'>
+                <option *ngFor='let region of regionOptions' [value]='region.value'>{{region.label}}</option>
+            </select>
+        </div>
+        <hr>
+        <button type="button" class="btn btn-default btn-xs" (click)="saveRegionSelect(); smModal.hide();" label="Yes">Yes</button>
+        <button type="button" class="btn btn-default btn-xs" (click)="cancelRegionSelect(); smModal.hide()" label="No">No</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<h1>Colour picker</h1>
+<h1>column header names</h1>
+<h1>column header widths</h1>
+<h1>Auto Save</h1>
+
+<!--<p-dialog header="Region" [(visible)]="displayRegion" modal="modal" width="300" responsive="true">
+        <p>Select Region</p>
+        <div>
+            <select (change)='selectRegion($event.target.value)'>
+                <option *ngFor='let region of regionOptions' [value]='region.value'>{{region.label}}</option>
+            </select>
+        </div>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+                <button type="button" (click)="cancelRegionSelect()" label="No">No</button>
+                <button type="button" (click)="saveRegionSelect()" label="Yes">Yes</button>
+            </div>
+        </p-footer>
+</p-dialog>-->
+
+<!--Small modal-->
+
+
+
+
+
