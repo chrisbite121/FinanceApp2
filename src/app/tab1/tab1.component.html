@@ -3,24 +3,12 @@
         {{title}}
     </div>
     <div class="col-md-3">
-        <button class="btn btn-xs" (click)="addRow();">
-            Add
-        </button>
-        <button class="btn btn-xs" (click)="deleteRow();">
-            Remove
-        </button>
-        <button class="btn btn-xs" (click)="refreshGrid();">
-            Refresh 
-        </button>        
-        <button class="btn btn-xs" (click)="saveUpdates();">
-            Save
-        </button>
-        <button *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();">
-            Undo
-        </button>
-        <button *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();">
-            Redo
-        </button>
+        <input type="button" class="btn btn-xs" (click)="addRow();" value="Add"/>
+        <input type="button" class="btn btn-xs" (click)="deleteRow();" value="Remove"/>
+        <input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
+        <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
+        <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
+        <input type="button" *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();" value="Redo" />
     </div>
 </div>
 
