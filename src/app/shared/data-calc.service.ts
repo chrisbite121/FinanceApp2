@@ -212,7 +212,7 @@ export class DataCalcService {
         return row.RTSLbe - row.RTSBudget
     }
 
-    matYtdTotal(row:IDataModel): number {
+    matYtdTotal(row): number {
         let result = 0;
         result =    Number(row.MatJan) +
                     Number(row.MatFeb) +
@@ -229,15 +229,15 @@ export class DataCalcService {
         return result;
     }
 
-    matLbe(row:IDataModel): number {
+    matLbe(row): number {
         return row.MatYtdTotal;
     }
 
-    matYtdVarianceToBudget(row:IDataModel): number {
+    matYtdVarianceToBudget(row): number {
         return row.MatYtdTotal - row.MatBudget
     }
 
-    matForecastVarianceToBudget(row:IDataModel): number {
+    matForecastVarianceToBudget(row): number {
         return row.MatLbe - row.MatBudget
     }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 
 import { LogService } from './log.service'
 
-import { Observable } from 'rxjs/RX';
+import { Observable } from 'rxjs/Rx';
 import { Subject } from 'rxjs/Subject';
 
 @Injectable()

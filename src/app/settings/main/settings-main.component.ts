@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core'
-
 import { SettingsService } from '../../shared/settings.service'
-import { DataApiService } from '../../shared/data-api.service'
+import { UtilsService } from '../../shared/utils.service'
 
 import { IRegion } from '../../model/region.model'
 import { ISettings, ISettingsOptions } from '../../model/settings.model'
@@ -27,7 +26,7 @@ export class SettingsMainComponent implements OnInit {
     public year: number
 
     constructor(private settingsService: SettingsService,
-                private dataApiService: DataApiService ) {
+                private utilsService: UtilsService ) {
     }
 
     showRegionDialog() {
@@ -82,85 +81,4 @@ export class SettingsMainComponent implements OnInit {
         console.log(year);
         this.selectedYear = year
     }
-
-    //TOBEDELETED
-    createList(){
-        this.dataApiService.createList$.subscribe(this.getSubscriber())
-    }
-
-    updateList(){
-        this.dataApiService.updateList$.subscribe(this.getSubscriber())
-    }
-
-    deleteList() {
-        this.dataApiService.deleteList$.subscribe(this.getSubscriber())
-    }
-
-    readList() {
-        this.dataApiService.readList$.subscribe(this.getSubscriber())
-    }
-
-    listExists() {
-        this.dataApiService.listExists$.subscribe(this.getSubscriber())
-    }
-
-    fieldExists() {
-        this.dataApiService.listExists$.subscribe(this.getSubscriber())
-    }
-
-    readFields(){
-        this.dataApiService.readFields$.subscribe(this.getSubscriber());
-    }
-
-    readField(){
-        this.dataApiService.readField$.subscribe(this.getSubscriber());
-    }
-
-    deleteField(){
-        this.dataApiService.deleteField$.subscribe(this.getSubscriber());
-    }
-
-    updateField(){
-        this.dataApiService.updateField$.subscribe(this.getSubscriber());
-    }
-
-    addItem(){
-        this.dataApiService.addItem$.subscribe(this.getSubscriber());
-    }
-
-    updateItem(){
-        this.dataApiService.updateItem$.subscribe(this.getSubscriber());
-    }
-
-    getItem(){
-        this.dataApiService.getItem$.subscribe(this.getSubscriber());
-    }
-
-    getItems(){
-        this.dataApiService.getItems$.subscribe(this.getSubscriber());
-    }
-
-    deleteItem(){
-        this.dataApiService.deleteItem$.subscribe(this.getSubscriber());
-    }
-
-    deleteItems(){
-        this.dataApiService.deleteItems$.subscribe(this.getSubscriber());
-    }
-    
-    
-    getSubscriber() {
-        return {
-            next(data){
-                console.log('next', data)
-            },
-            error(err){
-                console.log('error', err)
-            },
-            complete(){
-                console.log('completed');
-            }
-        }
-    }
- 
 }

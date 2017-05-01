@@ -1,0 +1,16 @@
+<input type="button" id="getHealthReport" (click)="getHealthReport()" value="Get Health Report" />
+<input type="button" id="actionHealthReport" (click)="actionHealthReport()" value="Action Health Report" />
+<input type="button" id="getPermissions" (click)="getPermissions()" value="Get Permissions" />
+<input type="button" id="checkSettings" (click)="checkSettings()" value="Check Settings" />
+<input type="button" id="initProvisioner" (click)="initProvisioner()" value="Provisioner" />
+
+<input type="button" id="getData" (click)="getData()" value="Get Application Data" />
+<input type="button" id="saveData" (click)="saveData()" value="Save Application Data" />
+
+
+<div class="row well" *ngFor = "let log of logs">
+    <api-logger>
+        <div class="description">{{log.description}}</div>
+        <div class="type">{{log.type}}</div>
+    </api-logger>
+</div>  

@@ -12,8 +12,13 @@ import { SettingsService } from './shared/settings.service'
 import { TableService } from './shared/table.service'
 import { DataCalcService } from './shared/data-calc.service'
 import { DataContextService } from './shared/data-context.service'
-import { DataApiService } from './shared/data-api.service'
+import { CommonApiService } from './shared/api-common.service'
 import { UiStateService } from './shared/ui-state.service'
+import { UtilsService } from './shared/utils.service'
+import { ListService } from './shared/list.service'
+import { ScriptService } from './shared/scripts.service'
+import { HealthReportService } from './shared/health-report.service'
+import { DataApiService } from './shared/data-api.service'
 
 // application
 import {AppComponent} from "./app.component";
@@ -52,9 +57,14 @@ import { appRoutes } from './routes'
         TableService,
         DataCalcService,
         DataContextService,
-        DataApiService,
-        UiStateService
-                  ],    
+        CommonApiService,
+        UtilsService,
+        UiStateService,
+        ListService,
+        ScriptService,
+        HealthReportService,
+        DataApiService
+        ],    
     bootstrap: [AppComponent]
 })
 export class AppModule {

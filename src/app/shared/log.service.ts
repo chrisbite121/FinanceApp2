@@ -1,21 +1,31 @@
 import { Injectable } from '@angular/core';
 
+interface ILogModel {
+    id: number,
+    description: string,
+    type: string,
+    timestamp: Date,
+    verbose: Boolean
+}
+
 @Injectable()
 export class LogService {
-    private _logs:Array<any>
+    private _logs:Array<ILogModel>
     private _logId: number
     constructor(){
         this._logs = []
         this._logId = 0
     }
 
-    log(desc:any){
-        let log = {};
+    log(desc:any, type:string = 'info', verbose:boolean = false){
+        let log = {
+            id: this.generateId(),
+            type: type,
+            description: desc,
+            timestamp: new Date(),
+            verbose: verbose
+        };
         
-        log['id'] = this.generateId()
-        log['description'] = desc;
-        log['timestamp'] = new Date();
-
         this._logs.push(log);
     }
 
@@ -24,8 +34,7 @@ export class LogService {
     }
 
     generateId(){
-        this._logId ++
-        return this._logId;
+        return this._logs.length + 1
     }
 
 }

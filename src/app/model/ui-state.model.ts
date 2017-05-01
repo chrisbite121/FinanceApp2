@@ -4,6 +4,13 @@ export interface IUiState {
     autoSave: boolean,
     highlightCss: any,
     debugMode: boolean,
-    apicall: boolean
+    appProcessing: boolean, //used to show spinning wheel whilst saving/updating
+    permissionStatusChecked: Boolean,
+    manageWeb: boolean,
+    manageList: boolean,
+    viewList: Boolean,
+    addListItems: Boolean,
+    message: string,
+    state: string
 
 }

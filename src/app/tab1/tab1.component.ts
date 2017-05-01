@@ -294,23 +294,38 @@ export class Tab1Component implements OnInit {
                 this.rtsGridOptions.api.setRowData(data);
             }
 
-            if (!this.cmGridOptions.rowData) {
-                this.cmGridOptions.rowData = data;
-            } else if (this.cmGridOptions.api) {
-                this.cmGridOptions.api.setRowData(data);
-            }
+            // if (!this.cmGridOptions.rowData) {
+            //     this.cmGridOptions.rowData = data;
+            // } else if (this.cmGridOptions.api) {
+            //     this.cmGridOptions.api.setRowData(data);
+            // }
 
             if(this.puGridOptions.api &&
                 this.ahGridOptions.api &&
                 this.prGridOptions.api &&
                 this.tsGridOptions.api &&
                 this.atsGridOptions.api &&
-                this.rtsGridOptions.api &&
-                this.cmGridOptions.api) {
+                this.rtsGridOptions.api
+                // && this.cmGridOptions.api
+                ) {
                     this.applyCellHighlights(data);  
                 }
 
             this.resizeTables(data.length);
+        })
+
+        this.dataContext.getMaterialDataStream().subscribe(data=>{
+            if (!this.cmGridOptions.rowData) {
+                this.cmGridOptions.rowData = data;
+            } else if (this.cmGridOptions.api) {
+                this.cmGridOptions.api.setRowData(data);
+            }
+
+            if(this.cmGridOptions.api) {
+                this.applyMaterialCellHighlights(data);
+            }
+
+            this.resizeMaterialTable(data.length);            
         })
 
         this.dataContext.getTotalDataStream().subscribe(data => {
@@ -426,10 +441,11 @@ export class Tab1Component implements OnInit {
             return this.applyCellStyle(column,data, bkColour);
         })
 
-        this.cmGridOptions.columnDefs.forEach((column:any) => {
-            //highlight updated cells
-            return this.applyCellStyle(column,data, bkColour);
-        })
+        //now a seperate table
+        // this.cmGridOptions.columnDefs.forEach((column:any) => {
+        //     //highlight updated cells
+        //     return this.applyCellStyle(column,data, bkColour);
+        // })
 
         this.puGridOptions.api.setColumnDefs(this.puGridOptions.columnDefs);
         this.ahGridOptions.api.setColumnDefs(this.ahGridOptions.columnDefs);
@@ -440,6 +456,18 @@ export class Tab1Component implements OnInit {
         this.cmGridOptions.api.setColumnDefs(this.cmGridOptions.columnDefs);
 
     }
+    applyMaterialCellHighlights(tableData: any) {
+        let bkColour = this._backgroundColour;
+        let data:Array<any> = this.constructHighlightsObject(tableData);
+
+        this.cmGridOptions.columnDefs.forEach((column: any) => {
+            //highlight updated cells
+            return this.applyCellStyle(column, data, bkColour);
+        })
+
+        this.cmGridOptions.api.setColumnDefs(this.cmGridOptions.columnDefs);
+    }
+
     applyTotalCellHighlights(tableData: any){
         let bkColour = this._backgroundColour;
         let data:Array<any> = this.constructHighlightsObject(tableData);
@@ -469,6 +497,7 @@ export class Tab1Component implements OnInit {
         this.rtstGridOptions.api.setColumnDefs(this.rtstGridOptions.columnDefs);
         this.mattGridOptions.api.setColumnDefs(this.mattGridOptions.columnDefs);
     }
+
     applyCellStyle(column: any, data: any, bkColour: string){
             column.cellStyle = function(params: any){
                 let fldName = params.colDef.field;
@@ -513,7 +542,7 @@ export class Tab1Component implements OnInit {
         this.tsTableHeight = (noRows * 25) + 40;
         this.atsTableHeight = (noRows * 25) + 40;
         this.rtsTableHeight = (noRows * 25) + 40;
-        this.cmTableHeight = (noRows * 25) + 40;
+        
 
         this.puTableWidth = 1800;
         this.ahTableWidth = 1800;
@@ -521,12 +550,17 @@ export class Tab1Component implements OnInit {
         this.tsTableWidth = 1800;
         this.atsTableWidth = 1800;
         this.rtsTableWidth = 2000;
-        this.cmTableWidth = 2000;
+        
         
         //Totals
         this.tTableWidth = 2100;
         this.prtTableWidth = 2100;
         this.rtstTableWidth = 2100;
         this.mattTableWidth = 2100;
+    }
+
+    resizeMaterialTable(noRows: number) {
+        this.cmTableHeight = (noRows * 25) + 40;
+        this.cmTableWidth = 2000;
     }      
 }

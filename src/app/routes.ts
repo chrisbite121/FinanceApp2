@@ -9,6 +9,8 @@ import { SummaryComponent } from './summary/summary.component'
 export const appRoutes = [
      { path: 'summary', component: SummaryComponent },
      { path: 'tab1', component: Tab1Component },
+     { path: '', redirectTo: '/summary', pathMatch: 'full'},
      { path: '404', component: Error404Component },
-     { path: '', redirectTo: '/summary', pathMatch: 'full'}
+     { path: '**', component: Error404Component }
+     
 ]

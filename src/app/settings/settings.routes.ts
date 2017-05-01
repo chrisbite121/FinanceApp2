@@ -6,6 +6,14 @@ import { SettingsMenuComponent } from './menu/settings-menu.component';
 import { SettingsCalendarComponent } from './calendar/settings-calendar.component';
 import { LoggerComponent } from './logger/logger.component'
 import { MappingComponent } from './mapping/settings-mapping.component'
+import { LookFeelComponent } from './look-feel/look-feel.component'
+import { ResourceListComponent } from './resource-list/resource-list.component'
+import { TotalListComponent } from './total-list/total-list.component';
+import { MaterialListComponent } from './material-list/material-list.component';
+import { SettingListComponent } from './setting-list/setting-list.component';
+import { UserPermissionsComponent } from './user-permissions/user-permissions.component';
+import { ScriptsComponent } from './scripts/scripts.component'
+
 const settingsSubRoutes = [
     {
         path: 'settings',
@@ -33,20 +41,58 @@ const settingsSubRoutes = [
         outlet: 'settingsContent'
     },
     {
+        path: 'map',
+        component: MappingComponent,
+        outlet: 'settingsContent'
+    },
+    {
         path: '',
         component: SettingsMainComponent,
         outlet: 'settingsContent'
     },
     {
-        path: 'map',
-        component: MappingComponent,
+        path: 'lookandfeel',
+        component: LookFeelComponent,
         outlet: 'settingsContent'
-    },    
+    },
     {
-        path: '',
-        component: SettingsMenuComponent,
-        outlet: 'settingsMenu'
-    }
+        path: 'resourcelist',
+        component: ResourceListComponent,
+        outlet: 'settingsContent'
+    },
+    {
+        path: 'materialslist',
+        component: MaterialListComponent,
+        outlet: 'settingsContent'
+    }, 
+    {
+        path: 'totalslist',
+        component: TotalListComponent,
+        outlet: 'settingsContent'
+    }, 
+    {
+        path: 'settingslist',
+        component: SettingListComponent,
+        outlet: 'settingsContent'
+    }, 
+    {
+        path: 'userpermissions',
+        component: UserPermissionsComponent,
+        outlet: 'settingsContent'
+    },
+    {
+        path: 'scripts',
+        component: ScriptsComponent,
+        outlet: 'settingsContent'
+    }          
+
+    // {
+    //     path: '',
+    //     component: SettingsMenuComponent,
+    //     outlet: 'settingsMenu'
+    // },        
+
+  
 ]
 
 export const settingsRoutes = [

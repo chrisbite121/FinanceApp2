@@ -1,0 +1,9 @@
+<input type="button" id="listPermissions" (click)="getPermissions()" value="get Permissions" />
+<input type="button" id="webPermissions" (click)="getWebPermissions()" value="get Web Permissions" />
+
+<div class="row well" *ngFor = "let log of logs">
+    <api-logger>
+        <div class="description">{{log.description}}</div>
+        <div class="type">{{log.type}}</div>
+    </api-logger>
+</div>  

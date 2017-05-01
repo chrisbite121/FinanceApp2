@@ -1,0 +1,11 @@
+<input type="button" id="checkLists" (click)="checkLists()" value="Check App Lists" />
+<input type="button" id="checkFields" (click)="checkFields()" value="Check List Fields" />
+
+<input type="button" id="readSettings" (click)="readSettingsData()" value="Read Settings Data" />
+
+<div class="row well" *ngFor = "let log of logs">
+    <api-logger>
+        <div class="description">{{log.description}}</div>
+        <div class="type">{{log.type}}</div>
+    </api-logger>
+</div>  

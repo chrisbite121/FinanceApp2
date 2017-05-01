@@ -1,17 +1,26 @@
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-4">
+        <select (change)="enableVervose($event.target.value);">
+            <option>No</option>
+            <option>Yes</option>
+        </select>
     </div>
     <div class="col-md-4">
         <button class="btn btn-xs" (click)="refreshLogs();">Refresh</button>
     </div>
+
 <table class="table table-bordered">
     <tr>
         <th>ID</th>
+        <th>type</th>
         <th>description</th>
         <th>timestamp</th>
     </tr>
     <tr *ngFor= "let log of _logs">
         <td>{{log.id}}</td>
+        <td>{{log.type}}</td>
         <td>{{log.description}}</td>
         <td>{{log.timestamp | date:'medium' }}</td>
     </tr>
