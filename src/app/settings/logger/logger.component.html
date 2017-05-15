@@ -1,15 +1,29 @@
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-2">
+        <button class="btn btn-xs" (click)="lengthLogs();">No of Cached Logs</button>
     </div>
-    <div class="col-md-4">
-        <select (change)="enableVervose($event.target.value);">
+    <div class="col-md-2">
+        <select>
+            <option>don't persist logs</option>
+            <option>persist logs</option>
+            <option>persist logs verbose</option>
+        </select>
+    </div>    
+    <div class="col-md-2">
+        <select (change)="enableVerbose($event.target.value);">
             <option>No</option>
             <option>Yes</option>
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-2">
         <button class="btn btn-xs" (click)="refreshLogs();">Refresh</button>
     </div>
+    <div class="col-md-2">
+        <button class="btn btn-xs" (click)="saveLogs();">Save</button>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-xs" (click)="getLogs();">Load Logs</button>
+    </div>      
 
 <table class="table table-bordered">
     <tr>
@@ -17,11 +31,13 @@
         <th>type</th>
         <th>description</th>
         <th>timestamp</th>
+        <th>status</th>
     </tr>
     <tr *ngFor= "let log of _logs">
-        <td>{{log.id}}</td>
-        <td>{{log.type}}</td>
-        <td>{{log.description}}</td>
-        <td>{{log.timestamp | date:'medium' }}</td>
+        <td>{{log.ItemId}}</td>
+        <td>{{log.Type}}</td>
+        <td>{{log.Description}}</td>
+        <td>{{log.Timestamp | date:'medium' }}</td>
+        <td>{{log.State}}</td>
     </tr>
 </table>

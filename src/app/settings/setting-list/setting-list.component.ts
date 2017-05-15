@@ -1,6 +1,7 @@
 import { Component } from '@angular/core'
 import { CommonApiService } from '../../shared/api-common.service'
 import { UtilsService } from '../../shared/utils.service'
+import { SettingsService } from '../../shared/settings.service'
 
 @Component({
     selector: 'setting-list',
@@ -9,10 +10,13 @@ import { UtilsService } from '../../shared/utils.service'
 })
 export class SettingListComponent {
 public logs:Array<any>;
+public output: Array<any>;
 
     constructor(private commonApiService: CommonApiService,
-                private utilsService: UtilsService){
+                private utilsService: UtilsService,
+                private settingsService: SettingsService){
                     this.logs = [];
+                    this.output =[];
                 }
 
 
@@ -500,5 +504,59 @@ public logs:Array<any>;
                 this.logs.push(_log);
             }
         }
-    } 
+    }
+
+    getCachedSettings(){
+        let fieldValuesArray = this.settingsValuesArray()
+        console.log(fieldValuesArray)
+        fieldValuesArray.forEach(field => {
+            this.output.push({
+                fieldName: field['fieldName'],
+                fieldValue: field['fieldValue']
+            })
+        })
+
+    }
+
+    settingsValuesArray(){
+        let fieldValuesArray = []
+        let settingsObject = this.settingsService.settings
+        let keysArray = Object.keys(settingsObject);
+
+        keysArray.forEach(key => {
+            fieldValuesArray.push({
+                fieldName: key,
+                fieldValue: settingsObject[key]
+            })
+        })
+        
+        return fieldValuesArray
+    }
+
+    getCachedAppSettings(){
+        let fieldValuesArray = this.appSettingsValuesArray()
+        console.log(fieldValuesArray)
+        fieldValuesArray.forEach(field => {
+            this.output.push({
+                fieldName: field['fieldName'],
+                fieldValue: field['fieldValue']
+            })
+        })  
+    }
+
+    appSettingsValuesArray(){
+        let fieldValuesArray = []
+        let settingsObject = this.settingsService.appSettings
+        let keysArray = Object.keys(settingsObject);
+
+        keysArray.forEach(key => {
+            fieldValuesArray.push({
+                fieldName: key,
+                fieldValue: settingsObject[key]
+            })
+        })
+        
+        return fieldValuesArray
+    }
+
 }

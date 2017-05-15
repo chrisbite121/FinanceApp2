@@ -3,12 +3,7 @@ export interface IFieldThatDoesntExist {
     fieldName: string,
 }
 
-export interface IFieldUpdate{
-    listName: string,
-    fieldName: string,
-    oldSchema: string,
-    newSchema: string
-}
+
 
 // export interface IFieldWrongType {
 //     listName: string,
@@ -20,10 +15,11 @@ export interface IFieldUpdate{
 export interface IFieldExists {
     fieldName: string,
     listName: string,
-    value: Boolean
+    result: Boolean
 }
 
 export interface IFieldUpdateResult {
+    apiCall: string,
     fieldName: string,
     listName: string,
     result: boolean
@@ -32,21 +28,23 @@ export interface IFieldUpdateResult {
 export interface IListExists {
     apiCall: string,
     listName: string,
-    value: Boolean
+    result: Boolean
 }
 
-export interface ISchemaFieldResult {
-    fieldName: string,
-    listName: string,
-    schemaXml: string
-}
+
 
 export interface IPermissionResult {
     permission: string,
     result: Boolean
 }
 
-export interface ISchemaListResult {
+export interface IReadFieldResult {
+    fieldName: string,
+    listName: string,
+    schemaXml: string
+}
+
+export interface IReadListResult {
     apiCall: string,
     listName: string,
     result: boolean,
@@ -149,13 +147,14 @@ export interface IListCreateError {
 }
 
 export interface IItemPropertyModel {
-    fieldName: string, //fieldName
-    fieldValue: any     //fieldValue
+    fieldName: string,
+    fieldValue: any
 }
 
 export interface IAddItemResult {
     apiCall: string,
     listName: string,
+    itemId: string,
     result: boolean
 }
 
@@ -180,3 +179,48 @@ export interface IFieldSpecModel {
     Required: string
 }
 
+export interface ICreateListResult {
+    apiCall: string,
+    listName: string,
+    result: Boolean
+}
+
+export interface IGetItemsResult {
+    apiCall: string,
+    listName: string,
+    result: Boolean,
+    data: Array<any>
+}
+
+
+//////Health Report Models
+
+export interface IReportResult {
+    reportHeading: string,
+    reportResult: string, 
+    listName: string,
+    fieldName: string
+}
+export interface IListSchemaReportResult {
+    reportHeading: string,
+    reportResult: string,
+    listName: string,
+    schemaXml: string
+}
+
+export interface IFieldSchemaReportResult {
+    reportHeading: string,
+    reportResult: string,
+    fieldName: string,
+    listName: string,
+    schemaXml: string
+}
+
+export interface IFieldUpdateReportResult{
+    reportHeading: string,
+    reportResult: string,
+    listName: string,
+    fieldName: string,
+    oldSchema: string,
+    newSchema: string
+}

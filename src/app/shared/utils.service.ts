@@ -29,7 +29,8 @@ private _Parser;
     }
 
     generateItemId(){
-        return parseInt(String(Math.random()*1000000000),10) 
+        //generates number based on milliseconds, ensure uniqueness
+        return new Date().getTime()
     }
 
     generateXmlGetItemById(id: number){
@@ -85,6 +86,18 @@ private _Parser;
         return obj;
     };
 
+    includeFields(fieldsArray){
+        return 'Include(ID,'
+                .concat(fieldsArray.join())
+                .concat(')')
+    }
+
+    genCamlQuery():string{
+        var camlQuery =  '<View><Query><OrderBy><FieldRef Name="ID" Ascending="FALSE"/></OrderBy></Query></View>' 
+
+        return camlQuery
+    }
+
     get message() {
         return 'message'
     }
@@ -115,6 +128,14 @@ private _Parser;
 
     get successStatus() {
         return 'success'
+    }
+
+    get failStatus() {
+        return 'fail'
+    }
+
+    get NaStatus() {
+        return 'NA'
     }
 
     get manageWeb(){
@@ -161,6 +182,10 @@ private _Parser;
         return 'FinanceAppTotalsData'
     }
 
+    get financeAppLogsData(){
+        return 'FinanceAppLogsData'
+    } 
+
     get createState(){
         return 'create'
     }
@@ -191,6 +216,70 @@ private _Parser;
         }
     }
 
+    //api calls
 
-   
+    get apiCallListExists() {
+        return 'listExists'
+    }
+
+    get apiCallDeleteList() {
+        return 'deleteList'
+    }
+
+    get apiCallCreateList(){
+        return 'createList'
+    }
+
+    get apiCallFieldsRequired(){
+        return 'fieldsRequired'
+    }
+
+    get apiCallFieldsType(){
+        return 'fieldsType'
+    }
+
+    get apiCallFieldsExists(){
+        return 'fieldExists'
+    }
+
+    get apiCallListXmlData() {
+        return 'listXmlData'
+    }
+
+    get apiCallAddFields() {
+        return 'addFields'
+    }
+
+    get apiCallUpdateField(){
+        return 'updateField'
+    }
+
+    get apiCallGetItems() {
+        return 'getItems'
+    }
+
+    get apiCallAddItem() {
+        return 'addItem'
+    }
+
+    get apiCallGetItem() {
+        return 'getItem'
+    }
+
+    get apiCallAddItems(){
+        return 'addItems'
+    }
+
+    get apiCallGetItemCount(){
+        return 'getItemCount'
+    }
+
+    get apiCallUpdateItem(){
+        return 'updateItem'
+    }
+
+    get apiCallDeleteItem(){
+        return 'deleteItem'
+    }
+  
 }

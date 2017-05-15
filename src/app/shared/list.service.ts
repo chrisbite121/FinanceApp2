@@ -13,6 +13,7 @@ export class ListService {
     private FinanceAppMaterialData:  Array<IFieldSpecModel>
     private FinanceAppTotalsData: Array<IFieldSpecModel>
     private FinanceAppSettingsData: Array<IFieldSpecModel>
+    private FinanceAppLogsData: Array<IFieldSpecModel>
     private _false = "FALSE"
     private _true = "TRUE"
     private _number = "Number"
@@ -22,6 +23,7 @@ export class ListService {
     private _boolean = "Boolean"
     private _error = 'error'
     private _info = 'info'
+    private _datetime = 'DateTime'
 
     constructor(private logService: LogService,
                 private utilsService: UtilsService){
@@ -163,14 +165,12 @@ export class ListService {
             { Id: 33, Name: "RTSYtdTotal", Type: this._currency, Required: this._false },
             { Id: 34, Name: "RTSLbe", Type: this._currency, Required: this._false },
             { Id: 35, Name: "RTSYtdVarianceToBudget", Type: this._currency, Required: this._false },
-            { Id: 36, Name: "MatBudget", Type: this._currency, Required: this._false },
-            { Id: 37, Name: "MatJan", Type: this._currency, Required: this._false },
-            { Id: 38, Name: "MatFeb", Type: this._currency, Required: this._false },
-            { Id: 39, Name: "MatMar", Type: this._currency, Required: this._false },
-            { Id: 40, Name: "MatApr", Type: this._currency, Required: this._false },
-            { Id: 41, Name: "MatFeb", Type: this._currency, Required: this._false },
-            { Id: 42, Name: "MatMar", Type: this._currency, Required: this._false },
-            { Id: 43, Name: "MatApr", Type: this._currency, Required: this._false },
+            { Id: 36, Name: "RTSVarianceToBudget", Type: this._currency, Required: this._false },
+            { Id: 37, Name: "MatBudget", Type: this._currency, Required: this._false },
+            { Id: 38, Name: "MatJan", Type: this._currency, Required: this._false },
+            { Id: 39, Name: "MatFeb", Type: this._currency, Required: this._false },
+            { Id: 40, Name: "MatMar", Type: this._currency, Required: this._false },
+            { Id: 41, Name: "MatApr", Type: this._currency, Required: this._false },
             { Id: 44, Name: "MatMay", Type: this._currency, Required: this._false },
             { Id: 45, Name: "MatJun", Type: this._currency, Required: this._false },
             { Id: 46, Name: "MatJul", Type: this._currency, Required: this._false },
@@ -226,11 +226,32 @@ export class ListService {
         ]
 
         this.FinanceAppSettingsData = [
-            { Id: 1, Name: "Years", Type: this._note, Required: this._false },
-            { Id: 2, Name: "DefaultYear", Type: this._number, Required: this._false },
-            { Id: 3, Name: "Autosave", Type: this._boolean, Required: this._false },
-            { Id: 4, Name: "HighlightColour", Type: this._text, Required: this._false },
-            { Id: 5, Name: "ListAutoCheck", Type: this._boolean, Required: this._false },
+            { Id: 1, Name: "ItemId", Type: this._text, Required: this._false },
+            { Id: 2, Name: "Years", Type: this._note, Required: this._false },
+            { Id: 3, Name: "Year", Type: this._number, Required: this._false },
+            { Id: 4, Name: "AutoSave", Type: this._boolean, Required: this._false },
+            { Id: 5, Name: "HighlightColour", Type: this._text, Required: this._false },
+            { Id: 6, Name: "ListAutoCheck", Type: this._boolean, Required: this._false },
+            { Id: 7, Name: "SharePointMode", Type: this._boolean, Required: this._false },
+            { Id: 8, Name: "DebugMode", Type: this._boolean, Required: this._false },
+            { Id: 9, Name: "ManageWeb", Type: this._boolean, Required: this._false },
+            { Id: 10, Name: "ManageList", Type: this._boolean, Required: this._false },
+            { Id: 11, Name: "ViewList", Type: this._boolean, Required: this._false },
+            { Id: 12, Name: "AddListItems", Type: this._boolean, Required: this._false },
+            { Id: 13, Name: "WorkingHoursInDay", Type: this._number, Required: this._false },
+            { Id: 14, Name: "TsWeighting", Type: this._number, Required: this._false },
+            { Id: 15, Name: "RegionOptions", Type: this._note, Required: this._false },
+            { Id: 16, Name: "Region", Type: this._note, Required: this._false },
+            { Id: 17, Name: "Persist", Type: this._boolean, Required: this._false },
+            { Id: 18, Name: "Verbose", Type: this._boolean, Required: this._false },
+        ]
+
+        this.FinanceAppLogsData = [
+            { Id: 1, Name: "ItemId", Type: this._text, Required: this._false },
+            { Id: 2, Name: "Type", Type: this._text, Required: this._false },
+            { Id: 3, Name: "Description", Type: this._text, Required: this._false },
+            { Id: 4, Name: "Timestamp", Type: this._datetime, Required: this._false },
+            { Id: 5, Name: "Verbose", Type: this._boolean, Required: this._false }
         ]
         //end init
     }
@@ -242,6 +263,19 @@ export class ListService {
 
         return this[listNameSpec][_index]
 
+    }
+
+    getArrayFieldNames(listSpecName: string): Array<string> {
+        let _array: Array<string> = [];
+        if (this[listSpecName] && Array.isArray(this[listSpecName])) {
+            this[listSpecName].forEach(element => {
+                _array.push(element.Name);
+            });
+        } else {
+            this.logService.log(`unable to locate list definition for list: ${listSpecName} at function getArrayFieldNames`, this._error, false);
+        }
+        this.logService.log('returned array from getArrayFieldNames call', this._info, true);
+        return _array;
     }
 
     getFields(listSpecName: string): Array<string> {
@@ -260,21 +294,24 @@ export class ListService {
     generateFieldXml(fieldSpec: IFieldSpecModel): string{
         let fieldXml: string;
         switch(fieldSpec.Type) {
-            case 'Text':
+            case this._text:
                 fieldXml = `<Field DisplayName="${fieldSpec.Name}" Name="${fieldSpec.Name}" Title="${fieldSpec.Name}" Type="${fieldSpec.Type}" Required="${fieldSpec.Required}"  />`
                 break;
-            case 'Note':
+            case this._note:
                 fieldXml = `<Field DisplayName="${fieldSpec.Name}" Name="${fieldSpec.Name}" Title="${fieldSpec.Name}" Type="${fieldSpec.Type}" Required="${fieldSpec.Required}"  />`
                 break;
-            case 'Number':
+            case this._number:
                 fieldXml = `<Field DisplayName="${fieldSpec.Name}" Name="${fieldSpec.Name}" Title="${fieldSpec.Name}" Type="${fieldSpec.Type}" Required="${fieldSpec.Required}" Decimal="FALSE"  />`
                 break;
-            case 'Currency':
+            case this._currency:
                 fieldXml = `<Field DisplayName="${fieldSpec.Name}" Name="${fieldSpec.Name}" Title="${fieldSpec.Name}" Type="${fieldSpec.Type}" Required="${fieldSpec.Required}" LCID="1033" Decimal="TRUE"  />`
                 break;
-            case 'Boolean':
+            case this._boolean:
                 fieldXml = `<Field DisplayName="${fieldSpec.Name}" Name="${fieldSpec.Name}" Title="${fieldSpec.Name}" Type="${fieldSpec.Type}" Required="${fieldSpec.Required}"  />`
                 break;
+            case this._datetime:
+                fieldXml = `<Field DisplayName="${fieldSpec.Name}" Name="${fieldSpec.Name}" Title="${fieldSpec.Name}" Type="${fieldSpec.Type}" Format="DateTime" Required="${fieldSpec.Required}"  />`
+                break;                  
             default:
                 this.logService.log('error unable to identify field type with field id: ' + String(fieldSpec.Id), 'error', false);
                 throw new Error('error unable to identify field type with field id: ' + String(fieldSpec.Id))

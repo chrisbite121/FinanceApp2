@@ -10,7 +10,7 @@ import { LogService } from '../../shared/log.service'
     styles: [``]
 })
 export class UserPermissionsComponent {
-    private logs: Array<any>
+    public logs: Array<any>
 
     constructor(private utilsService: UtilsService,
                 private commonApiService: CommonApiService,

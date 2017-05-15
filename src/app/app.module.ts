@@ -18,7 +18,8 @@ import { UtilsService } from './shared/utils.service'
 import { ListService } from './shared/list.service'
 import { ScriptService } from './shared/scripts.service'
 import { HealthReportService } from './shared/health-report.service'
-import { DataApiService } from './shared/data-api.service'
+import { NotificationService } from './shared/notification.service'
+// import { DataApiService } from './shared/data-api.service'
 
 // application
 import {AppComponent} from "./app.component";
@@ -63,7 +64,7 @@ import { appRoutes } from './routes'
         ListService,
         ScriptService,
         HealthReportService,
-        DataApiService
+        NotificationService
         ],    
     bootstrap: [AppComponent]
 })

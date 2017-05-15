@@ -23,9 +23,23 @@
 <input type="button" id="deleteItem" (click)="deleteItem()" value="delete Item" />
 <input type="button" id="deleteItems" (click)="deleteItems()" value="delete Items" />
 
-<div class="row well" *ngFor = "let log of logs">
-    <api-logger>
-        <div class="description">{{log.description}}</div>
-        <div class="type">{{log.type}}</div>
-    </api-logger>
-</div>  
+<h3>Settings</h3>
+<input type="button" id="getCachedSettings" (click)="getCachedSettings()" value="get cached settings" />
+<input type="button" id="getCachedAppSettings" (click)="getCachedAppSettings()" value="get cached app settings" />
+
+<div class="well">
+    <div class="row" *ngFor = "let log of logs">
+        <api-logger>
+            <div class="description">{{log.description}}</div>
+            <div class="type">{{log.type}}</div>
+        </api-logger>
+    </div>
+</div>
+
+<div class="well">
+    <div class="row" *ngFor = "let out of output">
+        <div class="col-md-4">{{out.fieldName}}</div>
+        <div class="col-md-4">{{out.fieldValue}}</div>
+        <div class="col-md-4"></div>
+    </div>
+</div>

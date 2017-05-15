@@ -10,6 +10,10 @@ import '@angular/forms';
 // RxJS
 import 'rxjs';
 
+//bootstrap
+import 'ng2-bootstrap/dropdown';
+import 'ng2-bootstrap/modal';
+
 // ag-grid
 import 'ag-grid/dist/styles/ag-grid.css';
 import 'ag-grid/dist/styles/theme-fresh.css';

@@ -1,8 +1,7 @@
-import { IFieldUpdate,
+import { 
         IFieldThatDoesntExist,
         IListExists,
         IPermissionResult,
-        ISchemaListResult,
         ICreateListSuccess,
         ICreateListFailed,
         ICreateListError,
@@ -20,59 +19,51 @@ import { IFieldUpdate,
         IListDeleteError,
         IListCreateSuccess,
         IListCreateFailed,
-        IListCreateError } from './data-validation.model'
+        IListCreateError,
+        IReportResult,
+        IListSchemaReportResult,
+        IFieldUpdateReportResult } from './data-validation.model'
 
 export interface IHealthReport {
     date: Date,
-    permissionsResults: IPermissionResult,
-    listExistsResults: Array<IListExists>,
-    listsFailedToCheck: Array<string>,
-    listXmlData: Array<ISchemaListResult>,
-    listFailedGetXml: Array<string>,
-    missingLists: Array<string>
-    missingFields: Array<IFieldThatDoesntExist>
-    fieldsWrongtype: Array<IFieldUpdate>
-    fieldsRequired: Array<IFieldUpdate>
+    permissions: IPermissionResult,
+    listExists: Array<IReportResult>,
+    listXmlData: Array<IListSchemaReportResult>,
+    fieldsExists: Array<IReportResult>
+    fieldsType: Array<IFieldUpdateReportResult>
+    fieldsRequired: Array<IFieldUpdateReportResult>,
+    errors: Array<any>
 }
 
 export interface IActionHealthReport {
     date: Date,
-    permissionsResults: IPermissionResult,
-    createListSuccess: Array<ICreateListSuccess>,
-    createListsFailed: Array<ICreateListFailed>,
-    createListError: Array<ICreateListError>,
-    createFieldsSuccess: Array<ICreateFieldsSuccess>,
-    createFieldsFailed: Array<ICreateFieldsFailed>,
-    createFieldsError: Array<ICreateFieldsError>,
-    updateFieldsSuccess: Array<IUpdateFieldsSuccess>,
-    updateFieldsFailed: Array<IUpdateFieldsFailed>,
-    updateFieldsError: Array<IUpdateFieldsError>
+    permissions: IPermissionResult,
+    createList: Array<IReportResult>,
+    addFields: Array<IReportResult>,
+    updateField: Array<IReportResult>,
+    errors: Array<any>
+
 }
 
 export interface ISettingsReport {
     date: Date,
-    permissionsResults: IPermissionResult,
-    listExistsResults: Array<IListExists>,
-    listsFailedToCheck: Array<string>,
-    listXmlData: Array<ISchemaListResult>,
-    listFailedGetXml: Array<string>,
-    missingFields: Array<IFieldThatDoesntExist>,
-    fieldsWrongType: Array<IFieldUpdate>,
-    fieldsRequired: Array<IFieldUpdate>
+    permissions: IPermissionResult,
+    listExists: Array<IReportResult>,
+    listXmlData: Array<IListSchemaReportResult>,
+    createList: Array<IReportResult>,
+    fieldsExists: Array<IReportResult>
+    fieldsType: Array<IFieldUpdateReportResult>
+    fieldsRequired: Array<IFieldUpdateReportResult>,
+    errors: Array<any>    
 }
 
 export interface IProvisionerReport {
     date: Date,
-    permissionsResults: IPermissionResult,
-    listExistsSuccess: Array<IListExistsSuccess>,
-    listExistsFailed: Array<IListExistsFailed>,
-    listExistsError: Array<IListExistsError>,
-    listDeleteSuccess: Array<IListDeleteSuccess>,
-    listDeleteFailed: Array<IListDeleteFailed>,
-    listDeleteError: Array<IListDeleteError>,
-    listCreateSuccess: Array<IListCreateSuccess>,
-    listCreateFailed: Array<IListCreateFailed>,
-    listCreateError: Array<IListCreateError>
+    permissions: IPermissionResult,
+    listExists: Array<IReportResult>,
+    createList: Array<IReportResult>,
+    deleteList: Array<IReportResult>,
+    errors: Array<any>
 }
 
 export interface IProcessDataReport {

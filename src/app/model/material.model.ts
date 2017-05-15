@@ -1,6 +1,6 @@
 export interface IMatModel {
     ListName: string,
-    Id: number,
+    ItemId: number,
     Year: number,
     State: string,
     Highlights: Array<any>, 

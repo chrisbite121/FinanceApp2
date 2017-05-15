@@ -1,10 +1,10 @@
-import { IDataModel } from '../model/data.model'
-export const initData:IDataModel[] = [
+import { IResourceModel } from '../model/resource.model'
+export const initData:IResourceModel[] = [
         { 
           ListName: 'FinanceAppResourceData',
-          Id: 1,
+          ItemId: 1,
           Year: 2017,
-          State: 'inert',
+          State: 'create',
           Highlights: [],          
           Role: 'Project Manager',
           Name: 'Chris Ercilla',
@@ -119,9 +119,9 @@ export const initData:IDataModel[] = [
  },
         { 
           ListName: 'FinanceAppResourceData',
-          Id: 2,
+          ItemId: 2,
           Year: 2017,
-          State: 'inert',
+          State: 'create',
           Highlights: [],          
           Role: 'Programme Manager',
           Name: 'Adam Smith',

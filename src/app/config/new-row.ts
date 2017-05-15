@@ -1,8 +1,8 @@
-import { IDataModel } from '../model/data.model'
+import { IResourceModel } from '../model/resource.model'
 
-export const newDataRow:IDataModel = {
+export const newDataRow:IResourceModel = {
             ListName: 'FinanceAppResourceData',
-            Id: 0,
+            ItemId: 0,
             Year: 0,
             State: 'create',
             Highlights: [],

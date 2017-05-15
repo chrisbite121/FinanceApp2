@@ -2,9 +2,9 @@ import { ITotalModel } from '../model/total.model'
 export const initTotalData:ITotalModel[] = [
     {
         ListName: 'FinanceAppTotalsData',
-        Id: 1,
+        ItemId: 1,
         Year: 2017,
-        State: 'inert',
+        State: 'create',
         Highlights: [],
         Placeholder1:'TOTAL (Incl Resource Costs)',
         PRBudget:0,

@@ -11,11 +11,17 @@ import { Observer } from 'rxjs/Observer';
 import {    IFieldExists,
             IFieldUpdateResult,
             IListExists,
-            ISchemaFieldResult,
-            ISchemaListResult,
+            IFieldSchemaReportResult,
+            IListSchemaReportResult,
             IItemPropertyModel,
             IUpdateItemResult,
-            IDeleteItemResult } from '../model/data-validation.model'
+            IDeleteItemResult,
+            ICreateListResult,
+            IReportResult,
+            IReadFieldResult,
+            IReadListResult,
+            IGetItemsResult,
+            IAddItemResult } from '../model/data-validation.model'
 
 
 declare var SP;
@@ -24,7 +30,7 @@ declare var appUrl;
 
 
 
-interface IPermissionModel {
+export interface IPermissionModel {
     permissionType: string,
     value: Boolean    
 }
@@ -46,16 +52,19 @@ export class CommonApiService {
                 private utilsService: UtilsService,
                 private uiStateService: UiStateService){
 
-                    try {
-                        this.hostUrl = hostUrl;
-                        console.log(this.hostUrl);
-                        this.appUrl = appUrl;
-                        console.log(this.appUrl);
-                    } catch (e) {
-                        this.logService.log(e, this._error, false);
-                    }
-            
-                }
+            try{
+                this.hostUrl = hostUrl;
+            } catch (e) {
+                this.logService.log(e, this._error, false);
+            }
+
+            try{
+                this.appUrl = appUrl;
+            } catch (e) {
+                this.logService.log(e, this._error, false);
+            }
+        }
+
 
     getPermissions(contextType:string, listName:string):Observable<any>{
         this.logService.log('Get permissions function called', this._info, true);
@@ -234,20 +243,22 @@ export class CommonApiService {
         this.logService.log('Delete list funtion called', this._info, true);
         
          let deleteList$ = new Observable(observer => {
-            observer.next('Delete List function called');
-            if (!this.uiStateService.getUiState('manageList')) {
-                let errorMsg = `user does not have permissions to delete lists`
-                this.logService.log(errorMsg, this._error, false);
-                observer.error(errorMsg);
-                return;
-            }
-            
+           
             let clientContext
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
             } catch (e) {
                 let errmsg = `Unable to create client context`
                 this.logService.log(errmsg, this._error, false);
+
+                let reportResult:IReportResult = {
+                    reportHeading: this.utilsService.apiCallDeleteList,
+                    reportResult: this.utilsService.errorStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+
                 observer.error(errmsg)
                 return;
             }
@@ -273,12 +284,23 @@ export class CommonApiService {
             function success() {
                 let resultMsg = 'list deleted successfully'
                 this.logService.log(resultMsg, this._info, false);
+                
                 let result = {
-                    apiCall: 'deleteList',
+                    apiCall: this.utilsService.apiCallDeleteList,
                     listName: listName,
                     result: true
                 }
                 observer.next(result);
+
+                let reportResult:IReportResult = {
+                    reportHeading: this.utilsService.apiCallDeleteList,
+                    reportResult: this.utilsService.successStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+
+
                 observer.complete();
                 return;
             }
@@ -287,11 +309,20 @@ export class CommonApiService {
                 let resultMsg = 'Request Failed. ' + args.get_message() + '<br/>' + args.get_stackTrace();
                 this.logService.log(resultMsg, this._error, false);
                 let result = {
-                    apiCall: 'deleteList',
+                    apiCall: this.utilsService.apiCallDeleteList,
                     listName: listName,
                     result: false
                 }
                 observer.next(result)
+
+                let reportResult:IReportResult = {
+                    reportHeading: this.utilsService.apiCallDeleteList,
+                    reportResult: this.utilsService.failStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+
                 observer.complete();
                 return;
             }
@@ -304,14 +335,7 @@ createList(listName:string, contextType:string):Observable<any>{
     this.logService.log('creatList function called', this._info, true);
     this.logService.log(`listName parameter: ${listName}.  contextType parameter: ${contextType}`, this._info, true);
     let createList$ = new Observable((observer:Observer<any>) => {
-        observer.next('create list function called');
 
-        if (!this.uiStateService.getUiState('manageList')) {
-            let permissionMsg = `user does not have permissions to create lists`
-            this.logService.log(permissionMsg, this._error, false);
-            observer.error(permissionMsg); 
-            return;
-        }
         let clientContext
         try {
             clientContext = new SP.ClientContext(this.appUrl);
@@ -373,30 +397,64 @@ createList(listName:string, contextType:string):Observable<any>{
         } catch (e) {
             this.logService.log('unable to load field definition', this._error, false)
             this.logService.log(e, this._error, false);
+
+            let reportResult: IReportResult = {
+                reportHeading: this.utilsService.apiCallCreateList,
+                reportResult: this.utilsService.errorStatus,
+                listName: listName,
+                fieldName: this.utilsService.NaStatus,
+            }
+            observer.next(reportResult)
+
             observer.error('unable to load field definition');
             return;
         }
 
-        observer.next('attempting to execute JSOM query: list creation')
+        //observer.next('attempting to execute JSOM query: list creation')
         this.logService.log('executing JSOM query: list creation', this._info, true);
         clientContext.load(listInfo);
         clientContext.executeQueryAsync(onListCreateSucceeded.bind(this), onListCreateFailed.bind(this));
 
         function onListCreateSucceeded() {
-            let result = {
+            let result: ICreateListResult = {
+                apiCall: this.utilsService.apiCallCreateList,
                 listName: listName,
                 result: true   
             };
             observer.next(result);
+
+            let reportResult: IReportResult = {
+                reportHeading: this.utilsService.apiCallCreateList,
+                reportResult: this.utilsService.successStatus,
+                listName: listName,
+                fieldName: this.utilsService.NaStatus,
+            }
+            observer.next(reportResult)
+
             this.logService.log(listName + 'list created', this._success, false);
             observer.complete();
             return;     
         }
 
         function onListCreateFailed(sender, args) {
-            let result = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
+            let resultMsg = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
+            
+            let result: ICreateListResult = {
+                apiCall: this.utilsService.apiCallCreateList,
+                listName: listName,
+                result: false
+            };            
             observer.next(result);
-            this.logService.log(result, this._error, false);
+
+            let reportResult: IReportResult = {
+                reportHeading: this.utilsService.apiCallCreateList,
+                reportResult: this.utilsService.failStatus,
+                listName: listName,
+                fieldName: this.utilsService.NaStatus,
+            }
+            observer.next(reportResult)
+
+            this.logService.log(resultMsg, this._error, false);
             observer.complete();
             return;
         }
@@ -410,14 +468,7 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log('check list Exists function called', this._info, true);
 
         let listExists$ = new Observable((observer:Observer<any>) => {
-            observer.next('check list Exists funciton called')
 
-            if (!this.uiStateService.getUiState('viewList')) {
-                let permissionMsg = `user does not have permissions to check if list exists`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg)
-                return;
-            }
         let clientContext
         try {
             clientContext = new SP.ClientContext(this.appUrl);
@@ -445,8 +496,8 @@ createList(listName:string, contextType:string):Observable<any>{
             this.logService.log('contextType = appWeb', this._info, true)
             context = clientContext;
         } else {
-            this.logService.log('unable to determine context type: Create List failed', this._error, false)
-            observer.error('unable to determine context type: Create List failed')
+            this.logService.log('unable to determine context type: List Exists failed', this._error, false)
+            observer.error('unable to determine context type: List Exists failed')
             return;
         }
             let web, listColl;
@@ -463,13 +514,14 @@ createList(listName:string, contextType:string):Observable<any>{
                     observer.error('unable to load JSOM query'); 
                     return;                   
             }
-            observer.next('attempting to execute JSOM query: check list exists')
+            //observer.next('attempting to execute JSOM query: check list exists')
             this.logService.log('executing JSOM query: check list exists', this._info, true);
             
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
-                let listFlag = false;
+                let reportResult: string = this.utilsService.failStatus
+                let listFlag = false
                 let listEnumerator;
                 try {
                     listEnumerator = listColl.getEnumerator();
@@ -484,36 +536,68 @@ createList(listName:string, contextType:string):Observable<any>{
                     let oList;
                     try {
                         oList = listEnumerator.get_current();
-                        console.log(oList.get_title());
+                        //console.log(oList.get_title());
                         if (oList.get_title() == listName) {
-                            listFlag = true;
+                            //set report result to success if exists
+                            reportResult = this.utilsService.successStatus;
+                            listFlag = true
                         }
                     } catch (e) {
                         this.logService.log('error encountered iterating through fields', this._error, false);
                         this.logService.log(e, this._error, false);
+                        this.utilsService.errorStatus
+
+                        let result: IReportResult = {
+                            reportHeading: this.utilsService.apiCallListExists,
+                            reportResult: this.utilsService.errorStatus,
+                            listName: listName,
+                            fieldName: this.utilsService.NaStatus
+                        }
+                        observer.next(result);
+
                         observer.error('error encountered iterating through fields');  
                         return;                          
                     }
                 }
-            
                 
-                let result: IListExists = {
-                    apiCall: 'ListExists',
+                let reportData: IReportResult = {
+                    reportHeading: this.utilsService.apiCallListExists,
                     listName: listName,
-                    value: listFlag
+                    fieldName: this.utilsService.NaStatus,
+                    reportResult: reportResult
                 }
 
-                this.logService.log(result, this._success, false);
+                observer.next(reportData);
+                
+                let result: IListExists = {
+                    apiCall: this.utilsService.apiCallListExists,
+                    listName: listName,
+                    result: listFlag
+                }
+
                 observer.next(result);
+
+                this.logService.log(result, this._success, false);
+                
                 observer.complete()
                 return;
                
             }
 
             function failure(sender, args) {
-                let result = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
-                this.logService.log(result, this._error, false);
+                let result: IReportResult = {
+                    reportHeading: this.utilsService.apiCallListExists,
+                    reportResult: this.utilsService.failStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                 }
+
                 observer.next(result);
+
+
+                let resultMsg = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
+                this.logService.log(resultMsg, this._error, false);
+                
                 observer.complete();
                 return;
             }
@@ -525,14 +609,6 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log('Read fields funtion called', this._info, true);
         this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}`, this._info, true);
         let readFields$ = new Observable((observer:Observer<any>) => {
-            observer.next('Read fields function called');
-
-            if (!this.uiStateService.getUiState('viewList')) {
-                let permissionMsg = `user does not have permissions to read list fields`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
 
             let clientContext
             try {
@@ -628,14 +704,6 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log('Field Exists funtion called', this._info, true);
         this.logService.log(`listName: ${listName}, fieldName: ${fieldName}, contextType: ${contextType}`);
         let fieldExists$ = new Observable((observer: Observer<any>) => {
-            observer.next('Field exists function called');
-
-            if (!this.uiStateService.getUiState('viewList')) {
-                let permissionMsg = `user does not have permissions to check if field exists`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
 
             let clientContext
             try {
@@ -721,7 +789,7 @@ createList(listName:string, contextType:string):Observable<any>{
                 let result:IFieldExists = {
                     fieldName: fieldName,
                     listName: listName,
-                    value: fieldFlag
+                    result: fieldFlag
                 }
                 //`field ${fieldName} on list ${listName} does not exist`
                 this.logService.log(result, this._success, false);
@@ -748,14 +816,7 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log('Read Field funtion called', this._info, true);
         this.logService.log(`fieldName Parameter: ${fieldName}, listName parameter ${listName}, contextType parameter: ${contextType}`, this._info, true);  
         let readField$ = new Observable((observer:Observer<any>) => {
-            observer.next('Read Field function called');
 
-            if (!this.uiStateService.getUiState('viewList')) {
-                let permissionMsg = `user does not have permissions to read field`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
         let clientContext
         try {
             clientContext = new SP.ClientContext(this.appUrl);
@@ -820,7 +881,7 @@ createList(listName:string, contextType:string):Observable<any>{
 
             observer.next(result);
             
-            let schemaObject:ISchemaFieldResult = {
+            let schemaObject:IReadFieldResult = {
                 fieldName: fieldName,
                 listName: listName,
                 schemaXml: SchemaXml
@@ -848,14 +909,7 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log(`fieldName parameter: ${fieldName}, listName parameter: ${listName}, contextType parameter: ${contextType}`)
 
         let deleteField$ = new Observable((observer:Observer<any>) => {
-            observer.next('deleteField function called');
 
-            if (!this.uiStateService.getUiState('manageList')) {
-                let permissionMsg = `user does not have permissions to delete field on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
         let clientContext
         try {
             clientContext = new SP.ClientContext(this.appUrl);
@@ -934,14 +988,7 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log(`fieldName parameter:  ${fieldName}, listName parameter: ${listName}, contextType parameter: ${contextType}, oldSchema parameter: ${oldSchema}, newSchema parameter: ${newSchema}`)
 
         let updateField$ = new Observable((observer:Observer<any>) => {
-            observer.next('update field function called');
 
-            if (!this.uiStateService.getUiState('manageList')) {
-                let permissionMsg = `user does not have permissions to update a field on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
             let clientContext
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
@@ -1005,6 +1052,15 @@ createList(listName:string, contextType:string):Observable<any>{
                 } catch (e) {
                     this.logService.log('unable to load required query', this._error, false)
                     this.logService.log(e, this._error, false)
+
+                    let reportResult: IReportResult = {
+                        reportHeading: this.utilsService.apiCallUpdateField,
+                        reportResult: this.utilsService.errorStatus,
+                        listName: listName,
+                        fieldName: fieldName
+                    }
+                    observer.next(reportResult);
+
                     observer.error('unable to load required query')
                     return;                     
                 }
@@ -1014,13 +1070,24 @@ createList(listName:string, contextType:string):Observable<any>{
 
                 function success1() {
                     let resultMsg = `Field: ${fieldName} in list: ${listName} updated successfully`;
+
                     let result: IFieldUpdateResult = {
+                        apiCall: this.utilsService.apiCallUpdateField,
                         listName: listName,
                         fieldName: fieldName,
                         result: true
                     }
-                    
                     observer.next(result);
+
+                    let reportResult: IReportResult = {
+                        reportHeading: this.utilsService.apiCallUpdateField,
+                        reportResult: this.utilsService.successStatus,
+                        listName: listName,
+                        fieldName: fieldName
+                    }
+                    observer.next(reportResult);
+
+
                     this.logService.log(resultMsg, this._success, false);
                     observer.complete()
                     return;                
@@ -1030,11 +1097,22 @@ createList(listName:string, contextType:string):Observable<any>{
                     this.logService.log(resultMsg, this._error, false);
                     let apiResult = args.get_message() + '-  STACKTRACE:' + args.get_stackTrace();
                     this.logService.log(apiResult, this._error, false);
+                    
                     let result: IFieldUpdateResult = {
+                        apiCall: this.utilsService.apiCallUpdateField,
                         listName: listName,
                         fieldName: fieldName,
                         result: true
                     }
+                    observer.next(result);
+
+                    let reportResult: IReportResult = {
+                        reportHeading: this.utilsService.apiCallUpdateField,
+                        reportResult: this.utilsService.successStatus,
+                        listName: listName,
+                        fieldName: fieldName
+                    }
+                    observer.next(reportResult);                    
                     
                     observer.complete()
                     return;                         
@@ -1055,18 +1133,151 @@ createList(listName:string, contextType:string):Observable<any>{
     }
 
     addItem(listName: string, contextType: string, itemValues: Array<IItemPropertyModel>): Observable<any>{
-        this.logService.log('Add Item funtion called', this._info, true);
-        this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, itemValues parameters: ${itemValues}`, this._info, true);
+        //this.logService.log('Add Item funtion called', this._info, true);
+        //this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, itemValues parameters: ${itemValues}`, this._info, true);
 
         let addItem$ = new Observable((observer:Observer<any>) => {
-            observer.next('add Item function called');
 
-            if (!this.uiStateService.getUiState('addListItems')) {
-                let permissionMsg = `user does not have permissions to add a field on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
+            let clientContext
+            try {
+                clientContext = new SP.ClientContext(this.appUrl);
+            } catch (e) {
+                this.logService.log(`unable to create clientContext`, this._error, false);
+                this.logService.log(e, this._error, false);
+                observer.error(`unable to create clientContext`)
                 return;
             }
+            
+            let context; 
+
+            if (contextType == this.utilsService.hostWeb) {
+                this.logService.log('contextType == this.utils.hostweb', this._info, true);
+                try {
+                    context = new SP.AppContextSite(clientContext, this.hostUrl);
+                } catch (e) {
+                    this.logService.log(`unable to create hostweb clientcontext`, this._error, false);
+                    this.logService.log(e, this._error, false);
+                    observer.error(`unable to create hostweb clientContext`)
+                    return;
+                }
+            
+            } else if (contextType == this.utilsService.appWeb){
+                //this.logService.log('contextType = appWeb', this._info, true)
+                context = clientContext;
+            } else {
+                this.logService.log('unable to determine context type: Create List failed', this._error, false)
+                observer.error('unable to determine context type: Create List failed')
+                return;
+            }
+
+            let list, itemCreateInfo, listItem, itemId
+            try {
+                //this.logService.log('setting up itemCreationInformation object for function: addItem', this._info, true);
+                list = context.get_web().get_lists().getByTitle(listName);
+
+                itemCreateInfo = new SP.ListItemCreationInformation();
+                listItem = list.addItem(itemCreateInfo);
+            } catch (e) {
+                this.logService.log('error setting up itemCreationInformation object for function: addItem', this._error, false);
+                this.logService.log(e,this._error, false);
+                observer.error('error setting up itemCreationInformation object for function: addItem')
+                return;
+            }
+            
+            try {
+                //this.logService.log('defining list item for function: addItem', this._info, true);
+
+                itemValues.forEach(element => {
+                    if (element.fieldName === 'ItemId') {
+                        itemId = element.fieldValue
+                    }
+                    this.logService.log(`adding field to list ${listName} with values...`, this._info, true)
+                    this.logService.log(String(element.fieldName) + ': ' + String(element.fieldValue), this._info, true);
+                    listItem.set_item(element.fieldName, element.fieldValue);
+
+                });
+                
+            } catch (e) {
+                this.logService.log('error setting list item definition for function: addItem', this._error, false);
+                observer.error('error setting list item definition for function: addItem')
+                return;
+            }
+
+
+            try {
+                //this.logService.log('loading list item for function: addItem', this._info, true);
+                listItem.update();
+                clientContext.load(listItem);
+            } catch (e) {
+                this.logService.log(`unable to load list item in function: addItem in list ${listItem}`)
+                this.logService.log(e,this._error, false);
+                observer.error(`unable to load list item in function: addItem in list ${listItem}`);
+                return;
+            }
+            
+
+            //this.logService.log('executing JSOM query for function: addItem', this._info, true);
+            clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
+
+            function success() {
+                let resultMsg = `Item successfully created in List: ${listName}`
+                
+                let result:IAddItemResult = {
+                    apiCall: this.utilsService.apiCallAddItem,
+                    listName: listName,
+                    itemId: itemId, 
+                    result: true
+                }
+                observer.next(result);
+
+                let reportResult:IReportResult = {
+                    reportHeading: this.utilsService.apiCallAddItem,
+                    reportResult: this.utilsService.successStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus                  
+                }
+                observer.next(reportResult)                
+
+                this.logService.log(resultMsg, this._success, true);
+                observer.complete()
+                return;                
+            }
+
+            function failure(sender, args) {
+                let apiResult = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
+                let resultMsg = `Request failed to addItem to list ${listName}`
+                let result:IAddItemResult = {
+                    apiCall: this.utilsService.apiCallAddItem,
+                    listName: listName,
+                    itemId: itemId,
+                    result: false
+                }
+                observer.next(result);                
+
+                let reportResult:IReportResult = {
+                    reportHeading: this.utilsService.apiCallAddItem,
+                    reportResult: this.utilsService.failStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus                  
+                }
+                observer.next(reportResult)                   
+
+
+                this.logService.log(resultMsg, this._error, false);
+                this.logService.log(apiResult, this._error, false);
+                observer.complete()
+                return;
+            }            
+        })
+        return addItem$
+    }
+
+    addItems(listName: string, contextType: string, items: Array<Array<IItemPropertyModel>>): Observable<any>{
+        this.logService.log('Add Item funtion called', this._info, true);
+        this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, number of items ${items.length}`, this._info, true);
+
+        let addItem$ = new Observable((observer:Observer<any>) => {
+
             let clientContext
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
@@ -1099,54 +1310,48 @@ createList(listName:string, contextType:string):Observable<any>{
                 return;
             }
 
-            let list, itemCreateInfo, listItem
-            try {
-                this.logService.log('setting up itemCreationInformation object for function: addItem', this._info, true);
-                list = context.get_web().get_lists().getByTitle(listName);
-
-                itemCreateInfo = new SP.ListItemCreationInformation();
-                listItem = list.addItem(itemCreateInfo);
-            } catch (e) {
-                this.logService.log('error setting up itemCreationInformation object for function: addItem', this._error, false);
-                this.logService.log(e,this._error, false);
-                observer.error('error setting up itemCreationInformation object for function: addItem')
-                return;
-            }
             
-            try {
-                this.logService.log('defining list item for function: addItem', this._info, true);
+            let list = context.get_web().get_lists().getByTitle(listName);
+            //iterate through items to be added
+            items.forEach(item => {
+
+                let itemCreateInfo, listItem
+                try {
+                    this.logService.log('setting up itemCreationInformation object for function: addItem', this._info, true);
+                    itemCreateInfo = new SP.ListItemCreationInformation();
+                    listItem = list.addItem(itemCreateInfo);
+                } catch (e) {
+                    this.logService.log('error setting up itemCreationInformation object for function: addItem', this._error, false);
+                    this.logService.log(e,this._error, false);
+                    observer.error('error setting up itemCreationInformation object for function: addItem')
+                    return;
+                }
                 
-                itemValues.forEach(element => {
-                    this.logService.log(`adding field to list ${listName} with values...`, this._info, true)
-                    this.logService.log(String(element.fieldName) + ': ' + String(element.fieldValue), this._info, true);
-                    listItem.set_item(element.fieldName, element.fieldValue);
-                });
-                listItem.update();
-            } catch (e) {
-                this.logService.log('error setting list item definition for function: addItem', this._error, false);
-                observer.error('error setting list item definition for function: addItem')
-                return;
-            }
-
-
-            try {
-                this.logService.log('loading list item for function: addItem', this._info, true);
-                clientContext.load(listItem);
-            } catch (e) {
-                this.logService.log(`unable to load list item in function: addItem in list ${listItem}`)
-                this.logService.log(e,this._error, false);
-                observer.error(`unable to load list item in function: addItem in list ${listItem}`);
-                return;
-            }
+                try {
+                    this.logService.log('defining list item for function: addItem', this._info, true);
+                    
+                    //iterate through the field values for each item
+                    item.forEach(element => {
+                        console.log(element);
+                        listItem.set_item(element.fieldName, element.fieldValue);
+                        listItem.update();
+                        context.load(listItem);
+                    });
+                    
+                } catch (e) {
+                    this.logService.log('error setting list item definition for function: addItem', this._error, false);
+                    observer.error('error setting list item definition for function: addItem')
+                    return;
+                }
+            })
             
-
             this.logService.log('executing JSOM query for function: addItem', this._info, true);
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
                 let resultMsg = `Item successfully created in List: ${listName}`
                 let result = {
-                    apiCall: 'addItem',
+                    apiCall: this.utilsService.apiCallAddItems,
                     listName: listName,
                     result: true
                 }
@@ -1160,7 +1365,7 @@ createList(listName:string, contextType:string):Observable<any>{
                 let apiResult = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
                 let resultMsg = `Request failed to addItem to list ${listName}`
                 let result = {
-                    apiCall: 'addItem',
+                    apiCall: this.utilsService.apiCallAddItems,
                     listName: listName,
                     result: false
                 }
@@ -1173,21 +1378,14 @@ createList(listName:string, contextType:string):Observable<any>{
             }            
         })
         return addItem$
-    }
+    }    
 
     updateItem(listName: string, contextType: string, itemId: string, itemValues: Array<IItemPropertyModel>): Observable<any>{
         this.logService.log('Update Item funtion called', this._info, true);
         this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, itemId parameter: ${itemId}, itemValues parameter: ${itemValues}`)
 
         let updateItem$ = new Observable((observer:Observer<any>) => {
-            observer.next('update Item function called');
 
-            if (!this.uiStateService.getUiState('addListItems')) {  
-                let permissionMsg = `user does not have permissions to update an item on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
             let clientContext
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
@@ -1242,7 +1440,7 @@ createList(listName:string, contextType:string):Observable<any>{
             function success() {
                 let resultMsg = 'updated list item successfully';
                 let result:IUpdateItemResult = {
-                    apiCall: 'updateItem',
+                    apiCall: this.utilsService.apiCallUpdateItem,
                     listName: listName,
                     itemId: itemId,
                     result: true
@@ -1259,7 +1457,7 @@ createList(listName:string, contextType:string):Observable<any>{
                 let resultMsg = `Request failed to updateItem to list ${listName}`
                 this.logService.log(resultMsg, this._error, false);
                 let result:IUpdateItemResult = {
-                    apiCall: 'updateItem',
+                    apiCall: this.utilsService.apiCallUpdateItem,
                     listName: listName,
                     itemId: itemId,
                     result: true
@@ -1278,14 +1476,6 @@ createList(listName:string, contextType:string):Observable<any>{
         this.logService.log(`listName parameter: ${listName}, queryString parameter: ${queryString}, contextType parameter: ${contextType}`)
 
         let getItem$ = new Observable((observer:Observer<any>) => {
-            observer.next('get Item function called');
-
-            if (!this.uiStateService.getUiState('viewList')) { 
-                let permissionMsg = `user does not have permissions to read an item on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
             
             let clientContext
             try {
@@ -1314,8 +1504,8 @@ createList(listName:string, contextType:string):Observable<any>{
                 this.logService.log('contextType = appWeb', this._info, true)
                 context = clientContext;
             } else {
-                this.logService.log('unable to determine context type: Create List failed', this._error, false)
-                observer.error('unable to determine context type: Create List failed');
+                this.logService.log('unable to determine context type: get item failed', this._error, false)
+                observer.error('unable to determine context type: get item failed');
                 return;
             }            
             
@@ -1357,18 +1547,37 @@ createList(listName:string, contextType:string):Observable<any>{
                     return;                  
                 }
             
+                let resultArry:Array<Object> = [];
+
                 while (listItemEnumerator.moveNext()) {
                     let result, oListItem;
                     try {
                         oListItem = listItemEnumerator.get_current();
                         result = oListItem.get_fieldValues()
-                        observer.next(result);
-                        this.logService.log(result, this._info, true);
+
+                        resultArry.push(result);
+                        this.logService.log(result, this.utilsService.infoStatus, true);
                     } catch (e) {
                         this.logService.log(e, this._error, false);
                         observer.error(e);                    
                     }
                 }
+
+                let reportResult: IReportResult = {
+                    reportHeading: this.utilsService.apiCallGetItem,
+                    reportResult: this.utilsService.successStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+                
+                let result: IGetItemsResult = {
+                    apiCall: this.utilsService.apiCallGetItem,
+                    listName: listName,
+                    result: true,
+                    data: resultArry
+                }
+                observer.next(result)
                 observer.complete();
             }
 
@@ -1386,19 +1595,12 @@ createList(listName:string, contextType:string):Observable<any>{
         
     }
 
-    getItems(listName: string, contextType: string): Observable<any>{
+    getItems(listName: string, contextType: string, include?: string, camlQueryString?: string): Observable<any>{
         this.logService.log('Get Items funtion called', this._info, true);
         this.logService.log(`listName parameter: ${listName}, contextType paramter: ${contextType}`)
 
         let getItems$ = new Observable((observer:Observer<any>) => {
             observer.next('get items function called');
-
-            if (!this.uiStateService.getUiState('viewList')) {
-                let permissionMsg = `user does not have permissions to read items on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
             
             let clientContext
             try {
@@ -1427,22 +1629,35 @@ createList(listName:string, contextType:string):Observable<any>{
                 this.logService.log('contextType = appWeb', this._info, true)
                 context = clientContext;
             } else {
-                this.logService.log('unable to determine context type: Create List failed', this._error, false)
-                observer.error('unable to determine context type: Create List failed');
+                this.logService.log('unable to determine context type: get items failed', this._error, false)
+                observer.error('unable to determine context type: get items failed');
                 return;
             }
-
 
             let web, list, camlQuery, items
             try {
                 web = context.get_web();
                 list = web.get_lists().getByTitle(listName);
                 camlQuery = new SP.CamlQuery();
+                if(camlQueryString) {
+                    try {
+                        camlQuery.set_viewXml(camlQueryString)
+                    } catch (e) {
+                        this.logService.log(JSON.stringify(e), this._error, false)
+                    }
+                }
+                
                 items = list.getItems(camlQuery);
-                clientContext.load(items);
+
+                if (include) {
+                    clientContext.load(items, include);
+                } else {
+                    clientContext.load(items);
+                }
+                
             } catch (e) {
                 this.logService.log('error loading context information for function getItems', this._error, false);
-                this.logService.log(e,this._error, false);
+                this.logService.log(JSON.stringify(e),this._error, false);
                 observer.error('error loading context information for function getItems');
                 return;
             }
@@ -1451,6 +1666,7 @@ createList(listName:string, contextType:string):Observable<any>{
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
+                console.log('success getItems')
                 let itemEnumerator
                 try {
                     itemEnumerator = items.getEnumerator();
@@ -1460,39 +1676,68 @@ createList(listName:string, contextType:string):Observable<any>{
                     observer.error(errmsg);
                     return;
                 }
+                let oItem, fieldValues;
+                let resultArry = [];                
                 while (itemEnumerator.moveNext()) {
-                    let oItem, fieldValues;
+
                     try{
                         oItem = itemEnumerator.get_current();
                         // note get_fieldValues returns json object
                         fieldValues = oItem.get_fieldValues();
-                        this.logService.log(fieldValues, this._info, false);
-                        observer.next({
-                            listName: listName, 
-                            result: true,
-                            fieldValues: fieldValues
-                        })
+                        this.logService.log(fieldValues, this.utilsService.infoStatus, true);
+                        resultArry.push(fieldValues);
+
+
                     } catch (e) {
                         this.logService.log(`error occured while iterating through list items on list ${listName}`, this._error, false);
                         this.logService.log(e, this._error, false);
-                        observer.error(e);
+
+                        let reportResult: IReportResult = {
+                            reportHeading: this.utilsService.apiCallGetItems,
+                            reportResult: this.utilsService.errorStatus,
+                            listName: listName,
+                            fieldName: this.utilsService.NaStatus
+                        }
+                        observer.next(reportResult)
+
+                        observer.complete();
                         return;
                     }
-                    
-                    
                 }
+
+                let reportResult: IReportResult = {
+                    reportHeading: this.utilsService.apiCallGetItems,
+                    reportResult: this.utilsService.successStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+                
+                let result: IGetItemsResult = {
+                    apiCall: this.utilsService.apiCallGetItems,
+                    listName: listName,
+                    result: true,
+                    data: resultArry
+                }
+                observer.next(result)
+
                 observer.complete();
             }
 
             function failure(sender, args) {
                 let result = 'Request Failed to get items. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
-                observer.next({
+
+                let reportResult: IReportResult = {
+                    reportHeading: this.utilsService.apiCallGetItems,
+                    reportResult: this.utilsService.errorStatus,
                     listName: listName,
-                    result: false,
-                    fieldValues: ''
-                });
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+
                 this.logService.log(result, this._error, false);
                 observer.complete();
+                
                 return;
             }            
         })
@@ -1501,17 +1746,9 @@ createList(listName:string, contextType:string):Observable<any>{
 
     deleteItem(listName: string, itemId: number, contextType: string):Observable<any>{
         this.logService.log('delete item funtion called', this._info, true);
-        this.logService.log(`listName parameter: ${listName}, itemId parameter: ${itemId}, contextType paramter: ${contextType}`)
+        this.logService.log(`listName parameter: ${listName}, itemId parameter: ${itemId}, contextType parameter: ${contextType}`)
 
         let deleteItem$ = new Observable((observer:Observer<any>) => {
-            observer.next('deleteItem function called');
-
-            if (!this.uiStateService.getUiState('manageList')) { 
-                let permissionMsg = `user does not have permissions to delete items on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
 
             let clientContext
             try {
@@ -1562,7 +1799,7 @@ createList(listName:string, contextType:string):Observable<any>{
             function success() {
                 let resultMsg = `Item with item id ${itemId} deleted successfully on list: ${listName}`
                 let result: IDeleteItemResult = {
-                    apiCall: 'deleteItem',
+                    apiCall: this.utilsService.deleteItem,
                     listName: listName,
                     itemId: String(itemId),
                     result: true
@@ -1577,7 +1814,7 @@ createList(listName:string, contextType:string):Observable<any>{
             function failure(sender, args) {
                 let resultMsg = `Failed to delete item ${itemId} on list ${listName}` + args.get_message() + ' <br/> ' + args.get_stackTrace()
                 let result: IDeleteItemResult = {
-                    apiCall: 'deleteItem',
+                    apiCall: this.utilsService.deleteItem,
                     listName: listName,
                     itemId: String(itemId),
                     result: true
@@ -1598,12 +1835,6 @@ createList(listName:string, contextType:string):Observable<any>{
         let deleteItems$ = new Observable((observer:Observer<any>) => {
             observer.next('delete Items function called')
 
-            if (!this.uiStateService.getUiState('manageList')) { 
-                let permissionMsg = `user does not have permissions to delete items on a list`;
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
             let clientContext
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
@@ -1708,14 +1939,7 @@ getListXml(listName: string, contextType: string):Observable<any>{
         this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}`)
 
         let getListXml$ = new Observable((observer:Observer<any>) => {
-            //observer.next('get list xml function called');
 
-            if (!this.uiStateService.getUiState('viewList')) {
-                let permissionMsg = `user does not have permissions to get list xml on a list`
-                this.logService.log(permissionMsg, this._error, false);
-                observer.error(permissionMsg);
-                return;
-            }
             let clientContext
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
@@ -1758,6 +1982,15 @@ getListXml(listName: string, contextType: string):Observable<any>{
             } catch (e) {
                 this.logService.log('unable to load required query', this._error, false)
                 this.logService.log(e, this._error, false)
+
+                let reportResult:IListSchemaReportResult = {
+                    reportHeading: this.utilsService.apiCallListXmlData,
+                    reportResult: this.utilsService.errorStatus,
+                    listName: listName,
+                    schemaXml: ''
+                }
+                observer.next(reportResult)
+
                 observer.error('unable to load required query')
                 return;     
             }
@@ -1772,8 +2005,23 @@ getListXml(listName: string, contextType: string):Observable<any>{
                 try {
                     this.logService.log(`attempting to load schemaXml query for function getListXml`, this._info, true);
                     let schema = list.get_schemaXml();
-                    let result:ISchemaListResult = { apiCall: 'getListXml', listName: listName, result: true, schemaXml: schema }
+                    
+                    let result:IReadListResult = { 
+                        apiCall: this.utilsService.apiCallListXmlData, 
+                        listName: listName, 
+                        result: true, 
+                        schemaXml: schema 
+                    }
                     observer.next(result);
+                    
+                    let reportResult:IListSchemaReportResult = {
+                        reportHeading: this.utilsService.apiCallListXmlData,
+                        reportResult: this.utilsService.successStatus,
+                        listName: listName,
+                        schemaXml: schema                      
+                    }
+                    observer.next(reportResult)
+                    
                     observer.complete()
                     return;
                 } catch (e) {
@@ -1787,8 +2035,23 @@ getListXml(listName: string, contextType: string):Observable<any>{
             function failure(sender, args) {
                 let resultMsg = `Failed to execute query to getListXml for list: ${listName}`;
                 let apiResult = args.get_message() + '-  STACKTRACE:' + args.get_stackTrace();
-                //observer.next(result);
-                let result:ISchemaListResult = { apiCall: 'getListXml', listName: listName, result: false, schemaXml: '' }
+
+                let result:IReadListResult = { 
+                    apiCall: 'getListXml', 
+                    listName: listName, 
+                    result: false, 
+                    schemaXml: '' 
+                }
+                observer.next(result);
+
+                let reportResult:IListSchemaReportResult = {
+                    reportHeading: this.utilsService.apiCallListXmlData,
+                    reportResult: this.utilsService.failStatus,
+                    listName: listName,
+                    schemaXml: ''
+                }
+                observer.next(reportResult)
+
                 this.logService.log(resultMsg, this._error, false);
                 this.logService.log(apiResult, this._error, false);
                 observer.complete()
@@ -1804,12 +2067,6 @@ addListFields(listName:string,fieldXml:Array<string>, contextType:string):Observ
     let addListField$ = new Observable((observer:Observer<any>) => {
         observer.next('addField to list function called');
 
-        if (!this.uiStateService.getUiState('manageList')) {
-            let permissionMsg = `user does not have permissions to create lists`
-            this.logService.log(permissionMsg, this._error, false);
-            observer.error(permissionMsg); 
-            return;
-        }
         let clientContext
         try {
             clientContext = new SP.ClientContext(this.appUrl);
@@ -1863,6 +2120,15 @@ addListFields(listName:string,fieldXml:Array<string>, contextType:string):Observ
         } catch (e) {
             this.logService.log('unable to load field definition', this._error, false)
             this.logService.log(e, this._error, false);
+
+            let reportResult: IReportResult = {
+                reportHeading: this.utilsService.apiCallAddFields,
+                reportResult: this.utilsService.errorStatus,
+                listName: listName,
+                fieldName: this.utilsService.NaStatus
+            }
+            observer.next(reportResult)
+
             observer.error('unable to load field definition');
             return;
         }
@@ -1873,17 +2139,35 @@ addListFields(listName:string,fieldXml:Array<string>, contextType:string):Observ
         clientContext.executeQueryAsync(onListCreateSucceeded.bind(this), onListCreateFailed.bind(this));
 
         function onListCreateSucceeded() {
-            let result = 'field/s added to list' + listName;
-            observer.next(result);
-            this.logService.log(result, this._success, false);
+            let resultMsg = 'field/s added to list' + listName;
+            
+            let reportResult: IReportResult = {
+                reportHeading: this.utilsService.apiCallAddFields,
+                reportResult: this.utilsService.successStatus,
+                listName: listName,
+                fieldName: this.utilsService.NaStatus
+            }
+            observer.next(reportResult)
+
+            this.logService.log(resultMsg, this._success, false);
             observer.complete();
             return;     
         }
 
         function onListCreateFailed(sender, args) {
-            let result = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
-            observer.next(result);
-            this.logService.log(result, this._error, false);
+            let resultMsg = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
+            
+            this.logService.log(resultMsg, this._error, false);
+
+            let reportResult: IReportResult = {
+                reportHeading: this.utilsService.apiCallAddFields,
+                reportResult: this.utilsService.failStatus,
+                listName: listName,
+                fieldName: this.utilsService.NaStatus
+            }
+            observer.next(reportResult)
+
+
             observer.complete();
             return;
         }
@@ -1891,5 +2175,105 @@ addListFields(listName:string,fieldXml:Array<string>, contextType:string):Observ
 
     return addListField$
 
-    }    
+}
+
+getItemCount(listName: string, contextType: string): Observable<any>{
+        this.logService.log('Get Item Count funtion called', this._info, true);
+
+        let getItem$ = new Observable((observer:Observer<any>) => {
+
+            let clientContext
+            try {
+                clientContext = new SP.ClientContext(this.appUrl);
+            } catch (e) {
+                this.logService.log(`unable to create clientContext`, this._error, false);
+                this.logService.log(e, this._error, false);
+                observer.error(`unable to create clientContext`)
+                return;
+            }
+                
+            let context; 
+
+            if (contextType == this.utilsService.hostWeb) {
+                this.logService.log('contextType == this.utils.hostweb', this._info, true);
+                try {
+                    context = new SP.AppContextSite(clientContext, this.hostUrl);
+                } catch (e) {
+                    this.logService.log(`unable to create hostweb clientcontext`, this._error, false);
+                    this.logService.log(e, this._error, false);
+                    observer.error(`unable to create hostweb clientContext`)
+                    return;
+                }
+            
+            } else if (contextType == this.utilsService.appWeb){
+                this.logService.log('contextType = appWeb', this._info, true)
+                context = clientContext;
+            } else {
+                this.logService.log('unable to determine context type: Create List failed', this._error, false)
+                observer.error('unable to determine context type: Create List failed');
+                return;
+            }            
+            
+            let web, list, query, listItems;
+            try {
+                web = context.get_web();
+                list = web.get_lists().getByTitle(listName);
+                query = new SP.CamlQuery();
+                listItems = list.getItems(query);
+                clientContext.load(listItems);
+            } catch (e) {
+                this.logService.log('error loading context information for function getItem', this._error, false);
+                this.logService.log(e,this._error, false);
+                observer.error('error loading context information for function getItem');
+                return;
+            }
+
+            this.logService.log('executing JSOM query for function: getItem', this._info, true);
+            clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
+
+            function success() {
+                let listItemEnumerator, listItemCount, messageSuccess;
+                messageSuccess = `executed query successfully for function getItem Count on list ${listName}`
+                this.logService.log(messageSuccess, this._success, true);
+
+                try {
+                    listItemCount = String(listItems.get_count());
+                } catch (e){
+                    this.logService.log(e, this._error, false);
+                    observer.error(JSON.stringify(e)); 
+                    return;                  
+                }
+            
+                let reportResult: IReportResult = {
+                    reportHeading: this.utilsService.apiCallGetItemCount,
+                    reportResult: this.utilsService.successStatus,
+                    listName: listName,
+                    fieldName: this.utilsService.NaStatus
+                }
+                observer.next(reportResult)
+                
+                let result: IGetItemsResult = {
+                    apiCall: this.utilsService.apiCallGetItemCount,
+                    listName: listName,
+                    result: true,
+                    data: listItemCount
+                }
+                observer.next(result)
+                observer.complete();
+            }
+
+            function failure(sender, args) {
+                let apiResult = 'Request Failed to get items. ' + args.get_message() + ' <br/> ' + args.get_stackTrace()
+                let result = `failed to execute query for getItem Count on list: ${listName}`
+                observer.next(result);
+                this.logService.log(result, this._error, false);
+                this.logService.log(apiResult, this._error, false);
+                observer.complete(); 
+                return;
+            }            
+        })
+        return getItem$
+        
+    }
+
 }

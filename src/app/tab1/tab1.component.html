@@ -3,8 +3,8 @@
         {{title}}
     </div>
     <div class="col-md-3">
-        <input type="button" class="btn btn-xs" (click)="addRow();" value="Add"/>
-        <input type="button" class="btn btn-xs" (click)="deleteRow();" value="Remove"/>
+        <input type="button" class="btn btn-xs" (click)="addResourceRow();" value="Add"/>
+        <input type="button" class="btn btn-xs" (click)="deleteResourceRow();" value="Remove"/>
         <input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
         <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
         <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
@@ -65,7 +65,16 @@
                             [style.width.px]="rtstTableWidth"
                             class="ag-blue" 
                  [gridOptions]="rtstGridOptions">
-    </ag-grid-angular>    
+    </ag-grid-angular>
+<div class="row">
+    <div class="col-md-9">
+        Material Costs
+    </div>
+    <div class="col-md-3">
+        <input type="button" class="btn btn-xs" (click)="addMaterialRow();" value="Add"/>
+        <input type="button" class="btn btn-xs" (click)="deleteMaterialRow();" value="Remove"/>
+    </div>
+</div>        
     <ag-grid-angular #agGrid10 style="overflow: hidden;" 
                             [style.height.px]="cmTableHeight" 
                             [style.width.px]="cmTableWidth"
@@ -77,7 +86,10 @@
                             [style.width.px]="mattTableWidth"
                             class="ag-blue" 
                  [gridOptions]="mattGridOptions">
-    </ag-grid-angular>        
+    </ag-grid-angular>
+<div class="row">
+    Totals
+</div>
     <ag-grid-angular #agGrid12 style="overflow: hidden;" 
                             [style.height.px]="tTableHeight" 
                             [style.width.px]="tTableWidth"

@@ -2,48 +2,52 @@ import { Injectable } from '@angular/core';
 import { Observer } from 'rxjs/Observer';
 
 import { WorkdayService } from './workdays.service'
+import { SettingsService } from './settings.service'
 
-import { IDataModel } from '../model/data.model';
+
+import { IResourceModel } from '../model/resource.model';
+import { IMatModel } from '../model/material.model';
+import { IDataModel } from '../model/data.model'
 import { IYear } from '../model/year.model'
-
+import { ITotalModel } from '../model/total.model'
 
 @Injectable()
 export class DataCalcService {
-    private _workingdays:IYear;
-    private _workingHoursInDay: number = 7.5;
-    private _TSWeighting = 0.2;
+    private _workingHoursInDay: number
+    private _TSWeighting: number
 
-    constructor(private workdayService:WorkdayService) {
+    constructor(private workdayService:WorkdayService,
+                private settingsService:SettingsService) {
         this.init();
     }
 
     init(){
-        this.workdayService.getWorkdayStream().subscribe(data => {
-            this._workingdays = data[0];
-        })        
+        this._workingHoursInDay = this.settingsService.workingHoursInDay
+        this._TSWeighting = this.settingsService.tsWeighting
     };
 
-    puForecast(row: IDataModel): number{
+    puForecast(row: IResourceModel): number{
         let result = 0;
-        if (this._workingdays) {
-            result = ((row.PUJan * this._workingdays.January) +
-                        (row.PUFeb * this._workingdays.Febuary) +
-                        (row.PUMar * this._workingdays.March) +
-                        (row.PUApr * this._workingdays.April) +
-                        (row.PUMay * this._workingdays.May) +
-                        (row.PUJun * this._workingdays.June) +
-                        (row.PUJul * this._workingdays.July) +
-                        (row.PUAug * this._workingdays.August) +
-                        (row.PUSep * this._workingdays.September) +
-                        (row.PUOct * this._workingdays.October) +
-                        (row.PUNov * this._workingdays.November) +
-                        (row.PUDec * this._workingdays.December)) *
+        let _workingdays:IYear = this.workdayService.workingDays
+        if (_workingdays) {
+            result = ((row.PUJan * _workingdays.January) +
+                        (row.PUFeb * _workingdays.Febuary) +
+                        (row.PUMar * _workingdays.March) +
+                        (row.PUApr * _workingdays.April) +
+                        (row.PUMay * _workingdays.May) +
+                        (row.PUJun * _workingdays.June) +
+                        (row.PUJul * _workingdays.July) +
+                        (row.PUAug * _workingdays.August) +
+                        (row.PUSep * _workingdays.September) +
+                        (row.PUOct * _workingdays.October) +
+                        (row.PUNov * _workingdays.November) +
+                        (row.PUDec * _workingdays.December)) *
                         row.PRDayRate
         }
         return result
     }
 
-    ahTotalHours(row: IDataModel): number{
+    ahTotalHours(row: IResourceModel): number{
         let result = 0;
 
             result =    Number(row.AHJan) +
@@ -62,36 +66,40 @@ export class DataCalcService {
         return result
     }
 
-    prMonth(row: IDataModel, monthLong: string): number{
+    prMonth(row: IResourceModel, monthLong: string): number{
+        let _workingdays:IYear = this.workdayService.workingDays
         let monthShort:string = this.getShortMonth(monthLong);
+
         if (monthShort === undefined) return 0;
+        
         let result:number = 0;
-        if (this._workingdays){
+        
+        if (_workingdays){
             let AHMonthValue = Number(row['AH' + monthShort])
             if (AHMonthValue !== 0){
                 let value1:number = 0
 
-                Number(AHMonthValue) > (Number(row.ContractedDayHours)*Number(this._workingdays[monthLong])) ?
-                value1 = Number(row.ContractedDayHours) * Number(this._workingdays[monthLong]) :
+                Number(AHMonthValue) > (Number(row.ContractedDayHours)*Number(_workingdays[monthLong])) ?
+                value1 = Number(row.ContractedDayHours) * Number(_workingdays[monthLong]) :
                 value1 = Number(AHMonthValue);
 
                 result =  value1 * (Number(row.ContractedDayHours)/Number(this._workingHoursInDay));
 
             } else {
-                result = Number(row.ContractedDayHours) * Number(this._workingdays[monthLong]) * Number(row['PU'+monthShort]);
+                result = Number(row.ContractedDayHours) * Number(_workingdays[monthLong]) * Number(row['PU'+monthShort]);
             }
         }
 
         return result;
     }
 
-    prYtdTotal(row: IDataModel): number {
+    prYtdTotal(row: IResourceModel): number {
         let result = 0;
         result = (row.AHTotalHours/this._workingHoursInDay) * row.PRDayRate;
         return result;
     }
 
-    prLbe(row:IDataModel): number {
+    prLbe(row:IResourceModel): number {
         let result = 0;
         result =    Number(row.PRJan) +
                     Number(row.PRFeb) +
@@ -108,26 +116,28 @@ export class DataCalcService {
         return result;
     }
 
-    prYtdVarianceToBudget(row: IDataModel):number {
+    prYtdVarianceToBudget(row: IResourceModel):number {
         let result = 0
         result = row.PRYtdTotal - row.PRBudget
         return result
     }
-    prForecastVarianceToBudget(row: IDataModel):number {
+    prForecastVarianceToBudget(row: IResourceModel):number {
         let result = 0
         result = row.PRLbe - row.PRBudget
         return result
     }
 
-    tsMonth(row: IDataModel, monthLong: string): number {
+    tsMonth(row: IResourceModel, monthLong: string): number {
         let result = 0;
         let monthShort = this.getShortMonth(monthLong);
+        let _workingdays:IYear = this.workdayService.workingDays
+
         if (monthShort === undefined) return 0;
 
         let PUMonthValue = Number(row['PU'+monthShort])
 
         if (PUMonthValue !== 0) {
-            result = row.TSDayRate * this._workingdays[monthLong] * PUMonthValue * this._TSWeighting;
+            result = row.TSDayRate * _workingdays[monthLong] * PUMonthValue * this._TSWeighting;
         } else {
             result = 0;
         }
@@ -135,7 +145,7 @@ export class DataCalcService {
         return result;
     }
 
-    tsForecast(row: IDataModel): number {
+    tsForecast(row: IResourceModel): number {
         let result = 0;
         result =    Number(row.TSJan) +
                     Number(row.TSFeb) +
@@ -153,7 +163,7 @@ export class DataCalcService {
         return result
     }
 
-    atsYtdTotal(row:IDataModel): number{
+    atsYtdTotal(row:IResourceModel): number{
         let result = 0;
         result =    Number(row.ATSJan) +
                     Number(row.ATSFeb) +
@@ -170,7 +180,7 @@ export class DataCalcService {
         return result
     }
 
-    rtsMonth(row:IDataModel, monthLong:string): number {
+    rtsMonth(row:IResourceModel, monthLong:string): number {
         let result = 0;
         let monthShort = this.getShortMonth(monthLong);
         if (monthShort === undefined) return 0;
@@ -183,11 +193,11 @@ export class DataCalcService {
         return result
     }
 
-    rtsYtdTotal(row:IDataModel):number {
+    rtsYtdTotal(row:IResourceModel):number {
         return row.ATSYtdTotal;
     }
 
-    rtsLbe(row:IDataModel):number{
+    rtsLbe(row:IResourceModel):number{
         let result = 0;
         result =    Number(row.RTSJan) +
                     Number(row.RTSFeb) +
@@ -204,11 +214,11 @@ export class DataCalcService {
         return result
     }
 
-    rtsYtdVarianceToBudget(row:IDataModel): number {
+    rtsYtdVarianceToBudget(row:IResourceModel): number {
         return row.RTSYtdTotal - row.RTSBudget;
     }
 
-    rtsVarianceToBudget(row:IDataModel): number {
+    rtsVarianceToBudget(row:IResourceModel): number {
         return row.RTSLbe - row.RTSBudget
     }
 
@@ -241,17 +251,67 @@ export class DataCalcService {
         return row.MatLbe - row.MatBudget
     }
 
-    //Totals
-    sumTotal(filteredYearData:IDataModel[], field:string):number{
+    //RESOURCE TOTALS
+    sumResourceTotal(filteredResourceYearData:IResourceModel[], field:string):number{
         let result = 0
-        filteredYearData.forEach((row)=>{
-            console.log(Number(row[field]));
+        filteredResourceYearData.forEach((row)=>{
             if (Number(row[field])){
                 result += Number(row[field])
             }
         })
         return result;
     }
+
+    //MATERIALS TOTALS
+    sumMaterialTotal(filteredMaterialYearData:IMatModel[], field:string):number{
+        let result = 0
+        filteredMaterialYearData.forEach((row)=>{
+            if (Number(row[field])){
+                result += Number(row[field])
+            }
+        })
+        return result;
+    }
+
+//SUM TOTALS
+sumTotal(filteredYearData:ITotalModel, field:string):number{
+    let result = 0
+    //remove the T prefix
+    let fieldBase:string = field.slice(1);
+    
+    //special fule for TProjectBudget, need to Trim Project as well
+    if (fieldBase === 'ProjectBudget') fieldBase = fieldBase.slice(7)
+
+    //each sumtoal value is the sum of 3 values PU<Value> + RTS<Value> + MAT<Value>
+    let field1:string;
+    let field2:string;
+    let field3:string;
+
+    // special rule for TVarianceToBudget
+    if (fieldBase === 'VarianceToBudget') {
+        field1 = "PRForecastVarianceToBudget"
+        field2 = "RTSVarianceToBudget"
+        field3 = "MatForecastVarianceToBudget"
+    } else {
+        field1 = "PR" + fieldBase
+        field2 = "RTS" + fieldBase
+        field3 = "Mat" + fieldBase
+    }
+
+    let value1: number;
+    let value2: number;
+    let value3: number;
+
+    if (filteredYearData.hasOwnProperty(field1) &&
+        filteredYearData.hasOwnProperty(field2) &&
+        filteredYearData.hasOwnProperty(field3)
+    ) {
+        result = Number(filteredYearData[field1]) + Number(filteredYearData[field2]) + Number(filteredYearData[field3])
+    } else {
+        console.error(`unable to find values for field ${field} - in totals object to run sum total function`)
+    }
+    return result;
+}      
 
 
     getShortMonth(monthLong: string): string {

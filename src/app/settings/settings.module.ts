@@ -31,10 +31,9 @@ import { settingsRoutes } from './settings.routes';
                 RouterModule.forChild(settingsRoutes),
                 FormsModule,
                 BsDropdownModule.forRoot(),
-                ModalModule.forRoot()],
+               ModalModule.forRoot()],
     declarations: [ 
         SettingsComponent,
-        
         SettingsResetComponent,
         SettingsMainComponent,
         SettingsProvisionerComponent,
@@ -43,10 +42,10 @@ import { settingsRoutes } from './settings.routes';
         LoggerComponent,
         MappingComponent,
         LookFeelComponent,
+        ApiLoggerComponent,
         ResourceListComponent,
         TotalListComponent,
         MaterialListComponent,
-        ApiLoggerComponent,
         SettingListComponent,
         UserPermissionsComponent,
         ScriptsComponent

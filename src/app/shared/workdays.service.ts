@@ -50,18 +50,17 @@ export class WorkdayService {
     }
 
     get workingDays(){
-        let _year = this.settingsService.getYear();
+        let _year = this.settingsService.year;
         let _index = this.findIndex(_year)
         //if cannot find year, use placeholder
         if(_index < 0) {
             this.createWdEntry(_year);
         }
-        console.log(this._workingDays);
         return this._workingDays[_index];
     }
 
     getWorkdayStream():Observable<Array<IYear>>{
-        let _year = this.settingsService.getYear();
+        let _year = this.settingsService.year;
         let filteredDataStream = this._workdayStream.asObservable().map((data, index) => {
             return data.filter((wrkdys:any)=> wrkdys.Year == _year)
         })
@@ -70,7 +69,7 @@ export class WorkdayService {
 
     getWorkdayData(){
         //check if entry exists
-        let _year = this.settingsService.getYear();
+        let _year = this.settingsService.year;
         let _index = this.findIndex(_year)
         if(_index < 0) {
             //year does not exist yet so add placeholder to array

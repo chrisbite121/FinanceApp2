@@ -6,6 +6,8 @@ import { TableService } from '../shared/table.service'
 import { DataContextService } from '../shared/data-context.service'
 import { UiStateService } from '../shared/ui-state.service'
 import { WorkdayService } from '../shared/workdays.service'
+import { ScriptService } from '../shared/scripts.service'
+import { SettingsService } from '../shared/settings.service'
 
 import { IYear } from '../model/year.model'
 @Component({
@@ -81,7 +83,9 @@ export class Tab1Component implements OnInit {
     constructor(private tableService: TableService, 
                 private dataContext: DataContextService,
                 private uiStateService: UiStateService,
-                private workdayService: WorkdayService) {
+                private workdayService: WorkdayService,
+                private scriptService: ScriptService,
+                private settingsService: SettingsService) {
         
         //initialise gridoptions objects
         this.puGridOptions = <GridOptions>{};
@@ -101,7 +105,7 @@ export class Tab1Component implements OnInit {
         this.wdGridOptions.context = { };
         this.wdGridOptions.singleClickEdit = true;
         this.wdGridOptions.onCellValueChanged = ($event: any) => {
-            console.log($event);
+
             this.workdayService.updateWorkingDays($event);
         };
         this.wdGridOptions.onGridReady = () => {
@@ -112,7 +116,8 @@ export class Tab1Component implements OnInit {
         this.puGridOptions.singleClickEdit = true;
         this.puGridOptions.enableCellExpressions = true;
         this.puGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber()); 
+            this.puGridOptions.api.tabToNextCell();
         };
         this.puGridOptions.context = { };
         this.puGridOptions.rowSelection = 'single';
@@ -121,7 +126,9 @@ export class Tab1Component implements OnInit {
         //actual hours gridoptions
         this.ahGridOptions.context = {};
         this.ahGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            //need to move focus to next cell
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber());
+            this.ahGridOptions.api.tabToNextCell();
         };
         // this.ahGridOptions.rowSelection = 'single';
         this.ahGridOptions.singleClickEdit = true;
@@ -130,7 +137,8 @@ export class Tab1Component implements OnInit {
         //project resource gridoptions
         this.prGridOptions.context = {};
         this.prGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber());
+            this.prGridOptions.api.tabToNextCell();
         };
         // this.prGridOptions.rowSelection = 'single';
         this.prGridOptions.singleClickEdit = true;
@@ -139,7 +147,8 @@ export class Tab1Component implements OnInit {
         //travel subsidence gridoptions
         this.tsGridOptions.context = {};
         this.tsGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber());
+            this.tsGridOptions.api.tabToNextCell();
         };
         // this.tsGridOptions.rowSelection = 'single';
         this.tsGridOptions.singleClickEdit = true;
@@ -148,7 +157,8 @@ export class Tab1Component implements OnInit {
         //actual travel subsidence gridoptions
         this.atsGridOptions.context = {};
         this.atsGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber());
+            this.atsGridOptions.api.tabToNextCell();
         };
         // this.atsGridOptions.rowSelection = 'single';
         this.atsGridOptions.singleClickEdit = true;
@@ -157,7 +167,8 @@ export class Tab1Component implements OnInit {
         //Project resource travel subsistence gridoptions
         this.rtsGridOptions.context = {};
         this.rtsGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber());
+            this.rtsGridOptions.api.tabToNextCell();
         };
         this.rtsGridOptions.rowSelection = 'single';
         this.rtsGridOptions.singleClickEdit = true;
@@ -166,17 +177,19 @@ export class Tab1Component implements OnInit {
         //Project cost material gridoptions
         this.cmGridOptions.context = {};
         this.cmGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe(this.getSubscriber());
+            this.cmGridOptions.api.tabToNextCell();
         };
 
         this.cmGridOptions.singleClickEdit = true;
         this.cmGridOptions.enableColResize = true;
-
+        this.cmGridOptions.rowSelection = 'single';
 
         //Total cost gridoptions
         this.tGridOptions.context = {};
         this.tGridOptions.onCellValueChanged = ($event: any) => {
-            this.dataContext.updateTable($event);
+            this.dataContext.updateTable($event).subscribe();
+            this.tGridOptions.api.tabToNextCell();
         };
         this.tGridOptions.onGridReady = () => {
             //Remove Header
@@ -257,7 +270,11 @@ export class Tab1Component implements OnInit {
             this.mattGridOptions.columnDefs = table;
         });                        
 
-        this.dataContext.getDataStream().subscribe(data => {
+        this.dataContext.getResourceDataStream().subscribe(data => {
+            if(this.settingsService.autoSave) {
+                this.scriptService.saveAppData().subscribe(this.getSubscriber())
+            }
+
             if (!this.puGridOptions.rowData) {
                 this.puGridOptions.rowData = data;
             } else if (this.puGridOptions.api) {
@@ -315,6 +332,11 @@ export class Tab1Component implements OnInit {
         })
 
         this.dataContext.getMaterialDataStream().subscribe(data=>{
+            if(this.settingsService.autoSave) {
+                this.scriptService.saveAppData().subscribe(this.getSubscriber())
+            }
+
+
             if (!this.cmGridOptions.rowData) {
                 this.cmGridOptions.rowData = data;
             } else if (this.cmGridOptions.api) {
@@ -329,7 +351,7 @@ export class Tab1Component implements OnInit {
         })
 
         this.dataContext.getTotalDataStream().subscribe(data => {
-            console.log(data);
+            
             if (!this.tGridOptions.rowData) {
                 this.tGridOptions.rowData = data;
             } else if (this.tGridOptions.api) {
@@ -379,22 +401,40 @@ export class Tab1Component implements OnInit {
         this.uiStateService.updateState();
     }
 
-    addRow(){
-        this.dataContext.addRow();
-        return    
+    addResourceRow(){
+        this.dataContext.addResourceRow();
+        return
     }
 
-    deleteRow(){
+    addMaterialRow(){
+        this.dataContext.addMaterialRow();
+        return
+    }    
+    
+
+    deleteResourceRow(){
         let selectedNode = this.puGridOptions.api.getSelectedNodes();
         if (selectedNode[0] && 
             selectedNode[0].data && 
-            selectedNode[0].data.Id) {
-                this.dataContext.deleteRow(selectedNode[0].data.Id);
+            selectedNode[0].data.ItemId) {
+                this.dataContext.deleteResourceRow(selectedNode[0].data.ItemId);
             } else {
                 alert('no row selected');
             }
         return
     }
+
+    deleteMaterialRow(){
+        let selectedNode = this.cmGridOptions.api.getSelectedNodes();
+        if (selectedNode[0] && 
+            selectedNode[0].data && 
+            selectedNode[0].data.ItemId) {
+                this.dataContext.deleteMaterialRow(selectedNode[0].data.ItemId);
+            } else {
+                alert('no row selected');
+            }
+        return
+    }    
 
     refreshGrid(){
         this.puGridOptions.api.refreshView();
@@ -501,13 +541,13 @@ export class Tab1Component implements OnInit {
     applyCellStyle(column: any, data: any, bkColour: string){
             column.cellStyle = function(params: any){
                 let fldName = params.colDef.field;
-                let rowId = params.data.Id;
+                let rowId = params.data.ItemId;
                 let highlightCell = false;
                 if (data.length > 0) {
                     
                     data.forEach(function(dataCell: any){
                          if(dataCell.fieldName == fldName &&
-                            dataCell.Id == rowId) {
+                            dataCell.ItemId == rowId) {
                                 highlightCell = true;
                             }
                     });
@@ -562,5 +602,42 @@ export class Tab1Component implements OnInit {
     resizeMaterialTable(noRows: number) {
         this.cmTableHeight = (noRows * 25) + 40;
         this.cmTableWidth = 2000;
-    }      
+    }
+
+    getSubscriber() {
+        return {
+            next(data){
+                console.log('next', data)
+                let _log = {
+                    description: data,
+                    type: 'info'
+                }
+                if (data && this.log) {
+                    this.log.push(data);
+                }
+                
+            },
+            error(err){
+                console.log('error', err)
+                let _log = {
+                    description: err,
+                    type: 'error'
+                }
+                if (err && this.log) {
+                    this.log.push(err);
+                }
+                
+            },
+            complete(){
+                console.log('completed');
+                let _log = {
+                    description: 'completed',
+                    type: 'complete'
+                }
+                if (this.log) {
+                    this.log.push('completed');
+                }
+            }
+        }
+    }    
 }

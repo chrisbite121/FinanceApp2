@@ -34,17 +34,19 @@ export class SettingsMainComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.settingsService.getSettingsOptionsStream().subscribe(data => {
-            this.years = <Array<number>>data.years
-            this.regionOptions = <Array<IRegion>>data.regionOptions
-        })
+        // this.settingsService.getSettingsOptionsStream().subscribe(data => {
+        //     this.years = <Array<number>>data.years
+        //     this.regionOptions = <Array<IRegion>>data.regionOptions
+        // })
         this.settingsService.getSettingsStream().subscribe(data => {
             this.region = <IRegion>data.region;
             this.year = data.year;
             this.selectedYear = data.year;
+            this.years = <Array<number>>data.years
+            this.regionOptions = <Array<IRegion>>data.regionOptions            
         })
         this.settingsService.getSettings()
-        this.settingsService.getSettingsOptions();
+        // this.settingsService.getSettingsOptions();
 
 
         // this.settingsService.getSettingOptions('years').subscribe(years => {

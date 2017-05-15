@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { IFieldUpdate,
+import { IFieldUpdateResult,
         IFieldThatDoesntExist } from '../model/data-validation.model'
 
 import {    IHealthReport,

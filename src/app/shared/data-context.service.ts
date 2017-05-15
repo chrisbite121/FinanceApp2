@@ -1,9 +1,10 @@
 import { Injectable, Inject } from '@angular/core'
 
 //models
-import { IDataModel } from '../model/data.model'
+import { IResourceModel } from '../model/resource.model'
 import { ITotalModel } from '../model/total.model'
 import { IMatModel } from '../model/material.model'
+import { ISettings } from '../model/settings.model'
 
 import { Observable } from 'rxjs/Rx';
 import { Observer } from 'rxjs/Observer';
@@ -20,35 +21,41 @@ import { UtilsService } from './utils.service'
 import { LogService } from './log.service'
 import { SettingsService } from './settings.service'
 import { HealthReportService } from './health-report.service'
+import { ListService } from './list.service'
 
 //application data
 import { newDataRow } from '../config/new-row'
 import { newTotalDataRow } from '../config/new-total'
+import { newMaterialDataRow } from '../config/new-mat'
 import { initData } from '../config/data'
 import { initTotalData } from '../config/totaldata'
 import { initMaterialData } from '../config/materialdata'
 
-//const PercentageUtilisedData:IDataModel[] = initData;
-const newRow:IDataModel = newDataRow;
+//const PercentageUtilisedData:IResourceModel[] = initData;
+const newResourceRow:IResourceModel = newDataRow;
+const newMaterialRow:IMatModel = newMaterialDataRow;
 const newTotalRow: ITotalModel = newTotalDataRow
 const totalData: Array<ITotalModel> = initTotalData
-const Data:IDataModel[] = initData;
+const resourceData:IResourceModel[] = initData;
 const matData: Array<IMatModel> = initMaterialData;
 
 
 @Injectable()
 export class DataContextService {
     private obs: Observable<any>
-    private dataStream: Subject<any> = new Subject();
+    private resourceDataStream: Subject<any> = new Subject();
     private totalDataStream: Subject<any> = new Subject();
     private materialDataStream: Subject<any> = new Subject();
     // private ctxStream: Subject<any> = new Subject();
     // private ctxObject: any[] = new Array;
     private stateChange: boolean = false;
     private _year: number = 2017;
-    private _FinanceData:IDataModel[]
+    private _sharepointMode: Boolean = false;
+    private _ResourceData:IResourceModel[]
     private _TotalData:ITotalModel[]
     private _MaterialData: IMatModel[]
+
+    // private _initComplete: boolean = false;
 
     constructor( // @Inject(JQUERY_TOKEN) private jQuery: any,
                 private commonApiService: CommonApiService,
@@ -57,185 +64,445 @@ export class DataContextService {
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
                 private logService: LogService,
-                private healthReportSerivce: HealthReportService){
+                private healthReportSerivce: HealthReportService,
+                private listService: ListService){
                     this.init();
 
                 }
     
     init(){
-        this.settingsService.getYearStream().subscribe((year:number) => {
-            this._year = year;
+        this.settingsService.getSettingsStream().subscribe((settings:ISettings) => {
+            this._year = settings.year;
+            this._sharepointMode = settings.sharePointMode
         })
+        //CHECK SETTINGS TO SEE IF SHOULD USE LOCAL MODE OR SHAREPOINT MODE
         //IF HTTP CALL RETURNS NO DATA USE PLACEHOLDER DATA
-        this._FinanceData = Data;
+        this._ResourceData = resourceData;
         this._TotalData = totalData;
         this._MaterialData = matData;
-        this.addToHistory();
+
+        //process calculated fields to make sure data is correct
+        this.calcTotalValues()
+        this.calcResourceValues()
+        this.calcMaterialValues()
+
+        //ONLY USING UNDO REDO WHEN AUTOSAVE DISABLED
+        if (!this.settingsService.autoSave) {
+            this.addToHistory();
+        }
     }
+    
 
-    getApiData() {
-        let _getDataReport: Array<any>
-        _getDataReport = [];
+    // getApiData(Resource:boolean,Material:boolean,Total:boolean):Observable<any>{
+    //     let _observableArray = []
 
-        let _observableArray = [
-            this.commonApiService.getItems(this.utilsService.financeAppResourceData, this.utilsService.hostWeb),
-            this.commonApiService.getItems(this.utilsService.financeAppMaterialData, this.utilsService.hostWeb),
-            this.commonApiService.getItems(this.utilsService.financeAppTotalsData, this.utilsService.hostWeb)
-        ]
+    //     if (Resource) _observableArray.push(this.commonApiService.getItems(this.utilsService.financeAppResourceData, this.utilsService.hostWeb))
 
-        let getData$ = Observable.from(_observableArray).mergeAll();
+    //     if (Material) _observableArray.push(this.commonApiService.getItems(this.utilsService.financeAppMaterialData, this.utilsService.hostWeb))
 
-        getData$.subscribe(
-            data => {
-                if (typeof(data) === 'object' &&
-                    data.listName &&
-                    data.result &&
-                    data.fieldValues) {
-                        _getDataReport.push(data)
-                        if (data.result == true && data.listName == this.utilsService.financeAppResourceData) {
-                            this._FinanceData = data.fieldValues
-                            console.log(this._FinanceData)
-                        } else if (data.result == false && data.listName == this.utilsService.financeAppResourceData) {
-                            //Failed to get Resource Data
-                        }
+    //     if (Total) _observableArray.push(this.commonApiService.getItems(this.utilsService.financeAppTotalsData, this.utilsService.hostWeb))
 
-                        if (data.result == true && data.listName == this.utilsService.financeAppMaterialData) {
-                            this._MaterialData = data.fieldValues
-                            console.log(this._MaterialData)
-                        } else if (data.result == false && data.listName == this.utilsService.financeAppMaterialData) {
-                            //Failed to get Material Data
-                        }
+    //     let getData$ = 
+    //         Observable.of(true)
+    //         .mergeMap(data => 
+    //             data
+    //             ? Observable.from(_observableArray)
+    //             : Observable.of(data)
+    //         )
+    //         .mergeMap(data =>
+    //             // process list data
+    //             (typeof(data) === 'object' &&
+    //             data.hasOwnProperty('listName') &&
+    //             data.hasOwnProperty('apiCall') &&
+    //             data.hasOwnProperty('result') &&        
+    //             data['apiCall'] == this.utilsService.apiCallGetItems && 
+    //             data['result'] == true)
+    //             ? this.processListData(data['data'], data['listName'])
+    //             : Observable.of(data)
+    //         )
 
-                        if (data.result == true && data.listName == this.utilsService.financeAppTotalsData) {
-                            this._TotalData = data.fieldValues
-                            console.log(this._TotalData)
-                        } else if (data.result == false && data.listName == this.utilsService.financeAppTotalsData) {
-                            //Failed to get Totals Data
-                        }
-                }
-            },
-            err => {
-                this.logService.log(`error calling api service to get data`, this.utilsService.errorStatus, false);
-                this.logService.log(err, this.utilsService.errorStatus, false);
-            },
-            () => {
-                this.logService.log('exiting getResourceData function', this.utilsService.infoStatus, true);
-                this.healthReportSerivce.getDataReport = _getDataReport
-            }            
-        )
-    }
+    //     return getData$
+    // }
 
-    submitApiData(){
-        let _submitDataReport: Array<any>
-        _submitDataReport = [];
+processListData(data:Array<Object>, listName: string):Observable<any> {
 
-        let _financeObservableArray: Array<any>
-        let _materialObservableArray: Array<any>
-        let _totalObservableArray: Array<any>
-        let _observableArray: Array<any>
+    this.logService.log(`Process List Data Function called for list: ${listName}`, this.utilsService.infoStatus, false);
+
+   let listData$ = new Observable((observer:Observer<any>) => {
+
+        let _resultsArray = new Array()
         
-        
-        _financeObservableArray = this.prepDataForApi(this._FinanceData, this.utilsService.financeAppResourceData)
-        _materialObservableArray = this.prepDataForApi(this._MaterialData, this.utilsService.financeAppMaterialData)
-        _totalObservableArray = this.prepDataForApi(this._TotalData, this.utilsService.financeAppTotalsData)
+        //need to pull out the field names from list spec and put them into array
+        let fieldNameArray = this.listService.getArrayFieldNames(listName);
 
-        _observableArray = _financeObservableArray.concat(_materialObservableArray).concat(_totalObservableArray)
-        
-        let submitData$ = Observable.from(_observableArray).mergeAll()
+        if (data.length>0) {
 
-        submitData$.submit(
-            data => {
-                if (typeof(data) === 'object' &&
-                    data.listName &&
-                    data.result &&
-                    data.apiCall == 'addItem') {
-                        _submitDataReport.push(data)
-                        if (data.result === true) {
-                           this.logService.log(`item added to list`, this.utilsService.infoStatus, true); 
-                        } else {
-                            this.logService.log(`failed to add item added to list`, this.utilsService.errorStatus, true);
-                        }
-                }
-                else if (typeof(data) === 'object' &&
-                    data.listName &&
-                    data.result &&
-                    data.apiCall == 'deleteItem') {
-                        _submitDataReport.push(data)
-                        if (data.result === true) {
-                           this.logService.log(`item deleted`, this.utilsService.infoStatus, true); 
-                        } else {
-                             this.logService.log(`failed to delete item added to list`, this.utilsService.errorStatus, true);
-                        }
-                }
-                else if (typeof(data) === 'object' &&
-                    data.listName &&
-                    data.result &&
-                    data.apiCall == 'updateItem') {
-                        _submitDataReport.push(data)
-                        if (data.result === true) {
-                            this.logService.log(`item updated`, this.utilsService.infoStatus, true); 
-                        } else {
-                            this.logService.log(`failed to update item`, this.utilsService.errorStatus, true);
-                        }
-                }
-                                            
-            },
-            err => {
-                this.logService.log(`error calling api`, this.utilsService.infoStatus, true);
-                this.logService.log(err, this.utilsService.infoStatus, true);
-            },
-            () => {
-                this.logService.log('ending submit data function', this.utilsService.infoStatus, true);
-                this.healthReportSerivce.submitDataReport = _submitDataReport;
-            }
-        )
-    }
+            data.forEach(item => {
+                console.log(item)
+                let _item = new Object();
+                //set base template of item and update internal field values
+                switch (listName) {
+                    case this.utilsService.financeAppMaterialData:
+                        _item = JSON.parse(JSON.stringify(newMaterialDataRow))
+                        _item['State'] = 'inert'
+                        _item['Highlights'] = [];
+                        _item['ListName'] = listName;
+                    break;
+                    case this.utilsService.financeAppResourceData:
+                        _item = JSON.parse(JSON.stringify(newDataRow))
+                        _item['State'] = 'inert'
+                        _item['Highlights'] = [];
+                        _item['ListName'] = listName;
+                    break;
+                    case this.utilsService.financeAppTotalsData:
+                        _item = JSON.parse(JSON.stringify(newTotalDataRow))
+                        _item['Placeholder1'] = 'TOTAL (Incl Resource Costs)'
+                        _item['Placeholder4'] = 'Resource Totals'
+                        _item['Placeholder5'] = 'Resource T&S Totals'
+                        _item['Placeholder6'] = 'Material Totals'
+                        _item['State'] = 'inert'
+                        _item['Highlights'] = [];
+                        _item['ListName'] = listName;
+                    break
+                    default:
+                        this.logService.log(`process list data error: unable to determine listName`, this.utilsService.errorStatus, false)
+                    break;
+                }   
 
-    public prepDataForApi(data, listName) {
-        //data Arry
-        let _observableArrary = []
-
-        if (typeof(data) == 'object') {
-            data.foreach(element=>{
-                let _result;
-                if(element.state==this.utilsService.createState) {
-                    let fieldArray = this.createFieldArray(element);
-                    _observableArrary.push(this.commonApiService.addItem(listName, this.utilsService.hostWeb, fieldArray))
-                } else if (element.state == this.utilsService.deleteState) {
-                    _observableArrary.push(this.commonApiService.deleteItem(listName, element['itemId'], this.utilsService.hostWeb))
-                } else if (element.state == this.updateState) {
-                    let fieldsArray = this.createFieldArray(element);
-                    _observableArrary.push(this.commonApiService.updateItem(listName, this.utilsService.hostWeb, element['itemId'], fieldsArray))
-                } else if (element.state == this.utilsService.inertState) {
+                //filter out superlous item data and create an object of just the required fields
+                for (let key in item) {
+                    let indexValue = fieldNameArray.findIndex((element) => {
+                        return element == key
+                    })
+                    if (indexValue >= 0){
+                        
+                        Object.defineProperty(_item, key, {
+                            value: item[key],
+                            writable: true
+                        }) 
+                    }
                 }
+                console.log(item['Role']);
+                console.log(_item['Role']);
+
+                _resultsArray.push(JSON.parse(JSON.stringify(_item)));
+
+                console.log(_resultsArray);
             })
-            return _observableArrary;
-        }
-    }
 
-    createFieldArray(item){
-        //create fields array
-        let _fieldArray:Array<IItemPropertyModel> = []
-        for (let property in item) {
-            if (item.hasOwnProperty(property) &&
-                property !== 'FieldValue' &&
-                property !== 'ItemId') {
-                _fieldArray.push({
-                    fieldName: property,
-                    fieldValue: item[property]
-                })
+            switch (listName) {
+                case this.utilsService.financeAppResourceData:
+                    this._ResourceData = _resultsArray;
+                break;
+                case this.utilsService.financeAppMaterialData:
+                    this._MaterialData = _resultsArray
+                break;
+                case this.utilsService.financeAppTotalsData:
+                    this._TotalData = _resultsArray
+                break
+                default:
+                    this.logService.log(`process list data error: unable to determine which dataset to update`, this.utilsService.errorStatus, false)
+                break;
             }
 
+            observer.next({
+                functionCall: 'processListData',
+                result: 'success'
+            })
+
         }
-        return _fieldArray   
-    } 
+        observer.complete()
+    })
+
+    return listData$
+
+}    
+
+    // getApiData(){
+    //     let _getDataReport: Array<any>
+    //     _getDataReport = [];
+
+    //     let _observableArray = [
+    //         this.commonApiService.getItems(this.utilsService.financeAppResourceData, this.utilsService.hostWeb),
+    //         this.commonApiService.getItems(this.utilsService.financeAppMaterialData, this.utilsService.hostWeb),
+    //         this.commonApiService.getItems(this.utilsService.financeAppTotalsData, this.utilsService.hostWeb)
+    //     ]
+
+    //     let getData$ = Observable.from(_observableArray).mergeAll();
+
+    //     getData$.subscribe(
+    //         data => {
+    //             if (typeof(data) === 'object' &&
+    //                 data.hasOwnProperty('listName') &&
+    //                 data.hasOwnProperty('result') &&
+    //                 data.hasOwnProperty('fieldValues')) {
+    //                     _getDataReport.push(data)
+    //                     if (data.result === true && data.listName === this.utilsService.financeAppResourceData) {
+    //                         this._ResourceData = data.fieldValues
+    //                     } else if (data.result === false && data.listName === this.utilsService.financeAppResourceData) {
+    //                         //Failed to get Resource Data
+    //                         this.logService.log('failed to get Finance App Resource Data', this.utilsService.errorStatus, false);
+    //                     }
+
+    //                     if (data.result == true && data.listName == this.utilsService.financeAppMaterialData) {
+    //                         this._MaterialData = data.fieldValues
+    //                     } else if (data.result == false && data.listName == this.utilsService.financeAppMaterialData) {
+    //                         //Failed to get Material Data
+    //                         this.logService.log('failed to get Finance App Material Data', this.utilsService.errorStatus, false);
+    //                     }
+
+    //                     if (data.result == true && data.listName == this.utilsService.financeAppTotalsData) {
+    //                         this._TotalData = data.fieldValues
+    //                     } else if (data.result == false && data.listName == this.utilsService.financeAppTotalsData) {
+    //                         //Failed to get Totals Data
+    //                         this.logService.log('failed to get Finance App Total Data', this.utilsService.errorStatus, false);                            
+    //                     }
+    //             }
+    //         },
+    //         err => {
+    //             this.logService.log(`error calling api service to get data`, this.utilsService.errorStatus, false);
+    //             this.logService.log(err, this.utilsService.errorStatus, false);
+    //         },
+    //         () => {
+    //             this.logService.log('exiting getResourceData function', this.utilsService.infoStatus, true);
+    //             this.healthReportSerivce.getDataReport = _getDataReport
+    //         }            
+    //     )        
+    // }
+
+    get resourceData(){
+        return this._ResourceData
+    }   
+
+    get materialData(){
+        return this._MaterialData
+    }
+
+    get totalsData() {
+        return this._TotalData
+    }
+
+    // submitApiData(){
+    //     this.logService.log('submit data to api function called', this.utilsService.infoStatus, false);
+        // let submit$ = new Observable((observer:Observer<any>) => {
+        //     let _submitDataReport: Array<any>
+        //     _submitDataReport = [];
+
+        //     let _resourceObservableArray: Array<any>
+        //     let _materialObservableArray: Array<any>
+        //     let _totalObservableArray: Array<any>
+        //     let _observableArray: Array<any>
+            
+        //     _resourceObservableArray = this.prepDataForApi(this._ResourceData, this.utilsService.financeAppResourceData)
+        //     _materialObservableArray = this.prepDataForApi(this._MaterialData, this.utilsService.financeAppMaterialData)
+        //     _totalObservableArray = this.prepDataForApi(this._TotalData, this.utilsService.financeAppTotalsData)
+
+        //     _observableArray = _resourceObservableArray.concat(_materialObservableArray).concat(_totalObservableArray)
+
+        //     let submitData$ = Observable
+        //             .from(_observableArray).mergeAll()
+        //             .mergeMap(data =>
+        //             (
+        //             (typeof(data) === 'object' &&
+        //             data.hasOwnProperty('listName') &&
+        //             data.hasOwnProperty('result') &&
+        //             data.hasOwnProperty('apiCall') &&
+        //             data['apiCall'] === 'addItem' &&
+        //             data['result'] == true)
+
+        //             ||
+
+        //             (typeof(data) === 'object' &&
+        //             data.hasOwnProperty('listName') &&
+        //             data.hasOwnProperty('result') &&
+        //             data.hasOwnProperty('apiCall') &&
+        //             data['apiCall'] === 'deleteItem' &&
+        //             data['result'] === true)
+                    
+        //             ||
+
+        //             (typeof(data) === 'object' &&
+        //             data.hasOwnProperty('listName') &&
+        //             data.hasOwnProperty('result') &&
+        //             data.hasOwnProperty('apiCall') &&
+        //             data['apiCall'] === 'updateItem' &&
+        //             data['result'] == true)
+        //             )
+                    
+        //             ? this.updateStateAfterApiCall(data['listName'], data['itemId'], data['apiCall'])
+        //             : Observable.of(data)
 
 
-    getDataStream(): Observable<any> {
-        let filteredDataStream = this.dataStream.asObservable().map((data, index) => {
+        //             )
+
+
+//             submitData$.subscribe(
+//                 data => {
+//                     //replace these tests with report 
+//                     if (typeof(data) === 'object' &&
+//                         data.hasOwnProperty('listName') &&
+//                         data.hasOwnProperty('result') &&
+//                         data.hasOwnProperty('apiCall') &&
+//                         data.apiCall === 'addItem') {
+//                             _submitDataReport.push(data)
+//                             if (data.result === true) {
+//                             this.logService.log(`item added to list`, this.utilsService.infoStatus, true); 
+//                             } else {
+//                                 this.logService.log(`failed to add item added to list`, this.utilsService.errorStatus, true);
+//                             }
+//                     }
+//                     else if (typeof(data) === 'object' &&
+//                         data.hasOwnProperty('listName') &&
+//                         data.hasOwnProperty('result') &&
+//                         data.hasOwnProperty('apiCall') &&
+//                         data.apiCall === 'deleteItem') {
+//                             _submitDataReport.push(data)
+//                             if (data.result === true) {
+//                             this.logService.log(`item deleted`, this.utilsService.infoStatus, true); 
+//                             } else {
+//                                 this.logService.log(`failed to delete item added to list`, this.utilsService.errorStatus, true);
+//                             }
+//                     }
+//                     else if (typeof(data) === 'object' &&
+//                         data.hasOwnProperty('listName') &&
+//                         data.hasOwnProperty('result') &&
+//                         data.hasOwnProperty('apiCall') &&
+//                         data.apiCall === 'updateItem') {
+//                             _submitDataReport.push(data)
+//                             if (data.result === true) {
+//                                 this.logService.log(`item updated`, this.utilsService.infoStatus, true); 
+//                             } else {
+//                                 this.logService.log(`failed to update item`, this.utilsService.errorStatus, true);
+//                             }
+//                     }
+                                                
+//                 },
+//                 err => {
+//                     this.logService.log(`error calling api`, this.utilsService.infoStatus, true);
+//                     this.logService.log(err, this.utilsService.infoStatus, true);
+//                     //need to notify user that save data failed!!!!
+
+//                     observer.complete()
+//                 },
+//                 () => {
+//                     this.logService.log('ending submit data function', this.utilsService.infoStatus, true);
+//                     this.healthReportSerivce.submitDataReport = _submitDataReport;
+                    
+//                     //commint updated results to history
+//                     this.addToHistory();
+//                     observer.complete()
+//                 }
+//             )
+//         })
+//         return submit$
+// }
+
+    // public prepDataForApi(data:Array<Object>, listName) {
+    //     //data Arry
+    //     console.log('PREP DATA FOR API')
+    //     let _observableArrary = []
+    //     if (Array.isArray(data)) {
+            
+    //         for (let i in data) {
+    //             if(data[i].hasOwnProperty('State') && data[i]['State']==this.utilsService.createState) {
+    //                 let fieldArray = this.createFieldArray(data[i]);
+    //                 _observableArrary.push(this.commonApiService.addItem(listName, this.utilsService.hostWeb, fieldArray))
+    //             } else if (data[i].hasOwnProperty('State') && data[i]['State'] == this.utilsService.deleteState) {
+    //                 _observableArrary.push(this.commonApiService.deleteItem(listName, data[i]['ItemId'], this.utilsService.hostWeb))
+    //             } else if (data[i].hasOwnProperty('State') && data[i]['State'] == this.utilsService.updateState) {
+    //                 let fieldsArray = this.createFieldArray(data[i]);
+    //                 _observableArrary.push(this.commonApiService.updateItem(listName, this.utilsService.hostWeb, data[i]['ItemId'], fieldsArray))
+    //             } else if (data[i].hasOwnProperty('State') && data[i]['State'] == this.utilsService.inertState) {
+    //                 this.logService.log(`item flagged as intert, saving item not required`, this.utilsService.infoStatus, true)
+    //             }
+    //         }
+    //         return _observableArrary;
+    //     }
+    // }
+
+    updateStateAfterApiCall(listName, itemId, apiCall):Observable<any> {
+        let updateState$ = new Observable((observer:Observer<any>) => {
+            let _listName:string = '' 
+            
+            switch(listName) {
+                case this.utilsService.financeAppResourceData:
+                    _listName = '_ResourceData'
+                break;
+                case this.utilsService.financeAppMaterialData:
+                    _listName = '_MaterialData'
+                break;
+                case this.utilsService.financeAppTotalsData:
+                    _listName = '_TotalData'
+                break;
+            }
+
+            try {
+                let indexValue = this[_listName].findIndex(element => {
+                    return element['ItemId'] == itemId
+                })
+
+                this[_listName][indexValue]['State'] = 'inert'
+
+                observer.next({
+                    functionCall:'updateStateAfterApiCall',
+                    result: 'complete'
+                })
+            } catch (e) {
+                this.logService.log(`failed to update state of listitem in list ${listName} with id ${itemId}`, 
+                            this.utilsService.errorStatus, 
+                            false)
+            }
+
+            ///need to handle the scenario where an element has been created and deleted and user attempts to select 'undo' how do we track this.
+            try {
+                switch(apiCall) {
+                    case this.utilsService.apiCallAddItem:
+                        this.historyService.addCreatedEntry(itemId)
+                    break;
+                    case this.utilsService.apiCallDeleteItem:
+                        this.historyService.addDeletedEntry(itemId)
+                    break;
+                    case this.utilsService.apiCallUpdateItem:
+                        //do nothing
+                    break;
+                }
+            } catch (e) {
+                this.logService.log(`failed to the history array of listitem in list ${listName} with id ${itemId}`, 
+                            this.utilsService.errorStatus, 
+                            false)
+            }
+
+            observer.complete()
+            })
+
+            return updateState$
+
+        
+    }
+
+    // createFieldArray(item){
+    //     //create fields array
+    //     let _fieldArray:Array<IItemPropertyModel> = []
+    //     for (let property in item) {
+    //         if (item.hasOwnProperty(property) &&
+    //             property !== 'FieldValue' &&
+    //             property !== 'ItemId') {
+    //             _fieldArray.push({
+    //                 fieldName: property,
+    //                 fieldValue: item[property]
+    //             })
+    //         }
+
+    //     }
+    //     return _fieldArray   
+    // } 
+
+
+    getResourceDataStream(): Observable<any> {
+        let filteredResourceDataStream = this.resourceDataStream.asObservable().map((data, index) => {
             return data.filter((row:any)=> row.State !== 'delete' && row.Year === this._year)
         })
-        return filteredDataStream
+        return filteredResourceDataStream
     }
 
     getTotalDataStream(): Observable<any> {
@@ -253,71 +520,263 @@ export class DataContextService {
     }
 
     getData(): void  {
-        this.calcFinanceValues()
-        this.dataStream.next(this._FinanceData);
+        this.calcResourceValues()
+        this.calcMaterialValues()
+        this.calcTotalValues()
+        this.resourceDataStream.next(this._ResourceData);
         this.totalDataStream.next(this._TotalData);
         this.materialDataStream.next(this._MaterialData);
     }
 
-    updateTable(event: any): void {
-        console.log(event);
-        //get data
-        let objectId = event.data.Id;
-        let columnName = event.colDef.field;
-        let newValue = event.value
-        //find index Value in Data Object
-        let indexValue = this.findIndex(objectId);
-        //convert number strings to numbers
-        if (Number(newValue)) {
-            //update Data object
-            this._FinanceData[indexValue][columnName] = +newValue;
-        }
-        //update values
-        this.updateState(indexValue, 'update','_FinanceData');
-        this.calcFinanceValues()
-        this.calcMaterialValues()
-        this.calcTotalValues()
+    updateTable(event: any): Observable<any> {
+        let updateTable$ = new Observable((observer: Observer<any>) => {
+            console.log(event);
+            let objectId, columnName, newValue, oldValue, indexValue, listName, tableName;
+            
+            if (event.data
+                && event.hasOwnProperty('colDef')
+                && event.hasOwnProperty('newValue')
+                && event.hasOwnProperty('oldValue')
+                && event.data.hasOwnProperty('ItemId')
+                && event.colDef.hasOwnProperty('field')
+                && event.data.hasOwnProperty('ListName')
+                ) {
+                    //get data
+                    objectId = event.data.ItemId;
+                    columnName = event.colDef.field;
+                    newValue = event.newValue;
+                    listName = event.data.ListName;
+                    oldValue = event.oldValue
+            } else {
+                this.logService.log('updateTable Error: required data items in updated row not found', this.utilsService.errorStatus, false)
+                ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+                observer.complete()
+                return
+            }
 
-        //emit values
-        this.dataStream.next(this._FinanceData);
-        this.totalDataStream.next(this._TotalData);
-        
-        if (this.stateChange) this.addToHistory()
-        
-        //reset statechange
-        this.stateChange = false;
+            if (!Number(newValue)) {
+                this.logService.log(`updateTable Error: Type error cannot convert newValue to number`, this.utilsService.errorStatus, false);
+                ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+                observer.complete();
+                return
+            } else {
+                newValue = +newValue
+            }
 
+            if (newValue == oldValue) {
+                this.logService.log('new value equals old value', this.utilsService.infoStatus, true);
+                observer.complete()
+                return
+            }
+
+            switch(listName) {
+                case this.utilsService.financeAppResourceData:
+                    tableName = '_ResourceData'
+                    try {
+                        //find index Value in Data Object
+                        indexValue = this.findResourceIndex(objectId);
+                    } catch (e) {
+                        this.logService.log(e, this.utilsService.errorStatus, false);
+                        ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+                        this.logService.log(`updateTable Error: unable to determine the ItemId 
+                                            of the affected object, update table failed`, this.utilsService.errorStatus, false);
+                        observer.complete();
+                        return
+                    }                    
+                break;
+                case this.utilsService.financeAppMaterialData:
+                    tableName = '_MaterialData'
+                    try {
+                        //find index Value in Data Object
+                        indexValue = this.findMaterialIndex(objectId);
+                    } catch (e) {
+                        this.logService.log(e, this.utilsService.errorStatus, false);
+                        ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+                        this.logService.log(`updateTable Error: unable to determine the ItemId 
+                                            of the affected object, update table failed`, this.utilsService.errorStatus, false);
+                        observer.complete();
+                        return
+                    }
+                break;
+                default:
+                    observer.complete()
+                    return
+            }
+
+            if (indexValue < 0) {
+                this.logService.log(`updateTable Error: can't find indexValue`, this.utilsService.errorStatus, false);
+                ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+                observer.complete();
+                return
+            }   
+
+            if (this[tableName] &&
+                this[tableName].hasOwnProperty(indexValue) &&
+                this[tableName][indexValue].hasOwnProperty(columnName)) {
+                    //convert number strings to numbers
+                    //update Data object
+                    try {
+                        this[tableName][indexValue][columnName] = newValue;
+                    } catch (e) {
+                        this.logService.log(e, this.utilsService.errorStatus, false)
+                        observer.complete();
+                        return
+                    }
+                }
+            
+            try {
+                //update values
+                this.updateState(indexValue, 'update', tableName);
+                switch (listName) {
+                    case this.utilsService.financeAppResourceData:
+                        this.calcResourceValues();
+                    break;
+                    case this.utilsService.financeAppMaterialData:
+                        this.calcMaterialValues()
+                    break;
+                    default:
+                        this.logService.log(`UpdateTable Error: unable to determine which data set to refresh`, this.utilsService.errorStatus, false);
+                    break;
+                }
+                
+                this.calcTotalValues();
+
+            } catch (e) {
+                this.logService.log(e, this.utilsService.errorStatus, false)
+                ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+                observer.complete()
+                return
+            }
+
+            try {
+                //emit values
+                switch (listName) {
+                    case this.utilsService.financeAppResourceData:
+                        this.resourceDataStream.next(this._ResourceData);
+                    break;
+                    case this.utilsService.financeAppMaterialData:
+                        this.materialDataStream.next(this._MaterialData);
+                    break;
+                    default:
+                        this.logService.log(`UpdateTable Error: unable to determine which data set to refresh`, this.utilsService.errorStatus, false);
+                    break;
+                }
+
+                this.totalDataStream.next(this._TotalData);
+                
+            } catch (e) {
+                this.logService.log('updateTable Error: error emitting data stream', this.utilsService.errorStatus, false)
+                ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+            }
+            
+            try {
+                if (this.stateChange && !this.settingsService.autoSave) this.addToHistory()
+            } catch (e) {
+                this.logService.log('updateTable Error: error updating history stream', this.utilsService.errorStatus, false)
+                ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+            }
+            
+            //reset statechange
+            this.stateChange = false;
+
+            observer.complete()
+        })
+        return updateTable$
     }
 
-    addRow(){
+    addResourceRow(){
+        console.log('ADD ROW')
         let _year:number = this._year;
-        let _Id:number = this._FinanceData.length + 1;
-        let _newRow:IDataModel = JSON.parse(JSON.stringify(newRow));
+        let _Id:number = this._ResourceData.length + 1;
+        let _newRow:IResourceModel = JSON.parse(JSON.stringify(newResourceRow));
         _newRow.Year = _year
-        _newRow.Id = _Id
+        _newRow.ItemId = _Id
 
-        this._FinanceData.push(_newRow)
+        this._ResourceData.push(_newRow)
 
         //emit values
-        this.dataStream.next(this._FinanceData);
-        this.addToHistory()
+        this.resourceDataStream.next(this._ResourceData);
+
+        //ONLY USING UNDO REDO WHEN AUTOSAVE DISABLED
+        if (!this.settingsService.autoSave) {
+            this.addToHistory();
+        }
         
         //reset statechange
         this.stateChange = false;        
     }
 
-    deleteRow(id: number){
+    addMaterialRow() {
+        console.log('ADD MATERIAL ROW')
+        let _year: number = this._year;
+        let _Id: number = this._MaterialData.length + 1;
+        let _newRow:IMatModel = JSON.parse(JSON.stringify(newMaterialRow));
+        _newRow.Year = _year;
+        _newRow.ItemId = _Id;
+
+        this._MaterialData.push(_newRow)
+
+        //emit vlaues
+        this.materialDataStream.next(this._MaterialData);
+
+        //ONLY USING UNDO REDO WHEN AUTOSAVE DISABLED
+        if (!this.settingsService.autoSave) {
+            this.addToHistory();
+        }
+
+
+
+        //reset statechange
+        this.stateChange = false
+    }
+
+    deleteMaterialRow(id: number){
+        let indexValue: number
+        //find Row in Mat Data Object
+        indexValue = this.findMaterialIndex(id);
+
+
+        if(id >= 0 && indexValue >= 0) {
+            this.updateState(indexValue, 'delete', '_MaterialData');
+        }
+
+        this.calcMaterialValues()
+        this.calcTotalValues()
+
+        //emit values
+        this.materialDataStream.next(this._MaterialData);
+        this.totalDataStream.next(this._TotalData);
+
+        //ONLY USING UNDO REDO WHEN AUTOSAVE DISABLED
+        if (!this.settingsService.autoSave) {
+            this.addToHistory();
+        }
+
+        //reset statechange
+        this.stateChange = false;
+    }
+
+    deleteResourceRow(id: number){
         let indexValue: number
         //find Row in Data Object
-        indexValue = this.findIndex(id);
-        if(id >= 0) {
-        this.updateState(indexValue, 'delete','_FinanceData');
-        //this.PercentageUtilisedData.splice(indexValue, 1);
+        indexValue = this.findResourceIndex(id);
+
+        if(id >= 0 && indexValue >= 0) {
+            this.updateState(indexValue, 'delete','_ResourceData');
+            //this.PercentageUtilisedData.splice(indexValue, 1);
         }   
     
+        this.calcResourceValues()
+        this.calcTotalValues()
+
         //emit values
-        this.dataStream.next(this._FinanceData);
-        this.addToHistory()
+        this.resourceDataStream.next(this._ResourceData);
+        this.totalDataStream.next(this._TotalData)
+
+        //ONLY USING UNDO REDO WHEN AUTOSAVE DISABLED
+        if (!this.settingsService.autoSave) {
+            this.addToHistory();
+        }
         
         //reset statechange
         this.stateChange = false;
@@ -326,16 +785,23 @@ export class DataContextService {
 
     saveUpdates(){
         //to be replaced by commonApiService calls
-        //this.coreService.saveChanges(this._FinanceData)
+        //this.coreService.saveChanges(this._ResourceData)
     }
 
-    findIndex(objectId: number) {
-       return this._FinanceData.findIndex((element:any):any => {
-                    return element.Id == +objectId
+    findResourceIndex(objectId: number) {
+       return this._ResourceData.findIndex((element:any):any => {
+                    return element.ItemId == +objectId
                 })       
     }
 
+    findMaterialIndex(objectId: number) {
+       return this._MaterialData.findIndex((element:any):any => {
+                    return element.ItemId == +objectId
+                })       
+    }    
+
     findTotalsIndex(year: number) {
+        //what if this row dows not exist?
        return this._TotalData.findIndex((element:any):any => {
                     return element.Year == +year
                 });
@@ -343,41 +809,69 @@ export class DataContextService {
 
     undo(){
         if (this.historyService.canUndo) {
-            this._FinanceData = this.historyService.undo()
-            //emit
-            this.dataStream.next(this._FinanceData);
+            let _data = this.historyService.undo()
             
-            //adding this is causing a bug
-            // this.calcTotalValues();
-            // this.dataStream.next(this._TotalData);
+            this._ResourceData = JSON.parse(JSON.stringify(_data.resourceData));
+            this._MaterialData = JSON.parse(JSON.stringify(_data.materialData));
+            this._TotalData = JSON.parse(JSON.stringify(_data.totalData));
+
+            //validate state of items is correct
+            this.validateAppDataState('_ResourceData');
+            this.validateAppDataState('_MaterialData');
+
+            //emit
+            this.resourceDataStream.next(this._ResourceData);
+            this.materialDataStream.next(this._MaterialData);
+            this.totalDataStream.next(this._TotalData);
         }
     }
 
     redo(){
         if (this.historyService.canRedo) {
-            this._FinanceData = this.historyService.redo()
-            //emit 
-            this.dataStream.next(this._FinanceData);
-            
-            //adding this is causing a bug
-            // this.calcTotalValues();
-            // this.dataStream.next(this._TotalData);    
+            let _data = this.historyService.redo()
+
+            //validate state of items is correct
+            this.validateAppDataState('_ResourceData');
+            this.validateAppDataState('_MaterialData');
+
+            this._ResourceData = JSON.parse(JSON.stringify(_data.resourceData));
+            this._MaterialData = JSON.parse(JSON.stringify(_data.materialData));
+            this._TotalData = JSON.parse(JSON.stringify(_data.totalData));
+
+            //validate state of items is correct
+
+            //emit
+            this.resourceDataStream.next(this._ResourceData);
+            this.materialDataStream.next(this._MaterialData);
+            this.totalDataStream.next(this._TotalData);
         }
     }
 
     addToHistory(){
-        this.historyService.addEntry(this._FinanceData);
-    }
+        this.historyService.addEntry(this._ResourceData, this._MaterialData, this._TotalData);
+   }
 
-    calcFinanceValues(){
+    calcResourceValues(){
+        console.log('CALCULATE RESOURCE VALUES')
         //reset context
         // this.resetCtxObject()
-        this.resetHighlights('_FinanceData');
+        this.resetHighlights('_ResourceData');
+
+        let filteredResourceYearData
+
+        //filter on current year and delete
+        try {
+            filteredResourceYearData = this._ResourceData.filter((row)=>{
+                return row.Year === this._year && row.State !== 'delete';
+            })
+        } catch (e) {
+            this.logService.log(e, this.utilsService.errorStatus, false);
+        }
+
 
         //process calculated fields
-        this._FinanceData.forEach((rowItem, index, array) => {
-            let indexValue = this.findIndex(rowItem.Id);
-
+        filteredResourceYearData.forEach((rowItem, index, array) => {
+            let indexValue = this.findResourceIndex(rowItem.ItemId);
             //PUForecast
             let updatedPUForecast = this.dataCalcService.puForecast(rowItem);
             this.checkCalcValue2(rowItem, 'PUForecast',updatedPUForecast, indexValue);
@@ -522,50 +1016,98 @@ export class DataContextService {
             //RTS Variance to Budget
             let updatedRTSVarianceToBudget = this.dataCalcService.rtsVarianceToBudget(rowItem);
             this.checkCalcValue2(rowItem, 'RTSVarianceToBudget', updatedRTSVarianceToBudget, indexValue);
-
-
-                                                
+                    
         });
 
 
     }
 
     calcMaterialValues(){
+        console.log('CALCUALTE MATERIAL VALUES')
         //reset context
         // this.resetCtxObject()
         let tableName = '_MaterialData'
         this.resetHighlights(tableName);
 
+        let filteredMaterialYearData;
+
+        //filter on current year and delete
+        try {
+            filteredMaterialYearData = this._MaterialData.filter((row)=>{
+                return row.Year === this._year && row.State !== 'delete';
+            })
+
+        } catch (e) {
+            this.logService.log(e, this.utilsService.errorStatus, false);
+        }
+
+
         //process calculated fields
-        this._MaterialData.forEach((rowItem, index, array) => {
-            let indexValue = this.findIndex(rowItem.Id);
-            let rowId = this._MaterialData[indexValue].Id;
-            //Mat Ytd Total
-            let updatedMatYtdTotal = this.dataCalcService.matYtdTotal(rowItem);
-            this.checkCalcValue(rowId, 'MatYtdTotal', updatedMatYtdTotal, indexValue, tableName);
-            //Mat Lbe
-            let updatedMatLbe = this.dataCalcService.matLbe(rowItem);
-            this.checkCalcValue(rowId, 'MatLbe', updatedMatLbe, indexValue, tableName); 
-            //MatYtdVarianceToBudget
-            let updatedMatYtdVarianceToBudget = this.dataCalcService.matYtdVarianceToBudget(rowItem);
-            this.checkCalcValue(rowId, 'MatYtdVarianceToBudget', updatedMatYtdVarianceToBudget, indexValue, tableName);
-            //MatVarianceToBudget
-            let updatedMatVarianceToBudget = this.dataCalcService.matForecastVarianceToBudget(rowItem);
-            this.checkCalcValue(rowId, 'MatVarianceToBudget', updatedMatVarianceToBudget, indexValue, tableName);
+        filteredMaterialYearData.forEach((rowItem, index, array) => {
+            
+            let indexValue
+
+            if (rowItem.hasOwnProperty('ItemId')) {
+                indexValue = this.findMaterialIndex(rowItem.ItemId);
+            } else {
+                this.logService.log(`cannot locate ID property in Material 
+                                    list row item, unable to process Material data`, this.utilsService.errorStatus, false)
+            }
+
+            try {
+                let rowId = this._MaterialData[indexValue].ItemId;
+                //Mat Ytd Total
+                let updatedMatYtdTotal = this.dataCalcService.matYtdTotal(rowItem);
+                this.checkCalcValue(rowId, 'MatYtdTotal', updatedMatYtdTotal, indexValue, tableName);
+                //Mat Lbe
+                let updatedMatLbe = this.dataCalcService.matLbe(rowItem);
+                this.checkCalcValue(rowId, 'MatLbe', updatedMatLbe, indexValue, tableName); 
+                //MatYtdVarianceToBudget
+                let updatedMatYtdVarianceToBudget = this.dataCalcService.matYtdVarianceToBudget(rowItem);
+                this.checkCalcValue(rowId, 'MatYtdVarianceToBudget', updatedMatYtdVarianceToBudget, indexValue, tableName);
+                //MatVarianceToBudget
+                let updatedMatVarianceToBudget = this.dataCalcService.matForecastVarianceToBudget(rowItem);
+                this.checkCalcValue(rowId, 'MatVarianceToBudget', updatedMatVarianceToBudget, indexValue, tableName);
+            } catch (e) {
+                this.logService.log(e, this.utilsService.errorStatus, false);
+            }
+            
         });
     }
 
     calcTotalValues(){
+        console.log('CALCULATE TOTAL VALUES')
+
+        let filteredResourceYearData, 
+            filteredMaterialYearData,
+            filteredTotalYearData,
+            indexValue,
+            totalRowId,
+            sumResourceArray,
+            sumMaterialArray,
+            sumTotalsArray;
         //Reset Highlights
         this.resetHighlights('_TotalData');
-        //filter on current year
-        let filteredYearData = this._FinanceData.filter((row)=>{
-            return row.Year === this._year;
-        })
-        let indexValue = this.findTotalsIndex(this._year);
-        let totalRowId = this._TotalData[indexValue].Id;
+        //filter on current year and delete
+        try {
+            filteredResourceYearData = this._ResourceData.filter((row)=>{
+                return row.Year === this._year && row.State !== 'delete';
+            })
+            filteredMaterialYearData = this._MaterialData.filter((row)=>{
+                return row.Year === this._year && row.State !== 'delete';
+            })
+            console.error(filteredMaterialYearData)
 
-        let sumArray = [
+        } catch (e) {
+            this.logService.log(e, this.utilsService.errorStatus, false);
+        }
+
+        //what if this row dows not exist?
+        indexValue = this.findTotalsIndex(this._year);
+
+        totalRowId = this._TotalData[indexValue].ItemId;
+
+        sumResourceArray = [
             'PRBudget',
             'PRJan',
             'PRFeb',
@@ -600,6 +1142,9 @@ export class DataContextService {
             'RTSLbe',
             'RTSYtdVarianceToBudget',
             'RTSVarianceToBudget',
+        ]
+
+        sumMaterialArray =[
             'MatBudget',
             'MatJan',
             'MatFeb',
@@ -616,48 +1161,79 @@ export class DataContextService {
             'MatYtdTotal',
             'MatLbe',
             'MatYtdVarianceToBudget',
-            'MatForecastVarianceToBudget'
+            'MatForecastVarianceToBudget'            
         ]
 
-        sumArray.forEach((fieldName)=>{
-            let calculatedValue = this.dataCalcService.sumTotal(filteredYearData, fieldName);
+        sumTotalsArray = [
+            'TProjectBudget',
+            'TJan',
+            'TFeb',
+            'TMar',
+            'TApr',
+            'TMay',
+            'TJun',
+            'TJul',
+            'TAug',
+            'TSep',
+            'TOct',
+            'TNov',
+            'TDec',
+            'TYtdTotal',
+            'TLbe',
+            'TYtdVarianceToBudget',
+            'TVarianceToBudget'
+        ]
+
+        sumResourceArray.forEach((fieldName)=>{
+            let calculatedValue = this.dataCalcService.sumResourceTotal(filteredResourceYearData, fieldName);
             this.checkCalcValue(totalRowId, fieldName, calculatedValue, indexValue, '_TotalData');
         })
-        // //updatedPRBudgetToal
-        // let updatedPRBudgetTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRBudget')
-        // this.checkTotalCalcValue(totalRowId,'PRBudget', updatedPRBudgetTotal, indexValue, '_TotalData');
-        // let updatedPRJanTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRJan')
-        // this.checkTotalCalcValue(totalRowId,'PRJan', updatedPRJanTotal, indexValue, '_TotalData');
-        // let updatedPRFebTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRFeb')
-        // this.checkTotalCalcValue(totalRowId,'PRFeb', updatedPRFebTotal, indexValue, '_TotalData');
-        // let updatedPRMarTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRMar')
-        // this.checkTotalCalcValue(totalRowId,'PRMar', updatedPRMarTotal, indexValue, '_TotalData');
-        // let updatedPRAprTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRApr')
-        // this.checkTotalCalcValue(totalRowId,'PRApr', updatedPRAprTotal, indexValue, '_TotalData');
-        // let updatedPRMayTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRMay')
-        // this.checkTotalCalcValue(totalRowId,'PRMay', updatedPRMayTotal, indexValue, '_TotalData');
-        // let updatedPRJunTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRJun')
-        // this.checkTotalCalcValue(totalRowId,'PRJun', updatedPRJunTotal, indexValue, '_TotalData');
-        // let updatedPRJulTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRJul')
-        // this.checkTotalCalcValue(totalRowId,'PRJul', updatedPRJulTotal, indexValue, '_TotalData');
-        // let updatedPRAugTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRAug')
-        // this.checkTotalCalcValue(totalRowId,'PRAug', updatedPRAugTotal, indexValue, '_TotalData');
-        // let updatedPRSepTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRSep')
-        // this.checkTotalCalcValue(totalRowId,'PRSep', updatedPRSepTotal, indexValue, '_TotalData');
-        // let updatedPROctTotal = this.dataCalcService.sumTotal(filteredYearData, 'PROct')
-        // this.checkTotalCalcValue(totalRowId,'PROct', updatedPROctTotal, indexValue, '_TotalData');
-        // let updatedPRNovTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRNov')
-        // this.checkTotalCalcValue(totalRowId,'PRNov', updatedPRNovTotal, indexValue, '_TotalData');
-        // let updatedPRDecTotal = this.dataCalcService.sumTotal(filteredYearData, 'PRDec')
-        // this.checkTotalCalcValue(totalRowId,'PRDec', updatedPRDecTotal, indexValue, '_TotalData');
+        sumMaterialArray.forEach((fieldName)=>{
+            let calculatedValue = this.dataCalcService.sumResourceTotal(filteredMaterialYearData, fieldName);
+            this.checkCalcValue(totalRowId, fieldName, calculatedValue, indexValue, '_TotalData');
+        })
+
+        //After running calculations for totals get filteredYearData to calculate sum totals
+
+        try {
+            filteredTotalYearData = this._TotalData.filter((row)=>{
+                return row.Year === this._year;
+            })
+        } catch(e) {
+            this.logService.log(e, this.utilsService.errorStatus, false)
+        }
+
+        //filteredTotalYearData should be an array of length one as there should only be 1 total row for each year
+        if (filteredTotalYearData.length !== 1) {
+            this.logService.log(`error looking up total year result set, 
+                                unable to run calcuations for totals`, this.utilsService.errorStatus, false);
+            return
+        }
+
+        // calculate the sum totals
+        sumTotalsArray.forEach((fieldName)=>{
+            let calculatedValue = this.dataCalcService.sumTotal(filteredTotalYearData[0], fieldName);
+            this.checkCalcValue(totalRowId, fieldName, calculatedValue, indexValue, '_TotalData');
+        })
+
 
     }
 
-    checkCalcValue(id: number, field:string, updatedValue:number, indexValue:number, tableName:string){
-        if (this[tableName][indexValue][field] !== Number(updatedValue)) {
+    checkCalcValue(ItemId: number, field:string, updatedValue:number, indexValue:number, tableName:string){
+        if (indexValue>=0 && 
+            this.hasOwnProperty(tableName) &&
+            this[tableName].hasOwnProperty(indexValue) &&
+            this[tableName][indexValue].hasOwnProperty(field) &&
+            this[tableName][indexValue][field] !== Number(updatedValue)) {
+            
+            // update the table with the new value
             this[tableName][indexValue][field] = Number(updatedValue)
+
+            // update state of row
             this.updateState(indexValue, 'update', tableName);
-            this.markChange(indexValue, id, field, tableName)
+
+            // add highlight 
+            this.markChange(indexValue, ItemId, field, tableName)
         }
     }
 
@@ -666,15 +1242,16 @@ export class DataContextService {
                    field: string, 
                    calcValue: number, 
                    indexValue: number){
-            if (rowItem[field] !== calcValue) {
+            if (indexValue>=0 && rowItem[field] !== calcValue) {
                 rowItem[field] = calcValue
-                this.updateState(indexValue, 'update','_FinanceData')
-                this.markChange(indexValue, rowItem.Id, field, '_FinanceData');
+                this.updateState(indexValue, 'update','_ResourceData')
+                this.markChange(indexValue, rowItem.ItemId, field, '_ResourceData');
             } 
 
     }
     resetHighlights(tableName: string){
-        if (this[tableName].length > 0){
+        if (this.hasOwnProperty(tableName) &&
+            this[tableName].length > 0){
             this[tableName].forEach((rowData:any)=> {
                 rowData.Highlights = [];
             })   
@@ -683,25 +1260,77 @@ export class DataContextService {
     }
 
     updateState(indexId: number, state: string, tableName: string){
+        let currentState
         this.stateChange = true;
-        let currentState = this[tableName][indexId]['state'];
+
+        if (this[tableName] &&
+            this[tableName][indexId]) {        
+                currentState = this[tableName][indexId]['State'];
+        } else {
+            this.logService.log(`updateSate Error: unable to locate tableName or indexId`, this.utilsService.errorStatus, false);
+        }
+        console.log('currentState', currentState)
+        console.log('state', state)
         //don't mark newly created items as update
         if (currentState == 'create' && state == 'update') {
             //do nothing
         } else {
-            this[tableName][indexId]['State'] = state;
+            console.log('UPDATING STATE TO: ', state)
+             this[tableName][indexId]['State'] = state;
         }
-        
+
         return
     }
 
     markChange(indexValue:number, objId: number, fieldName: string, tableName: string){
         let highlight:any = {
-            Id: objId,
+            ItemId: objId,
             fieldName: fieldName
         }
-        //this._FinanceData[indexValue]['Highlights'].push(highlight)
+        //this._ResourceData[indexValue]['Highlights'].push(highlight)
         this[tableName][indexValue]['Highlights'].push(highlight)
         return
-    }        
+    }
+
+    validateAppDataState(dataSetName) {
+        /*
+        this function validates the state of items after undo/redo is called.
+
+        if state = update check that item hasn't already been deleted, if yes mark as create instead
+        if state = create check that item hasn't already been created, if yes mark as update instead
+        if state = delete, check that is hasn't already been deleted, if yes mark as create instead
+        */
+        
+        if (this[dataSetName]) {
+            this[dataSetName].forEach(element => {
+                if (element['ItemId'] == undefined) {
+                    this.logService.log('error identifiying ItemId in validateAppDataState', this.utilsService.errorStatus, false)
+                }
+
+                if (element['State'] == undefined) {
+                    this.logService.log('error identifiying State in validateAppDataState', this.utilsService.errorStatus, false)
+                }
+
+                switch(element['State']) {
+                    case 'update':
+                        if(this.historyService.checkDeletedEntry(element['ItemId'])) {
+                            element['State'] = 'create'
+                        }
+                    break;
+                    case 'create':
+                        if(this.historyService.checkAddedEntry(element['ItemId'])) {
+                            element['State'] = 'update'
+                        }
+                    break;
+                    case 'delete':
+                        if(this.historyService.checkAddedEntry(element['ItemId'])) {
+                            element['State'] = 'create'
+                        }
+                    break;
+                }
+            })
+        }
+
+        return
+    }
 }

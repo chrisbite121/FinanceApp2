@@ -12,7 +12,7 @@ declare var SP;
 declare var hostUrl;
 declare var appUrl;
 
-interface IItemPropertyModel {
+export interface IItemPropertyModel {
     fieldName: string,
     fieldValue: any
 }

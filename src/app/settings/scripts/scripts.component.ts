@@ -3,7 +3,8 @@ import { ScriptService } from '../../shared/scripts.service'
 import { HealthReportService } from '../../shared/health-report.service'
 import { DataContextService } from '../../shared/data-context.service'
 import { UiStateService } from '../../shared/ui-state.service'
-
+import { CommonApiService } from '../../shared/api-common.service'
+import { UtilsService } from '../../shared/utils.service'
 
 @Component({
     selector: 'scripts',
@@ -11,21 +12,15 @@ import { UiStateService } from '../../shared/ui-state.service'
     styles: [``]
 })
 export class ScriptsComponent {
-
-    public log:Array<any> 
+    public logs:Array<any> = []
     constructor(private scriptService: ScriptService,
                 private healthReportService: HealthReportService,
                 private dataContextService: DataContextService,
-                private uiStateService: UiStateService) {
-        this.log = [];
+                private commonApiService: CommonApiService,
+                private utilsService: UtilsService) {
 
-        this.scriptService.getHealthReportDataStream().subscribe(this.getSubscriber());
-        this.scriptService.getActionHealthReportDataStream().subscribe(this.getSubscriber());
-        this.scriptService.getProvisionerDataStream().subscribe(this.getSubscriber());
-        this.scriptService.getSettingsStream().subscribe(this.getSubscriber());
-        this.scriptService.getPermissionsStream().subscribe(this.getSubscriber());
-
-
+        this.scriptService.getScriptsDataStream().subscribe(this.getSubscriber());
+        
         //end constructor
     }
 
@@ -44,48 +39,69 @@ export class ScriptsComponent {
 
     getHealthReport(){
         this.scriptService.healthReport()
-        let _healthReport = this.healthReportService.healthReport
-        this.log.push(_healthReport)
     }
 
     actionHealthReport(){
         this.scriptService.actionHealthReport()
-        let _actionHealthReportData = this.healthReportService.actionHealthReport
-        this.log.push(_actionHealthReportData)
     }
 
     getPermissions(){
-        this.scriptService.getPermissions()
+        this.commonApiService.getPermissions(this.utilsService.hostWeb, 
+                            this.utilsService.financeAppResourceData)
         
     }
 
     checkSettings(){
         this.scriptService.settingsListReport();
-        let _settingsListReport = this.healthReportService.settingsReport
-        this.log.push(_settingsListReport)
     }
 
     initProvisioner(){
-        this.scriptService.provisioner();
-        let _provisionerReport = this.healthReportService.provisionerReport
-        this.log.push(_provisionerReport)
+        this.scriptService.provisioner().subscribe(this.getSubscriber());
     }
 
-    saveData() {
-        this.dataContextService.submitApiData()
-        let _submitDataReport = this.healthReportService.submitDataReport
-        this.log.push(_submitDataReport)
+    saveAppData() {
+        this.scriptService.saveAppData().subscribe(this.getSubscriber())
     }
 
-    getData(){
-        this.dataContextService.getApiData()
-        let _getDataReport = this.healthReportService.getDataReport
-        this.log.push(_getDataReport)
+    loadAppData(){
+        this.scriptService.loadAppData(true, true, true).subscribe(this.getSubscriber())
     }
 
-    getUiStateValues(){
-        let uiValues = this.uiStateService.uiStateValues
-        console.log(uiValues)
+   showHealthReport(){
+        console.log(this.healthReportService.healthReport)
+    }
+
+    showResourceData(){
+        let resourceData = this.dataContextService.resourceData
+        console.log(resourceData)
+
+        resourceData.forEach(element => {
+            this.logs.push(JSON.stringify(element))
+        })
+    }
+
+    showMaterialData(){
+        let materialData = this.dataContextService.materialData
+        console.log(materialData)
+
+        materialData.forEach(element => {
+            this.logs.push(JSON.stringify(element))
+        })
+    }
+
+    showTotalsData(){
+        let totalData = this.dataContextService.totalsData
+        console.log(totalData)
+
+        totalData.forEach(element => {
+            this.logs.push(JSON.stringify(element))
+        })
+        
+    }
+
+    initApp() {
+        // this.scriptService.initApp()
+        //     .subscribe(this.getSubscriber())
     }
 
     getSubscriber() {
@@ -97,7 +113,7 @@ export class ScriptsComponent {
                     type: 'info'
                 }
                 if (data && this.log) {
-                    this.log.push(data);
+                    this.logs.push(data);
                 }
                 
             },
@@ -108,7 +124,7 @@ export class ScriptsComponent {
                     type: 'error'
                 }
                 if (err && this.log) {
-                    this.log.push(err);
+                    this.logs.push(err);
                 }
                 
             },
@@ -119,10 +135,9 @@ export class ScriptsComponent {
                     type: 'complete'
                 }
                 if (this.log) {
-                    this.log.push('completed');
+                    this.logs.push('completed');
                 }
             }
         }
     }
-
 }
