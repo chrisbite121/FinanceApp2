@@ -26,7 +26,7 @@ import {
 
 export interface IHealthReport {
     date: Date,
-    permissions: IPermissionResult,
+    permissions: Array<IPermissionResult>,
     listExists: Array<IReportResult>,
     listXmlData: Array<IListSchemaReportResult>,
     fieldsExists: Array<IReportResult>

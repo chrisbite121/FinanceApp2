@@ -1,0 +1,15 @@
+/*.tableContainer {
+    overflow-y: scroll;
+    overflow-x: scroll;
+    width: 100%;
+    width: calc(100% + 15px);
+    height: 99px;
+    height: calc(100% - 1px);
+
+
+}*/
+i { 
+    cursor: pointer; 
+    cursor: hand;
+    padding: 2px;
+     }

@@ -2,6 +2,7 @@ import { IResourceModel } from '../model/resource.model'
 export const initData:IResourceModel[] = [
         { 
           ListName: 'FinanceAppResourceData',
+          ID: 1,
           ItemId: 1,
           Year: 2017,
           State: 'create',
@@ -119,6 +120,7 @@ export const initData:IResourceModel[] = [
  },
         { 
           ListName: 'FinanceAppResourceData',
+          ID: 1,
           ItemId: 2,
           Year: 2017,
           State: 'create',

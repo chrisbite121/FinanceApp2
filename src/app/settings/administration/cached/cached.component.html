@@ -1,0 +1,49 @@
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showResourceData($event)' 
+                    [label]="'Resource Data'" 
+                    [type]="'primary'" 
+                    [id]="'resourcedata'" 
+                    [description]="'Show Resource Data'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showMaterialData($event)' 
+                    [label]="'Material Data'" 
+                    [type]="'primary'" 
+                    [id]="'materialdata'" 
+                    [description]="'Show Material Data'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showTotalsData($event)' 
+                    [label]="'Total Data'" 
+                    [type]="'primary'" 
+                    [id]="'totaldata'" 
+                    [description]="'Show Total Data'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showSummaryData($event)' 
+                    [label]="'Summary Data'" 
+                    [type]="'primary'" 
+                    [id]="'summarydata'" 
+                    [description]="'Show Summary Data'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showSettingsData($event)' 
+                    [label]="'Settings Data'" 
+                    [type]="'primary'" 
+                    [id]="'settingsdata'" 
+                    [description]="'Show Settings Data'"></of-button>
+     </div>                    
+  </div>
+</div>
+
+
+
+<div *ngIf='logs.length' class="container-fluid tableContainer">
+    <div *ngFor = "let log of logs">
+        <api-logger>
+            <div class="description">{{log}}</div>
+        </api-logger>
+    </div>
+</div>

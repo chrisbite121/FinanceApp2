@@ -1,0 +1,45 @@
+<div class="ms=Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm6 ms-u-md8 ms-u-lg10">
+            <h3>{{title}}</h3>
+        </div>
+        <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <i class="ms-Icon ms-Icon--Save" (click)="saveUpdates();"></i>
+        <i class="ms-Icon ms-Icon--Add" (click)="addResourceRow();"></i>
+        <i class="ms-Icon ms-Icon--Cancel" (click)="deleteResourceRow();"></i>
+        <i class="ms-Icon ms-Icon--Sync" (click)="refreshGrid();"></i>            
+           <!-- <input type="button" class="btn btn-xs" (click)="addResourceRow();" value="Add"/>
+            <input type="button" class="btn btn-xs" (click)="deleteResourceRow();" value="Remove"/>
+            <input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
+            <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
+            <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
+            <input type="button" *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();" value="Redo" />-->
+        </div>
+    </div>
+</div>
+
+<div class="tables">
+    <ag-grid-angular #agGrid6 style="overflow: hidden;" 
+                            [style.height.px]="tsTableHeight" 
+                            [style.width.px]="tsTableWidth"
+                            class="ag-fresh"  
+                 [gridOptions]="tsGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid7 style="overflow: hidden;" 
+                            [style.height.px]="atsTableHeight" 
+                            [style.width.px]="atsTableWidth"
+                            class="ag-fresh"  
+                 [gridOptions]="atsGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid8 style="overflow: hidden;" 
+                            [style.height.px]="rtsTableHeight" 
+                            [style.width.px]="rtsTableWidth"
+                            class="ag-fresh"  
+                 [gridOptions]="rtsGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid9 style="overflow: hidden;" 
+                            [style.height.px]="rtstTableHeight" 
+                            [style.width.px]="rtstTableWidth"
+                            class="ag-fresh" 
+                 [gridOptions]="rtstGridOptions">
+    </ag-grid-angular>

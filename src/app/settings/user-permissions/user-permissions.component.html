@@ -1,9 +1,25 @@
-<input type="button" id="listPermissions" (click)="getPermissions()" value="get Permissions" />
-<input type="button" id="webPermissions" (click)="getWebPermissions()" value="get Web Permissions" />
+<h3>User Permissions</h3>
 
-<div class="row well" *ngFor = "let log of logs">
-    <api-logger>
-        <div class="description">{{log.description}}</div>
-        <div class="type">{{log.type}}</div>
-    </api-logger>
-</div>  
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='getPermissions($event)' 
+                    [label]="'Get Permissions'" 
+                    [type]="'primary'" 
+                    [id]="'getpermissions'" 
+                    [description]="'Get User Permissions'"></of-button>
+        </div>
+    </div>
+</div>
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+                <table>
+                    <tr *ngFor= "let log of logs">
+                        <td>{{log}}</td>
+                    </tr>
+                </table>
+        </div>
+    </div>
+</div>
+

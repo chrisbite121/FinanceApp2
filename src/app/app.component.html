@@ -1,5 +1,13 @@
-<ag-grid-angular #agGrid style="width: 500px; height: 150px;" class="ag-fresh"
-                 [gridOptions]="gridOptions"
-                 [columnDefs]="columnDefs"
-                 [rowData]="rowData">
-</ag-grid-angular>
+<div class="container-fluid">
+    
+    <div class="row">
+        <nav-bar></nav-bar>
+    </div>
+    <div class="row">
+
+    <div class="col-md-12 mainContainer">
+        <router-outlet></router-outlet>
+    </div>
+
+    </div>
+</div>

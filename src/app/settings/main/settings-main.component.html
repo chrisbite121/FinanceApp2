@@ -1,93 +1,76 @@
-<h3>settings main</h3>
+<h2>Settings Home</h2>
 
-
-    <div class="row">
-      <div class="col-md-6">Region: {{region? region.value: 'none'}}</div>
-      <div class="col-md-6"><a href="javascript:void(0)" (click)="smModal.show()">change</a></div>
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Set Year
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-dropdown [innerlabel]="" 
+                  [id]="'currentYearToggle'" 
+                  [disable]='false' 
+                  [options]= "years" 
+                  [defaultValue]='selectedYear'
+                  (choiceSelectedEvent)='yearSelect($event)'></of-dropdown>
+    <br>
     </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        {{year}}
-      </div>
-      <div class="col-md-6">
-        <div class="btn-group" dropdown>
-          <button dropdownToggle type="button" class="btn btn-default btn-xs">
-            Select Year <span class="caret"></span>
-          </button>
-          <ul *dropdownMenu class="dropdown-menu" role="menu">
-            <li *ngFor='let year of years' [value]='year' role="menuitem">
-                <span style="cursor: pointer; cursor: hand;" class="dropdown-item" (click)='saveYearSelect(year)'>{{year}}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-<!--<select [(ngModel)]="selectedYear" (change)='selectYear($event.target.value)'>
-    <option *ngFor='let year of years' [value]='year'>{{year}}</option>
-</select>
-<button (click)='saveYearSelect();'>Set Year</button>-->
-
-
-
-<div bsModal #smModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title pull-left">Change Region</h3>
-        <button type="button" class="close pull-right" aria-label="Close" (click)="smModal.hide()">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div>
-            <select (change)='selectRegion($event.target.value)'>
-                <option *ngFor='let region of regionOptions' [value]='region.value'>{{region.label}}</option>
-            </select>
-        </div>
-        <hr>
-        <button type="button" class="btn btn-default btn-xs" (click)="saveRegionSelect(); smModal.hide();" label="Yes">Yes</button>
-        <button type="button" class="btn btn-default btn-xs" (click)="cancelRegionSelect(); smModal.hide()" label="No">No</button>
-      </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Auto Save'" 
+                [id]="'autoSaveToggle'" 
+                [value]="autoSaveValue" 
+                (toggleEvent)='autoSaveSelect($event)' 
+                [disable]='false'></of-toggle>
     </div>
   </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'SharePoint Mode'" 
+                [id]="'sharePointModeToggle'" 
+                [value]="sharePointModeValue" 
+                (toggleEvent)='sharePointModeSelect($event)' 
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Persist Logs'" 
+                [id]="'persistlogs'" 
+                [value]="persistLogsValue" 
+                (toggleEvent)='persistLogsSelect($event)' 
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Verbose Logging'" 
+                [id]="'verboseLogs'" 
+                [value]="verboseLogsValue" 
+                (toggleEvent)='verboseLogsSelect($event)' 
+                [disable]='!persistLogsValue'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Run Health Report on Start'" 
+                [id]="'autocheck'" 
+                [value]="listAutoCheckValue" 
+                (toggleEvent)='listAutoCheckSelect($event)' 
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Travel and Subsistence Weighting
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2" #tsweighting>
+     <of-textfield [innerlabel]="'Travel and Subsistence Weighting'" [id]="'tsWeighting'" (textEntered)='tsWeightingSet($event)' [defaultValue]="tsWeightingValue"></of-textfield>
+    </div>
+  </div>
+
 </div>
-
-
-
-<h3>Colour picker</h3>
-<h3>column header names</h3>
-<h3>column header widths</h3>
-<h3>Auto Save</h3>
-<h3>Auto check/provision lists on startup</h3>
-<h3>Map fields</h3>
-<h3>provision in host web or app web</h3>
-<h3>Logger list</h3>
-<h3>Display user permissions, none, partial, full add refresh button</h3>
-<h3>Add well for observer.next() context sub component in list management pages</h3>
-<h3>Enable Debugging Mode</h3>
-<h3>Store context type for each list in settings list</h3>
-
-
-
-<!--<p-dialog header="Region" [(visible)]="displayRegion" modal="modal" width="300" responsive="true">
-        <p>Select Region</p>
-        <div>
-            <select (change)='selectRegion($event.target.value)'>
-                <option *ngFor='let region of regionOptions' [value]='region.value'>{{region.label}}</option>
-            </select>
-        </div>
-        <p-footer>
-            <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
-                <button type="button" (click)="cancelRegionSelect()" label="No">No</button>
-                <button type="button" (click)="saveRegionSelect()" label="Yes">Yes</button>
-            </div>
-        </p-footer>
-</p-dialog>-->
-
-<!--Small modal-->
-
 
 
 

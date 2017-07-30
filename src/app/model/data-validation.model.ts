@@ -154,7 +154,8 @@ export interface IItemPropertyModel {
 export interface IAddItemResult {
     apiCall: string,
     listName: string,
-    itemId: string,
+    oldItemId: string,
+    newItemId: string,
     result: boolean
 }
 
@@ -201,6 +202,14 @@ export interface IReportResult {
     listName: string,
     fieldName: string
 }
+
+export interface IReportItemResult {
+    reportHeading: string,
+    reportResult: string, 
+    listName: string,
+    itemValues: Array<any>
+}
+
 export interface IListSchemaReportResult {
     reportHeading: string,
     reportResult: string,

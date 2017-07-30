@@ -2,27 +2,37 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms'
-
-//bootstrap
-import { BsDropdownModule } from 'ng2-bootstrap/dropdown';
-import { ModalModule } from 'ng2-bootstrap/modal';
+import { SharedModule } from '../shared/shared.module'
 
 import { SettingsComponent } from './settings.component';
-import { SettingsResetComponent } from './reset/settings-reset.component';
-import { SettingsProvisionerComponent } from './provisioner/settings-provisioner.component';
+
 import { SettingsMainComponent } from './main/settings-main.component';
 import { SettingsMenuComponent } from './menu/settings-menu.component';
-import { SettingsCalendarComponent } from './calendar/settings-calendar.component';
+import { SettingsWorkDaysComponent } from './workdays/workdays.component';
 import { LoggerComponent } from './logger/logger.component';
-import { MappingComponent } from './mapping/settings-mapping.component';
+import { LogListComponent } from './list-manager/log-list/log-list.component';
 import { LookFeelComponent } from './look-feel/look-feel.component';
-import { ResourceListComponent } from './resource-list/resource-list.component';
-import { TotalListComponent } from './total-list/total-list.component';
-import { MaterialListComponent } from './material-list/material-list.component';
-import { SettingListComponent } from './setting-list/setting-list.component';
 import { UserPermissionsComponent } from './user-permissions/user-permissions.component';
-import { ScriptsComponent } from './scripts/scripts.component'
+import { TestComponent } from './test/test.component'
+
+import { AdministrationComponent } from './administration/administration.component'
+import { SettingsResetComponent } from './administration/reset/settings-reset.component';
+import { SettingsProvisionerComponent } from './administration/provisioner/settings-provisioner.component';
+import { HealthReportComponent } from './administration/healthreport/healthreport.component'
+import { DataComponent } from './administration/data/data.component'
+import { CachedComponent } from './administration/cached/cached.component'
+
 import { ApiLoggerComponent } from './shared/api-logger.component';
+
+import { ListManagerComponent } from './list-manager/list-manager.component'
+import { ListManagerApiComponent } from './list-manager/shared/list-manager-api.component'
+import { ResourceListComponent } from './list-manager/resource-list/resource-list.component';
+import { TotalListComponent } from './list-manager/total-list/total-list.component';
+import { MaterialListComponent } from './list-manager/material-list/material-list.component';
+import { SettingListComponent } from './list-manager/setting-list/setting-list.component';
+import { WorkdaysListComponent } from './list-manager/workdays-list/workdays-list.component';
+import { SummaryListComponent } from './list-manager/summary-list/summary-list.component';
+
 
 import { settingsRoutes } from './settings.routes';
 
@@ -30,25 +40,35 @@ import { settingsRoutes } from './settings.routes';
     imports:  [CommonModule,
                 RouterModule.forChild(settingsRoutes),
                 FormsModule,
-                BsDropdownModule.forRoot(),
-               ModalModule.forRoot()],
+               SharedModule],
     declarations: [ 
         SettingsComponent,
-        SettingsResetComponent,
+        
         SettingsMainComponent,
         SettingsProvisionerComponent,
         SettingsMenuComponent,
-        SettingsCalendarComponent,
+        SettingsWorkDaysComponent,
         LoggerComponent,
-        MappingComponent,
+        LogListComponent,
         LookFeelComponent,
         ApiLoggerComponent,
+        UserPermissionsComponent,
+        TestComponent,
+
+        AdministrationComponent,
+        SettingsResetComponent,
+        HealthReportComponent,
+        CachedComponent,
+        DataComponent,
+
+        ListManagerComponent,
+        ListManagerApiComponent,
         ResourceListComponent,
         TotalListComponent,
         MaterialListComponent,
         SettingListComponent,
-        UserPermissionsComponent,
-        ScriptsComponent
+        WorkdaysListComponent,
+        SummaryListComponent
      ],
     exports: [ SettingsComponent ]
 })

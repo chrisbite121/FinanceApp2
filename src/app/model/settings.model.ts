@@ -1,18 +1,17 @@
-import { IRegion } from './region.model'
-
 export interface ISettings {
     itemId: string,
     year: number,
     years: Array<number>,
-    region: IRegion,
-    regionOptions: IRegion[],
-    sharePointMode: Boolean,
-    autoSave: Boolean,
+    sharePointMode: boolean,
+    autoSave: boolean,
     workingHoursInDay: number,
     tsWeighting: number,
-    listAutoCheck: Boolean,
+    listAutoCheck: boolean,
     persist: boolean,
-    verbose: boolean
+    verbose: boolean,
+    headerColour: string,
+    highlightColour: string,
+    headerFontColour: string
 }
 
 export interface IAppSettings {
@@ -22,12 +21,12 @@ export interface IAppSettings {
     addListItems: boolean,
     useSettingsList: boolean,
     useLoggingList: boolean,
-    logginListReady: boolean
+    useWorkDaysList: boolean,
+    logginListReady: boolean,
+    appUrl: string,
+    hostUrl: string
 }
 
-
-
 export interface ISettingsOptions {
-    regionOptions: IRegion[],
     years: Array<number>
 }

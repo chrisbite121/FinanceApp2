@@ -1,0 +1,33 @@
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='saveAppData($event)' 
+                    [label]="'Save App Data'" 
+                    [type]="'primary'" 
+                    [id]="'saveAppData'" 
+                    [description]="'Save App Data'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='loadAppData($event)' 
+                    [label]="'Load App Data'" 
+                    [type]="'primary'" 
+                    [id]="'load App Data'" 
+                    [description]="'Load App Data'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='clearCache($event)' 
+                    [label]="'Clear Cache'" 
+                    [type]="'primary'" 
+                    [id]="'Clear Cache'" 
+                    [description]="'Clear Cache'"></of-button>
+     </div>                     
+  </div>
+</div>
+
+<div *ngIf='logs.length' class="container-fluid tableContainer">
+    <div *ngFor = "let log of logs">
+        <api-logger>
+            <div class="description">{{log}}</div>
+        </api-logger>
+    </div>
+</div>

@@ -1,86 +1,163 @@
-import { Component, OnInit } from '@angular/core'
-import { SettingsService } from '../../shared/settings.service'
-import { UtilsService } from '../../shared/utils.service'
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core'
+import { SettingsService } from '../../service/settings.service'
+import { UtilsService } from '../../service/utils.service'
+import { ScriptService } from '../../service/scripts.service'
+import { DataContextService } from '../../service/data-context.service'
 
-import { IRegion } from '../../model/region.model'
 import { ISettings, ISettingsOptions } from '../../model/settings.model'
+
+import { Observable } from 'rxjs/Rx';
+
+import { FabricDropdownWrapperComponent } from '../../office-fabric/dropdown/fabric.dropdown.wrapper.component'
+import { FabricToggleWrapperComponent } from '../../office-fabric/toggle/fabric.toggle.wrapper.component'
 
 @Component({
     selector: 'settings-main',
-    templateUrl: './settings-main.component.html',
-    styles: [`
-        option, select, button {
-            color: #000000
-        },
-        li, span { cursor: pointer; cursor: hand; }
-    `]
+    templateUrl: './settings-main.component.html'
 })
-export class SettingsMainComponent implements OnInit { 
-    public displayRegion: boolean = false;
-    public region: IRegion;
-    //private settings: ISettings;
-    public regionOptions: Array<IRegion>;
-    public selectedRegion: IRegion;
+export class SettingsMainComponent implements OnInit, AfterViewInit { 
     public selectedYear: number;
     public years: Array<number>;
     public year: number
+    public autoSaveValue: boolean;
+    public sharePointModeValue: boolean;
+    public persistLogsValue: boolean;
+    public verboseLogsValue: boolean;
+    public workingHoursInDayValue: number;
+    public tsWeightingValue: number;
+    public listAutoCheckValue: boolean;
+    public tswInput: HTMLElement
 
     constructor(private settingsService: SettingsService,
-                private utilsService: UtilsService ) {
+                private utilsService: UtilsService,
+                private scriptService: ScriptService,
+                private dataContextService: DataContextService ) {
     }
 
-    showRegionDialog() {
-        this.displayRegion = true;
-    }
+    @ViewChild('tsweighting') private tswDiv: ElementRef
 
     ngOnInit() {
-        // this.settingsService.getSettingsOptionsStream().subscribe(data => {
-        //     this.years = <Array<number>>data.years
-        //     this.regionOptions = <Array<IRegion>>data.regionOptions
-        // })
         this.settingsService.getSettingsStream().subscribe(data => {
-            this.region = <IRegion>data.region;
             this.year = data.year;
-            this.selectedYear = data.year;
+            this.selectedYear = +data.year;
+            this.autoSaveValue = data.autoSave
+            this.sharePointModeValue = data.sharePointMode
             this.years = <Array<number>>data.years
-            this.regionOptions = <Array<IRegion>>data.regionOptions            
+            this.workingHoursInDayValue = data.workingHoursInDay
+            this.tsWeightingValue = data.tsWeighting
+            this.listAutoCheckValue = data.listAutoCheck
+            this.persistLogsValue = data.persist
+            this.verboseLogsValue = data.verbose
         })
         this.settingsService.getSettings()
-        // this.settingsService.getSettingsOptions();
 
-
-        // this.settingsService.getSettingOptions('years').subscribe(years => {
-        //     this.years = <Array<IYearChoice>>years;
-        // });
-        // this.settingsService.getSetting('region').subscribe(region =>
-        // { this.region = <IRegion>region;})
-        // this.settingsService.getSettingOptions('regionOptions').subscribe(regionOptions =>
-        // { this.regionOptions = <IRegion[]>regionOptions });
+        this.tswInput = this.tswDiv.nativeElement.getElementsByTagName('input')[0]
     }
 
-    updateAttr(attr: any, value: any) {
-        this.settingsService.setSetting(attr, value)
+    ngAfterViewInit(){
+        //register event listner on the tsweight input field
+        let tsWeight = 
+            Observable.fromEvent(this.tswInput, 'keyup',)
+            .debounceTime(1000)
+            .subscribe((data:Event) => {
+                this.updateSetting('TsWeighting',data.target['value'])
+            });
     }
 
-    selectRegion(region: any): void {
-        this.selectedRegion = region;
+    yearSelect(year){
+        this.updateSetting('Year', year)
     }
 
-    cancelRegionSelect(){
-        this.selectedRegion = this.region; 
+    autoSaveSelect(value: boolean){
+        this.updateSetting('AutoSave', value)
     }
 
-    saveRegionSelect(){
-        this.settingsService.setSetting('region',this.selectedRegion)
+    sharePointModeSelect(value: boolean){
+        this.updateSetting('SharePointMode', value)
     }
 
-    saveYearSelect(year){
-        this.settingsService.setSetting('year', year)
-        this.selectedYear = year
+    persistLogsSelect(value: boolean){
+        this.updateSetting('Persist', value)
     }
 
-    selectYear(year: number) {
-        console.log(year);
-        this.selectedYear = year
+    verboseLogsSelect(value: boolean){
+        this.updateSetting('Verbose', value)
     }
+
+    listAutoCheckSelect(value: boolean){
+        this.updateSetting('ListAutoCheck', value)
+    }
+
+    tsWeightingSet(value: any) {
+    }
+
+
+
+    updateSetting(settingName, fieldValue) {
+        this.scriptService.updateSetting(this.prepDataForUpdate(settingName, fieldValue))
+                .subscribe(
+                    data => {
+                        if (typeof(data) == 'object' &&
+                            data.hasOwnProperty('apiCall') &&
+                            data.hasOwnProperty('result') &&
+                            data.apiCall == this.utilsService.apiCallUpdateItem &&
+                            data.result == true
+                        ) {
+                            console.log('item updated successfully')
+                        }                
+                        console.log('next', data)
+                    },
+                    err => {
+                        console.log('error', err)
+                    },
+                    () => {
+                        this.settingsService.getSettings()
+                        if(settingName == 'Year') {
+                            this.dataContextService.checkForCachedData([this.utilsService.financeAppResourceData,
+                                                            this.utilsService.financeAppMaterialData,
+                                                            this.utilsService.financeAppTotalsData,
+                                                            this.utilsService.financeAppSummaryData], fieldValue)
+                            .mergeMap(data => 
+                                (typeof(data) == 'object' &&
+                                data.hasOwnProperty('functionCall') &&
+                                data.hasOwnProperty('listName') &&
+                                data.hasOwnProperty('result') &&
+                                data.hasOwnProperty('dataExists') &&
+                                data.functionCall == 'checkForCachedData' &&
+                                data.result == true &&
+                                data.dataExists == false
+                                )
+                                ? this.scriptService.loadAppData(data.listName, fieldValue)
+                                : Observable.of(data)
+                            )
+                            
+                        }
+                        console.log('completed')
+                    }
+                )
+    }
+
+
+    prepDataForUpdate(fieldName, fieldValue){
+        return [{
+            fieldName: fieldName,
+            fieldValue: fieldValue
+        }]
+    }
+
+
+    getSubscriber():any {
+        return {
+            next(data){
+                console.log('next', data)
+            },
+            error(err){
+                console.log('error', err)
+            },
+            complete(){
+                console.log('completed');
+            }
+        }
+    }    
+
 }

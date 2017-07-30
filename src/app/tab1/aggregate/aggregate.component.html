@@ -1,0 +1,103 @@
+
+<div class="row">
+    <div class="col-md-9">
+        {{title}}
+    </div>
+    <div class="col-md-3">
+        <input type="button" class="btn btn-xs" (click)="addResourceRow();" value="Add"/>
+        <input type="button" class="btn btn-xs" (click)="deleteResourceRow();" value="Remove"/>
+        <input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
+        <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
+        <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
+        <input type="button" *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();" value="Redo" />
+                
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+            <ag-grid-angular #agGrid1   [style.height.px]="wdTableHeight" 
+                                        [style.width.px]="wdTableWidth" 
+                                        class="ag-fresh" 
+                        [gridOptions]="wdGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid2 style="overflow: hidden;" 
+                                    [style.height.px]="puTableHeight" 
+                                    [style.width.px]="puTableWidth"
+                                    class="ag-fresh" 
+                                    [gridOptions]="puGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid3 style="overflow: hidden;" 
+                                    [style.height.px]="ahTableHeight" 
+                                    [style.width.px]="ahTableWidth"
+                                    class="ag-fresh"  
+                        [gridOptions]="ahGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid4 style="overflow: hidden;" 
+                                    [style.height.px]="prTableHeight" 
+                                    [style.width.px]="prTableWidth"
+                                    class="ag-fresh"  
+                                    [gridOptions]="prGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid5 style="overflow: hidden;" 
+                                    [style.height.px]="prtTableHeight" 
+                                    [style.width.px]="prtTableWidth"
+                                    class="ag-fresh" 
+                                    [gridOptions]="prtGridOptions">
+            </ag-grid-angular>    
+            <ag-grid-angular #agGrid6 style="overflow: hidden;" 
+                                    [style.height.px]="tsTableHeight" 
+                                    [style.width.px]="tsTableWidth"
+                                    class="ag-fresh"  
+                        [gridOptions]="tsGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid7 style="overflow: hidden;" 
+                                    [style.height.px]="atsTableHeight" 
+                                    [style.width.px]="atsTableWidth"
+                                    class="ag-fresh"  
+                        [gridOptions]="atsGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid8 style="overflow: hidden;" 
+                                    [style.height.px]="rtsTableHeight" 
+                                    [style.width.px]="rtsTableWidth"
+                                    class="ag-fresh"  
+                        [gridOptions]="rtsGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid9 style="overflow: hidden;" 
+                                    [style.height.px]="rtstTableHeight" 
+                                    [style.width.px]="rtstTableWidth"
+                                    class="ag-fresh" 
+                        [gridOptions]="rtstGridOptions">
+            </ag-grid-angular>
+        <div class="row">
+            <div class="col-md-9">
+                Material Costs
+            </div>
+            <div class="col-md-3">
+                <input type="button" class="btn btn-xs" (click)="addMaterialRow();" value="Add"/>
+                <input type="button" class="btn btn-xs" (click)="deleteMaterialRow();" value="Remove"/>
+            </div>
+        </div>        
+            <ag-grid-angular #agGrid10 style="overflow: hidden;" 
+                                    [style.height.px]="cmTableHeight" 
+                                    [style.width.px]="cmTableWidth"
+                                    class="ag-fresh" 
+                        [gridOptions]="cmGridOptions">
+            </ag-grid-angular>
+            <ag-grid-angular #agGrid11 style="overflow: hidden;" 
+                                    [style.height.px]="mattTableHeight" 
+                                    [style.width.px]="mattTableWidth"
+                                    class="ag-fresh" 
+                        [gridOptions]="mattGridOptions">
+            </ag-grid-angular>
+        <div class="row">
+        Totals
+        </div>
+            <ag-grid-angular #agGrid12 style="overflow: hidden;" 
+                                    [style.height.px]="tTableHeight" 
+                                    [style.width.px]="tTableWidth"
+                                    class="ag-fresh"  
+                        [gridOptions]="tGridOptions">
+            </ag-grid-angular>
+    </div>
+</div>

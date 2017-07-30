@@ -1,4 +1,41 @@
-look and feel <br />
+<h2>look and feel</h2>
 
-table header colour <br />
-highlight colour <br />
+
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Table Header Colour
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <of-textfield [innerlabel]="'Table Header Colour'" [id]="'headercolour'" (textEntered)='headerColourSet($event)' [defaultValue]="headerColourValue"></of-textfield>
+    </div>
+  </div>
+
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Header Font Colour
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <of-textfield [innerlabel]="'Header Font Colour'" [id]="'headerfontcolour'" (textEntered)='headerFontColourSet($event)' [defaultValue]="headerFontColourValue"></of-textfield>
+    </div>
+  </div>
+
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Highlight Colour
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <of-textfield [innerlabel]="'Highlight Colour'" [id]="'highlightcolour'" (textEntered)='highlightColourSet($event)' [defaultValue]="highlightColourValue"></of-textfield>
+    </div>
+  </div>
+
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='saveUpdates($event)' 
+                    [label]="'Save Updates'" 
+                    [type]="'primary'" 
+                    [id]="'savedata'" 
+                    [description]="'Save'"></of-button>
+     </div>
+  </div>    
+</div>

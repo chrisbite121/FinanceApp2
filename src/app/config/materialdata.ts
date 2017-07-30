@@ -3,6 +3,7 @@ import { IMatModel } from  '../model/material.model'
 export const initMaterialData: IMatModel[] = [
  {  
     ListName: 'FinanceAppMaterialData',
+    ID: 1,
     ItemId: 1,
     Year: 2017,
     State: 'create',
@@ -28,6 +29,7 @@ export const initMaterialData: IMatModel[] = [
 },
 {
     ListName: 'FinanceAppMaterialData',
+    ID: 2,
     ItemId: 2,
     Year: 2017,
     State: 'create',

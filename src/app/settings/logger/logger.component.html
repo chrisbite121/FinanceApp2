@@ -1,43 +1,65 @@
-<div class="row">
-    <div class="col-md-2">
-        <button class="btn btn-xs" (click)="lengthLogs();">No of Cached Logs</button>
-    </div>
-    <div class="col-md-2">
-        <select>
-            <option>don't persist logs</option>
-            <option>persist logs</option>
-            <option>persist logs verbose</option>
-        </select>
-    </div>    
-    <div class="col-md-2">
-        <select (change)="enableVerbose($event.target.value);">
-            <option>No</option>
-            <option>Yes</option>
-        </select>
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-xs" (click)="refreshLogs();">Refresh</button>
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-xs" (click)="saveLogs();">Save</button>
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-xs" (click)="getLogs();">Load Logs</button>
-    </div>      
+<div class="ms-Grid">
+  <div class="ms-Grid-row"><br></div>  
+  <div class="ms-Grid-row">
 
-<table class="table table-bordered">
-    <tr>
-        <th>ID</th>
-        <th>type</th>
-        <th>description</th>
-        <th>timestamp</th>
-        <th>status</th>
-    </tr>
-    <tr *ngFor= "let log of _logs">
-        <td>{{log.ItemId}}</td>
-        <td>{{log.Type}}</td>
-        <td>{{log.Description}}</td>
-        <td>{{log.Timestamp | date:'medium' }}</td>
-        <td>{{log.State}}</td>
-    </tr>
-</table>
+  
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md5 ms-u-lg3">
+      <of-toggle [innerlabel]="'Display Verbose'" 
+                [id]="'verbosetoggle'" 
+                [value]="false" 
+                (toggleEvent)='showVerbose($event)' 
+                [disable]='false'></of-toggle>
+     </div>
+
+    <div class="ms-Grid-col ms-u-sm1 ms-u-md1 ms-u-lg1"></div>
+    <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg1">
+        Type
+    </div>
+
+    <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg2">
+        <of-dropdown [innerlabel]="''" 
+                        [id]="'displayType'" 
+                        [disable]='false' 
+                        [options]= "logTypeOptions" 
+                        [defaultValue]='logTypeDefaultValue'
+                        (choiceSelectedEvent)='filterType($event)'></of-dropdown>
+    </div>
+    
+    <div class="ms-Grid-col ms-u-sm1 ms-u-md1 ms-u-lg1"></div>
+      
+    <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg2">
+        <of-commandbutton [label]='commandButtonLabel' [list]='commandButtonValues' (buttonClicked)='commandButtonClick($event)'></of-commandbutton>
+    </div>
+</div>
+  <div class="ms-Grid-row">
+      <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>type</th>
+                    <th>description</th>
+                    <th>timestamp</th>
+                    <th>status</th>
+                </tr>
+                <tr *ngFor= "let log of _logs">
+                    <td>{{log.ItemId}}</td>
+                    <td>{{log.Type}}</td>
+                    <td>{{log.Description}}</td>
+                    <td>{{log.Timestamp | date:'medium' }}</td>
+                    <td>{{log.State}}</td>
+                </tr>
+            </table>
+      </div>
+  </div> 
+</div>
+
+<div class="pagination">
+  <a href="#">&laquo;</a>
+  <a href="#">1</a>
+  <a class="active" href="#">2</a>
+  <a href="#">3</a>
+  <a href="#">4</a>
+  <a href="#">5</a>
+  <a href="#">6</a>
+  <a href="#">&raquo;</a>
+</div>

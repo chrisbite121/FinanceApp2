@@ -3,6 +3,7 @@ import { IMatModel } from '../model/material.model'
 export const newMaterialDataRow: IMatModel = {
     ListName: 'FinanceAppMaterialData',
     ItemId: 0,
+    ID: 0,
     Year: 0,
     State: 'create',
     Highlights: [],

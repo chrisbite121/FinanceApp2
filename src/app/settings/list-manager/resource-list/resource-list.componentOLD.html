@@ -1,0 +1,286 @@
+<!-- <h3>list actions</h3>
+
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='listExists($event)' 
+                    [label]="'List Exists'" 
+                    [type]="'small'" 
+                    [id]="'listexists'" 
+                    [description]="'List Exists'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>  
+  <div class="ms-Grid-row">     
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='readList($event)' 
+                    [label]="'Read List'" 
+                    [type]="'small'" 
+                    [id]="'readlist'" 
+                    [description]="'Read List'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>  
+  <div class="ms-Grid-row">                   
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='deleteList($event)' 
+                    [label]="'Delete List'" 
+                    [type]="'small'" 
+                    [id]="'deletelist'" 
+                    [description]="'Delete List'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">             
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='createList($event)' 
+                    [label]="'Create List'" 
+                    [type]="'small'" 
+                    [id]="'createlist'" 
+                    [description]="'Create List'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">          
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='updateList($event)' 
+                    [label]="'Update Title Field'" 
+                    [type]="'small'" 
+                    [id]="'updatelist'" 
+                    [description]="'Update List'"></of-button>
+     </div>    
+  </div>
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">          
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='checkListConfig($event)' 
+                    [label]="'Check List Config'" 
+                    [type]="'small'" 
+                    [id]="'checkconfig'" 
+                    [description]="'Check List Config'"></of-button>
+     </div>    
+  </div>
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">          
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='actionListConfig($event)' 
+                    [label]="'Action List Config'" 
+                    [type]="'small'" 
+                    [id]="'actionconfig'" 
+                    [description]="'Action List Config'"></of-button>
+     </div>    
+  </div>
+    <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">          
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='deleteHealthReport($event)' 
+                    [label]="'Delete Health Report'" 
+                    [type]="'small'" 
+                    [id]="'deletehealthreport'" 
+                    [description]="'Delete Health Report'"></of-button>
+     </div>    
+  </div>    
+  <div class="ms-Grid-row"><br></div>
+<div class="ms-Grid-row">
+    <h3>Field Actions</h3>
+</div>
+  <div class="ms-Grid-row"><br></div>
+<div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='readList($event)' 
+                    [label]="'Read Fields'" 
+                    [type]="'small'" 
+                    [id]="'readfields'" 
+                    [description]="'Read Fields'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4">
+        
+     </div>     
+</div>
+<div class="ms-Grid-row"><br /></div>
+<div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='deleteField($event)' 
+                    [label]="'Delete Field'" 
+                    [type]="'small'" 
+                    [id]="'deletefield'" 
+                    [description]="'Delete Field'"></of-button>
+     </div>    
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4" *ngIf='fieldBoolean'>
+              <of-dropdown [innerlabel]="" 
+                  [id]="'deletefieldname'" 
+                  [disable]='false'
+                  [options]='fieldNames' 
+                  [defaultValue]=''
+                  (choiceSelectedEvent)='deleteFieldSelect($event)'></of-dropdown>
+     </div>          
+</div>
+<div class="ms-Grid-row"><br /></div>
+<div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='updateField($event, "Type")' 
+                    [label]="'Update Field Type'" 
+                    [type]="'small'" 
+                    [id]="'updatefieldType'" 
+                    [description]="'Update Field Type'"></of-button>
+     </div>    
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4" *ngIf='fieldBoolean'>
+              <of-dropdown [innerlabel]="" 
+                  [id]="'updatefieledtypename'" 
+                  [disable]='false'
+                  [options]='fieldNames' 
+                  [defaultValue]=''
+                  (choiceSelectedEvent)='updateFieldTypeNameSelect($event)'></of-dropdown>
+     </div>
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md3 ms-u-lg2">
+      <of-dropdown [innerlabel]="" 
+                  [id]="'createFieldType'" 
+                  [disable]='false' 
+                  [options]= "fieldTypeOptions" 
+                  [defaultValue]='"Text"'
+                  (choiceSelectedEvent)='updateFieldTypeSelect($event)'></of-dropdown>
+    <br>
+    </div>             
+</div>
+<div class="ms-Grid-row"><br /></div>
+<div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='createField($event)' 
+                    [label]="'Create Field'" 
+                    [type]="'small'" 
+                    [id]="'createfields'" 
+                    [description]="'Create Field'"></of-button>
+     </div>
+    <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4">
+        <of-textfield [innerlabel]="'Field Name'" [id]="'createFieldName'" (textEntered)='createFieldNameSet($event)' [defaultValue]=""></of-textfield>
+     </div>
+
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md3 ms-u-lg2">
+      <of-dropdown [innerlabel]="" 
+                  [id]="'createFieldType'" 
+                  [disable]='false' 
+                  [options]= "fieldTypeOptions" 
+                  [defaultValue]='"Text"'
+                  (choiceSelectedEvent)='createFieldTypeSelect($event)'></of-dropdown>
+    </div>
+</div>
+<div class="ms-Grid-row"><br /></div>
+<div class="ms-Grid-row">    
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md3 ms-u-lg2">
+        <of-button (buttonClicked)='getFieldXml($event)' 
+                    [label]="'Get Field XML'" 
+                    [type]="'small'" 
+                    [id]="'getfieldxml'" 
+                    [description]="'Get Field XML'"></of-button>
+    </div>    
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4" *ngIf='fieldBoolean'>
+              <of-dropdown [innerlabel]="" 
+                  [id]="'getfieldxmlselect'" 
+                  [disable]='false'
+                  [options]='fieldNames' 
+                  [defaultValue]=''
+                  (choiceSelectedEvent)='getFieldXmlSelect($event)'></of-dropdown>
+     </div>         
+</div>
+<div class="ms-Grid-row">
+    <h3>Item Actions</h3>
+</div>
+  <div class="ms-Grid-row"><br></div>
+<div class="ms-Grid-row">     
+    <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+    <of-button (buttonClicked)='getItem($event)' 
+                [label]="'Get First Item'" 
+                [type]="'small'" 
+                [id]="'getitem'" 
+                [description]="'Get First Item'"></of-button>
+    </div>
+</div>
+  <div class="ms-Grid-row"><br></div>
+<div class="ms-Grid-row">          
+    <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+    <of-button (buttonClicked)='getItems($event)' 
+                [label]="'Get Items'" 
+                [type]="'small'" 
+                [id]="'getitems'" 
+                [description]="'Get Items'"></of-button>
+    </div>
+</div>
+  <div class="ms-Grid-row"><br></div>
+<div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='addItem($event)' 
+                    [label]="'Add Item'" 
+                    [type]="'small'" 
+                    [id]="'additem'" 
+                    [description]="'Add Item'"></of-button>
+     </div>
+  </div>
+    <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">     
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='updateItem($event)' 
+                    [label]="'Update Item'" 
+                    [type]="'small'" 
+                    [id]="'updateitem'" 
+                    [description]="'Update Item'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2" *ngIf='itemBoolean'>
+              <of-dropdown [innerlabel]="" 
+                  [id]="'updateitemname'" 
+                  [disable]='false'
+                  [options]='itemIds' 
+                  [defaultValue]=''
+                  (choiceSelectedEvent)='updateitemIdSelect($event)'></of-dropdown>
+     </div>  
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2" *ngIf='fieldBoolean'>
+              <of-dropdown [innerlabel]="" 
+                  [id]="'updatefieldname'" 
+                  [disable]='false'
+                  [options]='fieldNames' 
+                  [defaultValue]=''
+                  (choiceSelectedEvent)='updateItemFieldSelect($event)'></of-dropdown>
+     </div>
+    <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-textfield [innerlabel]="'Value'" [id]="'updatefieldvalue'" (textEntered)='updateItemSet($event)' [defaultValue]=""></of-textfield>
+     </div>
+  </div>
+  <div class="ms-Grid-row">          
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='deleteItem($event)' 
+                    [label]="'Delete Item'" 
+                    [type]="'small'" 
+                    [id]="'deleteitem'" 
+                    [description]="'Delete Item'"></of-button>
+     </div>
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4" *ngIf='itemBoolean'>
+              <of-dropdown [innerlabel]="" 
+                  [id]="'deleteitemname'" 
+                  [disable]='false'
+                  [options]='itemIds' 
+                  [defaultValue]=''
+                  (choiceSelectedEvent)='deleteItemSelect($event)'></of-dropdown>
+     </div>        
+  </div>
+    <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">          
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='deleteItems($event)' 
+                    [label]="'Delete  All Items'" 
+                    [type]="'small'" 
+                    [id]="'deleteallitems'" 
+                    [description]="'Delete All Items'"></of-button>
+     </div>      
+  </div>
+</div>
+
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+                <table>
+                    <tr *ngFor= "let log of logs">
+                        <td>{{log}}</td>
+                    </tr>
+                </table>
+        </div>
+    </div>
+</div> -->

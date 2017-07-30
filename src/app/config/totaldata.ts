@@ -2,6 +2,7 @@ import { ITotalModel } from '../model/total.model'
 export const initTotalData:ITotalModel[] = [
     {
         ListName: 'FinanceAppTotalsData',
+        ID: 1,
         ItemId: 1,
         Year: 2017,
         State: 'create',

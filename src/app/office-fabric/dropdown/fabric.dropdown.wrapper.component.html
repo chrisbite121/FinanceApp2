@@ -1,0 +1,9 @@
+<div class="ms-Dropdown" tabindex="0" id=[id]>
+  <label *ngIf='innerlabel' class="ms-Label">{{innerlabel}}</label>
+  <i class="ms-Dropdown-caretDown ms-Icon ms-Icon--ChevronDown"></i>
+  <select class="ms-Dropdown-select" (change)='onValueSelected($event.target.value)'>
+    <option *ngFor='let option of options; let idx = index' [value]=[option] [attr.selected]="idx==2">
+        {{option}}
+    </option>
+  </select>
+</div>

@@ -1,0 +1,31 @@
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='resetAppWebLists($event)' 
+                    [label]="'Reset App Lists'" 
+                    [type]="'primary'" 
+                    [id]="'resetapp'" 
+                    [description]="'Reset App Lists'"></of-button>
+     </div>
+  
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='resetAppWebLists($event)' 
+                    [label]="'Reset Host Lists'" 
+                    [type]="'primary'" 
+                    [id]="'resethost'" 
+                    [description]="'Reset Host Lists'"></of-button>
+     </div>
+  </div>
+</div>
+
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+                <table>
+                    <tr *ngFor= "let log of logs">
+                        <td>{{log}}</td>
+                    </tr>
+                </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+total component
+
+
+    <label class="ms-Label" >text field</label>
+    <of-textfield [innerlabel]="'Enter a paragraph number'" [id]="'excludedParagraph'" (textEntered)='testme($event)' [defaultValue]="'aaa'"></of-textfield>
+
+    
+    <of-toggle [innerlabel]="'Auto Save'" [id]="'autoSaveToggle'" [value]="false" (toggleEvent)='toggleEventCall($event)' [disable]='false'></of-toggle>
+
+    <of-dropdown [innerlabel]="'test dropdown'" [id]="'testDropdown01'" [disable]='false' [options]= "['Choose an option...','choice1', 'choice2', 'choice3']" (choiceSelectedEvent)='choiceSelected($event)'></of-dropdown>
+
+
+    <of-messagebar [description]="'test description'" [type]="'info'" [urltext]="'more info...'"></of-messagebar>
+
+    <of-messagebar [description]="'test description'" [type]="'success'" [urltext]="'more info...'"></of-messagebar>
+
+    <of-messagebar [description]="'test description'" [type]="'error'" [urltext]="'more info...'"></of-messagebar>
+
+    <of-messagebar [description]="'test description'" [type]="'blocked'" [urltext]="'more info...'"></of-messagebar>
+
+    <of-messagebar [description]="'test description'" [type]="'warning'" [urltext]="'more info...'"></of-messagebar>
+
+    <of-messagebar [description]="'test description'" [type]="'severwarning'" [urltext]="'more info...'"></of-messagebar>
+
+
+    <of-table></of-table>
+
+    <of-button (buttonClicked)='buttonclicked($event)' [label]="'my button'" [type]="'hero'" [id]="'firstButton'" [description]="'description of the button'"></of-button>
+    <of-button (buttonClicked)='buttonclicked($event)' [label]="'my button'" [type]="'normal'" [id]="'firstButton'" [description]="'description of the button'"></of-button>
+    <of-button (buttonClicked)='buttonclicked($event)' [label]="'my button'" [type]="'primary'" [id]="'firstButton'" [description]="'description of the button'"></of-button>
+    <of-button (buttonClicked)='buttonclicked($event)' [label]="'my button'" [type]="'compound'" [id]="'firstButton'" [description]="'description of the button'"></of-button>
+    <of-button (buttonClicked)='buttonclicked($event)' [label]="'my button'" [type]="'small'" [id]="'firstButton'" [description]="'description of the button'"></of-button>
+
+    <of-commandbutton [label]='commandButtonLabel' [list]='commandButtonValues' (buttonClicked)='buttonclicked($event)'></of-commandbutton>
+
+
+    
+
+    
+
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+purge Logs
+set logs upper limit
+
+<h3>Colour picker</h3>
+<h3>column header names</h3>
+<h3>column header widths</h3>
+<h3>Auto Save</h3>
+<h3>Auto check/provision lists on startup</h3>
+<h3>Map fields</h3>
+<h3>provision in host web or app web</h3>
+<h3>Logger list</h3>
+<h3>Display user permissions, none, partial, full add refresh button</h3>
+<h3>Add well for observer.next() context sub component in list management pages</h3>
+<h3>Enable Debugging Mode</h3>
+<h3>Store context type for each list in settings list</h3>

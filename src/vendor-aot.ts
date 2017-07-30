@@ -10,12 +10,13 @@ import '@angular/forms';
 // RxJS
 import 'rxjs';
 
-//bootstrap
-import 'ng2-bootstrap/dropdown';
-import 'ng2-bootstrap/modal';
-
 // ag-grid
 import 'ag-grid/dist/styles/ag-grid.css';
 import 'ag-grid/dist/styles/theme-fresh.css';
 import 'ag-grid/dist/styles/theme-blue.css';
 import 'ag-grid-angular/main'
+
+//office-ui-fabric
+import 'office-ui-fabric-js/dist/css/fabric.min.css';
+import 'office-ui-fabric-js/dist/css/fabric.components.min.css';
+import 'office-ui-fabric-js/dist/js/fabric.min.js';

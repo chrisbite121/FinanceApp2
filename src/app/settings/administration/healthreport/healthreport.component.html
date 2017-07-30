@@ -1,0 +1,60 @@
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='getHealthReport($event)' 
+                    [label]="'Get Health Report'" 
+                    [type]="'primary'" 
+                    [id]="'gethealthreport'" 
+                    [description]="'Get Health Report'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='actionHealthReport($event)' 
+                    [label]="'Action Health Rep.'" 
+                    [type]="'primary'" 
+                    [id]="'actionhealthreport'" 
+                    [description]="'Action Health Report'"></of-button>
+     </div>
+  </div>  
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='checkSettings($event)' 
+                    [label]="'Check Settings'" 
+                    [type]="'primary'" 
+                    [id]="'checksettings'" 
+                    [description]="'Check Settings'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showHealthReport($event)' 
+                    [label]="'show Health Rep.'" 
+                    [type]="'primary'" 
+                    [id]="'showhealthreport'" 
+                    [description]="'Show Health Report'"></of-button>
+     </div>
+  </div>
+  <div class="ms-Grid-row"><br></div>  
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg3">
+        <of-button (buttonClicked)='deleteHealthReport($event)' 
+                    [label]="'Delete Health Report'" 
+                    [type]="'primary'" 
+                    [id]="'deletehealthreport'" 
+                    [description]="'Delete Health Report'"></of-button>
+     </div>
+  </div>           
+
+</div>
+
+<div *ngIf='logs.length' class="container-fluid tableContainer">
+    <div *ngFor = "let log of logs">
+        <api-logger>
+            <div class="description">{{log}}</div>
+        </api-logger>
+    </div>
+</div>

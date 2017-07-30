@@ -2,6 +2,7 @@ import { ITotalModel } from '../model/total.model';
 
 export const newTotalDataRow = {
         ListName: 'FinanceAppTotalsData',
+        ID: 0,
         ItemId: 0,
         Year: 0,
         State: 'create',

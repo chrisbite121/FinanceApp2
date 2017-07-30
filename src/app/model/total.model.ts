@@ -1,5 +1,6 @@
 export interface ITotalModel {
           ListName: string,
+          ID: number,
           ItemId: number,
           Year: number,
           State: string,

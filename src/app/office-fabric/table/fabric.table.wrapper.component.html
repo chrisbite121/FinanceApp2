@@ -1,0 +1,22 @@
+<table class="ms-Table ms-u-slideRightIn10 {{selectableClass}}">
+  <thead>
+    <tr>
+      <th>Item Id</th>
+      <th>Description</th>
+      <th>Type</th>
+      <th>Timestamp</th>
+      <th>Verbose</th>
+      <th>State</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor='let row of dataArray'>
+      <td>{{row.ItemId}}</td>
+      <td>{{row.Description}}</td>
+      <td>{{row.Type}}</td>
+      <td>{{row.Timestamp}}</td>
+      <td>{{row.Verbose}}</td>
+      <td>{{row.State}}</td>
+
+  </tbody>
+</table>

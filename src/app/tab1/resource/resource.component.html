@@ -1,0 +1,49 @@
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <i class="ms-Icon ms-Icon--Save" (click)="saveUpdates();"></i>
+        <i class="ms-Icon ms-Icon--Add" (click)="addResourceRow();"></i>
+        <i class="ms-Icon ms-Icon--Cancel" (click)="deleteResourceRow();"></i>
+        <i class="ms-Icon ms-Icon--Sync" (click)="refreshGrid();"></i>
+
+       <!-- <input type="button" class="btn btn-xs" (click)="addResourceRow();" value="Add"/>
+        <input type="button" class="btn btn-xs" (click)="deleteResourceRow();" value="Remove"/>
+        <input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
+        <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
+        <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
+        <input type="button" *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();" value="Redo" />-->
+    </div>
+</div>
+    <ag-grid-angular #agGrid1   [style.height.px]="wdTableHeight" 
+                                [style.width.px]="wdTableWidth" 
+                                class="ag-fresh" 
+                 [gridOptions]="wdGridOptions">
+    </ag-grid-angular>
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <h3>{{title}}</h3>
+    </div>    
+</div>
+    <ag-grid-angular #agGrid2 style="overflow: hidden;" 
+                            [style.height.px]="puTableHeight" 
+                            [style.width.px]="puTableWidth"
+                            class="ag-fresh" 
+                            [gridOptions]="puGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid3 style="overflow: hidden;" 
+                            [style.height.px]="ahTableHeight" 
+                            [style.width.px]="ahTableWidth"
+                            class="ag-fresh"  
+                 [gridOptions]="ahGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid4 style="overflow: hidden;" 
+                            [style.height.px]="prTableHeight" 
+                            [style.width.px]="prTableWidth"
+                            class="ag-fresh"  
+                            [gridOptions]="prGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid5 style="overflow: hidden;" 
+                            [style.height.px]="prtTableHeight" 
+                            [style.width.px]="prtTableWidth"
+                            class="ag-fresh" 
+                            [gridOptions]="prtGridOptions">
+    </ag-grid-angular>    

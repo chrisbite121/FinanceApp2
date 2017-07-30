@@ -1,0 +1,52 @@
+import { Component } from  '@angular/core'
+import { ScriptService } from '../../../service/scripts.service'
+
+@Component({
+    selector: 'settings-provisioner',
+    templateUrl: './settings-provisioner.component.html'
+})
+export class SettingsProvisionerComponent { 
+
+    public logs: Array<any> = []
+
+    constructor(private scriptService: ScriptService){}
+
+provisionHostLists(event){
+    this.scriptService.provisioner()
+        .subscribe(
+            data => {
+                console.log(data)
+                this.logs.push(data)
+            },
+            err => {
+                console.log(err)
+                this.logs.push(err)
+            },
+            () => {
+                let _msg = 'provisioner host lists script complete'
+                console.log(_msg)
+                this.logs.push(_msg)
+            }
+        )
+}
+
+provisionAppLists(event){
+    this.scriptService.initApp()
+    .subscribe(
+        data => {
+            console.log(data)
+            this.logs.push(data)
+        },
+        err => {
+            console.log(err)
+            this.logs.push(err)
+        },
+        () => {
+            let _msg = 'provision App lists script complete'
+            console.log(_msg)
+            this.logs.push(_msg)
+        }
+    )
+}
+
+}

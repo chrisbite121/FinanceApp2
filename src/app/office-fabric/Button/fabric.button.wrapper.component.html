@@ -1,0 +1,7 @@
+<button class="ms-Button {{type}}" (click)="onButtonClicked($event)" id=[id]>
+  <span *ngIf="useIcon" class="ms-Button-icon"><i class="{{iconType}}"></i></span> 
+  <span class="ms-Button-label">{{label}}</span>
+  <span *ngIf="useDescription" class="ms-Button-description">{{description}}</span> 
+
+
+</button>

@@ -1,66 +1,95 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ILogModel } from '../../model/log.model'
+import { ICommandButtonEntry, ICommandButtonLabel } from '../../model/CommandButton.model'
 
-import { LogService } from '../../shared/log.service'
-import { CommonApiService } from '../../shared/api-common.service'
-import { UtilsService } from '../../shared/utils.service'
-import { ScriptService } from '../../shared/scripts.service'
+import { LogService } from '../../service/log.service'
+import { CommonApiService } from '../../service/api-common.service'
+import { UtilsService } from '../../service/utils.service'
+import { ScriptService } from '../../service/scripts.service'
+
+import { FabricDropdownWrapperComponent } from '../../office-fabric/dropdown/fabric.dropdown.wrapper.component'
+import { FabricToggleWrapperComponent } from '../../office-fabric/toggle/fabric.toggle.wrapper.component'
+import { FabricCommandButtonWrapperComponent } from '../../office-fabric/commandbutton/fabric.commandButton.wrapper.component'
+
+import { CommandButtonLabel, CommandButtonValues } from './logger.config'
 
 @Component({
     selector: 'logger',
     templateUrl: './logger.component.html',
-    styles:[`
-        button {
-            color: black;
-        }
-        
-    `]
+    styleUrls: ['./logger.component.css']
 })
 export class LoggerComponent implements OnInit {
     public _logs: Array<ILogModel>
     public _enableVerbose: boolean
+    public commandButtonLabel:ICommandButtonLabel
+    public commandButtonValues: Array<ICommandButtonEntry>
+    public logTypeOptions: Array<string>
+    public logTypeDefaultValue: string
+
 
     constructor(private logService: LogService,
                 private commonApiService: CommonApiService,
                 private utilsService: UtilsService,
                 private scriptService: ScriptService){
         this._logs = [];
+        this.commandButtonLabel = CommandButtonLabel
+        this.commandButtonValues = CommandButtonValues
+        this._enableVerbose = false;
+        this.logTypeDefaultValue = 'All'
+        this.logTypeOptions = ['All', this.utilsService.infoStatus, this.utilsService.errorStatus,this.utilsService.successStatus]
     }
 
     ngOnInit(){
-        this.refreshLogs();
+        this.refreshLogs(null);
+        this.reverseLogs()
     }
 
-    refreshLogs(){
-        this._logs = this.logService.logs;
-        this._logs = this._logs.reverse().filter((value, index, array) => {
-            if (this._enableVerbose == false) {
-                return value.Verbose == false
-            } else {
-                return value.Verbose == false || value.Verbose == true
-            }
-        });
+    reverseLogs(){
+        if(this._logs && Array.isArray(this._logs)){
+            this._logs = this._logs.reverse()
+        } else {
+            console.error('unable to reverse logs')
+        }
     }
 
-    enableVerbose(value){
-        if (value == "Yes") {
+    refreshLogs(event){
+        console.log('refresh logs')
+        this._logs = JSON.parse(JSON.stringify(this.logService.logs));
+             this._logs = this._logs.filter((value, index, array) => {
+                if (this._enableVerbose == false) {
+                    return value.Verbose == false
+                } else {
+                    return value.Verbose == false || value.Verbose == true
+                }
+            });           
+        }
+
+    showVerbose(value){
+        if (value) {
             this._enableVerbose = true
         } else {
             this._enableVerbose = false;
         }
-        this.refreshLogs();
+        this.refreshLogs(null);
         
     }
 
-    saveLogs(){
-        // this.commonApiService.addItems(this.utilsService.financeAppLogsData, this.utilsService.appWeb, this.logService.prepLogs(false))
-        //     .subscribe(this.getSubscriber())
+    filterType(type){
+        if(type=='All'){
+            this._logs = JSON.parse(JSON.stringify(this.logService.logs))
+        } else {
+            this._logs = JSON.parse(JSON.stringify(this.logService.logs.filter((value, index, array) => {
+                return value.Type == type
+            })))
+        }
+    }
 
+    saveLogs(event){
         this.scriptService.saveLogsBatch().subscribe(this.getSubscriber())
     }
 
-    getLogs(){
+    getLogs(event){
         this.scriptService.getLogs().subscribe(this.getSubscriber())
     }
 
@@ -78,10 +107,47 @@ export class LoggerComponent implements OnInit {
         }
     }
 
-    lengthLogs(){
+    lengthLogs(event){
         console.log(this.logService.lengthLogs)
     }
 
+    generateLog(verbose) {
+        verbose
+        ? this.logService.log('test verbose log', this.utilsService.infoStatus, true)
+        : this.logService.log('test log', this.utilsService.infoStatus, false);
 
+        this.refreshLogs(true)
+    }
+
+    commandButtonClick(event){
+        console.log(event.id)
+        let id = event.id
+        switch(id){
+            case 'lengthLogs':
+                this.lengthLogs(event)
+            break;
+            case 'refreshLogs':
+                this.refreshLogs(event)
+            break;
+            case 'saveLogs':
+                this.saveLogs(event)
+            break;
+            case 'getLogs':
+                this.getLogs(event)
+            break;
+            case 'generateLog':
+                this.generateLog(false)
+            break;
+            case 'generateLogVerbose':
+                this.generateLog(true)
+            break;
+            case 'reverseLogs':
+                this.reverseLogs()
+            break;
+            default:
+                console.error(`unrecognised command request: ${id}`)
+            break;
+        }
+    }
 
 }

@@ -1,0 +1,46 @@
+<!--<div class="ms-Pivot ms-Pivot">
+  <ul class="ms-Pivot-links">
+    <li class="ms-Pivot-link is-selected" data-content="resource" title="Resource Data" tabindex="1" [routerLink]="['/tab1', 'resource' ]">
+      Resource
+    </li>
+    <li class="ms-Pivot-link " data-content="material" title="Material Data" tabindex="1" [routerLink]="['/tab1', 'material' ]">
+      Material
+    </li>
+    <li class="ms-Pivot-link " data-content="travel" title="Travel Data" tabindex="1" [routerLink]="['/tab1', 'travel' ]">
+      Travel
+    </li>
+    <li class="ms-Pivot-link " data-content="total" title="Total Data" tabindex="1" [routerLink]="['/tab1', 'total' ]">
+      Total
+    </li>  
+    <li class="ms-Pivot-link " data-content="aggregate" title="Aggregate Data" tabindex="1" [routerLink]="['/tab1', 'aggregate' ]">
+      Aggregate
+    </li>        
+  </ul>
+  <div class="ms-Pivot-content" data-content="resource">
+    This is the the resrouce tab.
+  </div>
+  <div class="ms-Pivot-content" data-content="material">
+    This is the material tab.
+  </div>
+  <div class="ms-Pivot-content" data-content="travel">
+    This is the travel tab.
+  </div>
+  <div class="ms-Pivot-content" data-content="total">
+    This is the total tab.
+  </div>
+  <div class="ms-Pivot-content" data-content="aggregate">
+    This is the aggregate tab.
+  </div>  
+</div>-->
+
+
+<div class="ms-Pivot ms-Pivot">
+  <ul class="ms-Pivot-links">
+    <li *ngFor='let item of dataArray' class="ms-Pivot-link is-selected" data-content=item.dataContent title=item.title tabindex="1" [routerLink]=item.routerLink>
+      {{item.title}}
+    </li>
+  </ul>
+  <div class="ms-Pivot-content" data-content=item.dataContent>
+    <!--{{item.content}}-->
+  </div>
+</div>

@@ -1,0 +1,108 @@
+<div class="ms-CommandBar">
+  <div class="ms-CommandBar-sideCommands">
+<!--
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Forward"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Back"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Print"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Save"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Cancel"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Add"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>      
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Sync"></i></span> 
+        <span class="ms-CommandButton-label"></span> 
+      </button>      
+    </div>-->
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Save"></i></span> 
+        <span class="ms-CommandButton-label">Save</span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Delete"></i></span> 
+        <span class="ms-CommandButton-label">Delete</span>
+      </button>
+    </div>
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Add"></i></span> 
+        <span class="ms-CommandButton-label">Add</span> 
+      </button>
+    </div>
+    
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Cancel"></i></span> 
+        <span class="ms-CommandButton-label">Cancel</span> 
+      </button>
+    </div>
+
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Refresh"></i></span> 
+        <span class="ms-CommandButton-label">Refresh</span> 
+      </button>  
+    </div>
+
+
+    <div class="ms-CommandButton ms-CommandButton--noLabel">
+      <button class="ms-CommandButton-button" [routerLink]="['/settings']">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Settings"></i></span> 
+        <span class="ms-CommandButton-label">Settings</span> 
+      </button>
+    </div>     
+  </div>  
+  <!--- Left hand area menu -->
+  <div class="ms-CommandBar-mainArea">
+    <div class="ms-CommandButton">
+      <button class="ms-CommandButton-button" (click)="backToProjectSite();">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--ChromeBack"></i></span> 
+        <span class="ms-CommandButton-label">Back to Project Site</span> 
+      </button>
+    </div>    
+    <div class="ms-CommandButton" [routerLink]="['/summary']">
+      <button class="ms-CommandButton-button">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--AppIconDefault"></i></span> 
+        <span class="ms-CommandButton-label">Summary</span> 
+      </button>
+    </div>
+    <div class="ms-CommandButton">
+      <button class="ms-CommandButton-button" [routerLink]="['/tab1']">
+        <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Tiles"></i></span> 
+        <span class="ms-CommandButton-label">FY1</span> 
+      </button>
+    </div>
+  </div>
+</div>

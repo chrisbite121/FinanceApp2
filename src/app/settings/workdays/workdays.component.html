@@ -1,0 +1,151 @@
+Working Days
+
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='getWorkDays($event)' 
+                    [label]="'Get Working Days'" 
+                    [type]="'primary'" 
+                    [id]="'workingdays'" 
+                    [description]="'get the working days for all years'"></of-button>
+     </div>
+  </div>
+
+  <div class="ms-Grid-row" *ngIf='years'>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Select Year
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-dropdown [innerlabel]="" 
+                  [id]="'currentYearToggle'" 
+                  [disable]='false' 
+                  [options]= "years" 
+                  [defaultValue]='selectedYear'
+                  (choiceSelectedEvent)='filterWorkdayData($event)'></of-dropdown>
+    </div>
+  </div>
+</div>
+
+<div class="ms-Grid" *ngIf="selectedYear">
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        January
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'jan'" [defaultValue]="selectedYear.January" (textEntered)='updateWdData($event, "January")'></of-textfield>
+     </div>
+
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Febuary
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'feb'" [defaultValue]="selectedYear.Febuary" (textEntered)='updateWdData($event, "Febuary")'></of-textfield>
+     </div>
+
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        March
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'mar'" [defaultValue]="selectedYear.March" (textEntered)='updateWdData($event, "March")'></of-textfield>
+     </div>
+  </div>
+  <div class="ms-Grid-row"> 
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        April
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'apr'" [defaultValue]="selectedYear.April" (textEntered)='updateWdData($event, "April")'></of-textfield>
+     </div>
+
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        May
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'may'" [defaultValue]="selectedYear.May" (textEntered)='updateWdData($event, "May")'></of-textfield>
+     </div>
+
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        June
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'jun'" [defaultValue]="selectedYear.June" (textEntered)='updateWdData($event, "June")'></of-textfield>
+     </div>
+  </div>
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        July
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'jul'" [defaultValue]="selectedYear.July" (textEntered)='updateWdData($event, "July")'></of-textfield>
+     </div>
+
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        August
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'aug'" [defaultValue]="selectedYear.August" (textEntered)='updateWdData($event, "August")'></of-textfield>
+     </div>
+
+      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        September
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'sep'" [defaultValue]="selectedYear.September" (textEntered)='updateWdData($event, "September")'></of-textfield>
+     </div>
+  </div>
+  <div class="ms-Grid-row">  
+      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        October
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'oct'" [defaultValue]="selectedYear.October" (textEntered)='updateWdData($event, "October")'></of-textfield>
+     </div>
+
+      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        November
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'nov'" [defaultValue]="selectedYear.November" (textEntered)='updateWdData($event, "November")'></of-textfield>
+     </div>
+
+      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        December
+     </div>
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-textfield [innerlabel]="" [id]="'dec'" [defaultValue]="selectedYear.December" (textEntered)='updateWdData($event, "December")'></of-textfield>
+     </div>     
+  </div>
+
+</div>
+
+<div class="ms-Grid">
+  <div class="ms-Grid-row">
+      <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+        <div [hidden]="!selectedYear">
+          <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+                <of-button (buttonClicked)='saveUpdates($event)' 
+                            [label]="'Save Updates'" 
+                            [type]="'primary'" 
+                            [id]="'savedata'" 
+                            [description]="'get the working days for all years'"></of-button>
+            </div>
+          </div>  
+        </div>
+  </div>
+
+  <div class="ms-Grid-row">
+      <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+            <table>
+                <tr>
+                  <th>Logs</th>
+                </tr>
+                <tr *ngFor= "let log of logs">
+                    <td>{{log}}
+                </tr>
+            </table>
+      </div>
+  </div>
+</div>
+
+
