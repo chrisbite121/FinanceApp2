@@ -1436,7 +1436,7 @@ processSettingsData(data){
 loadAppData(listArray:Array<string>, year:number):Observable<any>{
     let getData$ = Observable
         .from(listArray)
-        .mergeMap(listName =>
+        .mergeMap((listName:any) =>
             (typeof(listName) == 'string' &&
             listName.length > 0)
             ? this.commonApiService.getItems(
@@ -1453,9 +1453,9 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
                                             )
             : Observable.of(listName)
         )
-        .mergeMap(data =>
+        .mergeMap((data:any) =>
             // process list data
-            (typeof(data) === 'object' &&
+            (typeof(data) == 'object' &&
             data.hasOwnProperty('listName') &&
             data.hasOwnProperty('apiCall') &&
             data.hasOwnProperty('result') &&        
@@ -1464,7 +1464,18 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
             ? this.dataContextService.processListData(data['data'], data['listName'])
             : Observable.of(data)
         )
-        .mergeMap(data => 
+        .mergeMap((data:any) =>
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('listName') &&
+            data.functionCall == 'processListData' &&
+            data.result == true
+            )
+            ? this.dataContextService.emitValues([data.listName])
+            : Observable.of(data)
+        )
+        .mergeMap((data:any) => 
             (typeof(data) === 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('result') &&
@@ -1473,46 +1484,7 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
             data.functionCall == 'processListData' &&
             data.result == false &&
             data.resultLength == 0)
-            ? this.dataContextService.CreateDummyDataItem(data.listName)
-            : Observable.of(data)
-        )
-        .mergeMap(data =>
-            (typeof(data) === 'object' &&
-            data.hasOwnProperty('functionCall') &&
-            data.hasOwnProperty('result') &&
-            data.hasOwnProperty('listName') &&
-            data.hasOwnProperty('item') &&
-            data.functionCall == 'CreateDummyDataItem' &&
-            data.result == true)
-            ? this.commonApiService.addItem(data.listName, this.listService.getListContext(data.listName), this.createFieldArray(data.item, data.listName))
-            : Observable.of(data)
-        )
-        .mergeMap(data =>
-            (typeof(data) === 'object' && 
-            data.hasOwnProperty('listName') &&
-            data.hasOwnProperty('apiCall') &&
-            data.hasOwnProperty('result') &&
-            data.hasOwnProperty('newItemId') &&
-            data['apiCall'] == this.utilsService.apiCallAddItem && 
-            data['result'] == true)
-            //if settings exists get data
-            ? this.commonApiService.getItem(data.listName, 
-                                            this.utilsService.generateXmlGetItemById(data.newItemId),
-                                            this.listService.getListContext(data.listName),
-                                            this.utilsService.includeFields(
-                                                    this.listService.getArrayFieldNames(data.listName)))
-            : Observable.of(data)
-        )
-        .mergeMap( data => 
-            (typeof(data) == 'object' && 
-            data.hasOwnProperty('listName') &&
-            data.hasOwnProperty('apiCall') &&
-            data.hasOwnProperty('result') &&
-            data.hasOwnProperty('data') &&
-            data['apiCall'] == this.utilsService.apiCallGetItem && 
-            data['result'] == true)    
-            //need to process item data, add results to data table
-            ? this.dataContextService.processListData(data.data, data.listName)
+            ? this.addDataRow(data.listName, this.settingsService.year, true)
             : Observable.of(data)
         )
 
@@ -1558,23 +1530,16 @@ getAppData(listArray:Array<string>, year:number): Observable<any>{
     let get$ = 
         this.dataContextService.checkForCachedData(listArray, year)
             .mergeMap(data =>
-                (
-                    (typeof(data) == 'object' &&
-                    data.hasOwnProperty('functionCall') &&
-                    data.hasOwnProperty('listName') &&
-                    data.hasOwnProperty('result') &&
-                    data.hasOwnProperty('dataExists') &&
-                    data.functionCall == 'checkForCachedData' &&
-                    data.result == true &&
-                    data.dataExists == false
-                )
-                &&
-                (
-                    this.settingsService.sharePointMode
-                )
-                )
-                ? this.loadAppData([data.listName],year)
-                : Observable.of(data)
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('dataExists') &&
+            data.functionCall == 'checkForCachedData' &&
+            data.result == true &&
+            data.dataExists == true)
+            ? this.dataContextService.emitValues([data.listName])
+            : Observable.of(data)
             )
             .mergeMap(data =>
             (
@@ -1585,20 +1550,16 @@ getAppData(listArray:Array<string>, year:number): Observable<any>{
                 data.hasOwnProperty('dataExists') &&
                 data.functionCall == 'checkForCachedData' &&
                 data.result == true &&
-                data.dataExists == true)
-                
-                ||
-
-                (typeof(data) == 'object' &&
-                data.hasOwnProperty('functionCall') &&
-                data.hasOwnProperty('result') &&
-                data.hasOwnProperty('listName') &&
-                data.functionCall == 'processListData' &&
-                data.result == true)
+                data.dataExists == false
             )
-            ? this.dataContextService.emitValues([data.listName])
-            : Observable.of(data)
+            &&
+            (
+                this.settingsService.sharePointMode
             )
+            )
+                ? this.loadAppData([data.listName],year)
+                : Observable.of(data)
+            )        
 
         return get$
 }
@@ -1617,7 +1578,19 @@ updateTable(event: any): Observable<any> {
         * 9. reset statechange flag
         */
         let updateTable$ =
-             this.dataContextService.extractProperties(event)
+            this.dataContextService.emitContextValues([this.utilsService.financeAppResourceData,
+                                                        this.utilsService.financeAppMaterialData,
+                                                        this.utilsService.financeAppTotalsData,
+                                                        this.utilsService.financeAppSummaryData])
+            .mergeMap(data =>
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('listArray') &&
+            data.hasOwnProperty('result') &&
+            data.result ==  true)
+            ? this.dataContextService.extractProperties(event)
+            : Observable.of(data) 
+            )
             .mergeMap(data =>
                 (typeof(data) == 'object' &&
                 data.hasOwnProperty('functionCall') &&
@@ -1629,7 +1602,6 @@ updateTable(event: any): Observable<any> {
                 ? this.dataContextService.preProcessData(data.data)
                 : Observable.of(data)
             )
-            //get table name
             .mergeMap(data => 
                 (typeof(data) == 'object' &&
                 data.hasOwnProperty('functionCall') &&
@@ -1711,71 +1683,145 @@ saveAppData(){
         .merge(...this.prepDataForApi([
                 {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
                 {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
-                {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData}])
+                {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData},
+                {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData}])
+        )
+        .mergeMap((data:any) => 
+        // When adding an item to a list we need to update the ID with the newly createed ID value
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('apiCall') &&
+            data.hasOwnProperty('ID') &&
+            data['apiCall'] == this.utilsService.apiCallAddItem &&
+            data['result'] == true)        
+        ? this.dataContextService.updateItemIdAfterAdd(data['itemId'], data['ID'], data['listName'], this.dataContextService.getTableName(data['listName']))
+        : Observable.of(data)
         )
         .mergeMap(data =>
-        (
-        (typeof(data) === 'object' &&
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('apiCall') &&
-        data['apiCall'] === this.utilsService.apiCallAddItem &&
-        data['result'] == true)
-
-        ||
-
-        (typeof(data) === 'object' &&
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('apiCall') &&
-        data['apiCall'] === this.utilsService.apiCallDeleteItem &&
-        data['result'] === true)
-        
-        ||
-
-        (typeof(data) === 'object' &&
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('apiCall') &&
-        data['apiCall'] === this.utilsService.apiCallUpdateItem &&
-        data['result'] == true)
-        )
-        ? this.dataContextService
-            .updateStateAfterApiCall(data['listName'], data['itemId'], data['apiCall'])
-        : this.placeholderObservable(data)
-        )
-    return submitData$
-}
-
-addDataRow(listName:string){
-    let addRow$ = 
-        this.dataContextService.addDataRow(listName)
-    .mergeMap(data =>
-        (typeof(data) == 'object' &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('tableName') &&
-        data.functionCall == 'addDataRow' &&
-        data.result == true
-        )
-        ? this.dataContextService.emitValues([data.listName])
-        : Observable.of(data)
-    )
-    .mergeMap(data =>
         (
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('result') &&
-            data.result == true &&
-            data.functionCall == 'emitValues'
-            )
-            && this.settingsService.autoSave
-            && this.settingsService.sharePointMode
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('ID') &&
+            data.hasOwnProperty('apiCall') &&
+            data.result == 'updateItemIdAfterAdd' &&
+            data.result == true)
+
+            ||
+
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('apiCall') &&
+            data.hasOwnProperty('ID') &&
+            data['apiCall'] == this.utilsService.apiCallDeleteItem &&
+            data['result'] == true)
+            
+            ||
+
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('apiCall') &&
+            data.hasOwnProperty('ID') &&
+            data['apiCall'] == this.utilsService.apiCallUpdateItem &&
+            data['result'] == true)
         )
-        ? this.saveAppData()
+        ? this.dataContextService.getIndexValue(data['listName'], data['ID'], {apiCall: data['apiCall']})
         : Observable.of(data)
-    )
+        )
+        .mergeMap(data => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('data') &&
+            data.hasOwnProperty('tableName') &&
+            data.hasOwnProperty('data') &&
+            data.functionCall == 'getIndexValue' &&
+            data.result == true)
+            ? this.dataContextService.updateStateValue(data.indexValue, this.utilsService.inertState, data.tableName, data.data)
+            : this.placeholderObservable(data)
+        )
+    return submitData$
+}
+
+addDataRow(listName:string, year: number, saveData: boolean){
+    let addRow$ = 
+        this.dataContextService.createDataItem(listName)
+        .mergeMap((data:any) => 
+            ((typeof(data) === 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('item') &&
+            data.functionCall == 'addDataRow')
+            &&
+            (!saveData || !this.settingsService.sharePointMode))
+            ? this.dataContextService.addDataItemToTable(data.listName, data.item)
+            : Observable.of(data)
+        )
+        .mergeMap((data:any) =>
+            ((typeof(data) === 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('item') &&
+            data.functionCall == 'addDataRow' &&
+            data.result == true)
+            && 
+            (saveData && this.settingsService.sharePointMode))
+            ? this.commonApiService.addItem(data.listName, this.listService.getListContext(data.listName), this.createFieldArray(data.item, data.listName))
+            : Observable.of(data)
+        )
+        .mergeMap((data:any) =>
+            (typeof(data) === 'object' && 
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('apiCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('ID') &&
+            data['apiCall'] == this.utilsService.apiCallAddItem && 
+            data['result'] == true)
+            //if settings exists get data
+            ? this.commonApiService.getItem(data.listName, 
+                                            this.utilsService.generateXmlGetItemById(data.ID),
+                                            this.listService.getListContext(data.listName),
+                                            this.utilsService.includeFields(
+                                                    this.listService.getArrayFieldNames(data.listName)))
+            : Observable.of(data)
+        )
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' && 
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('apiCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('data') &&
+            data['apiCall'] == this.utilsService.apiCallGetItem && 
+            data['result'] == true)
+            //need to process item data, add results to data table
+            ? this.dataContextService.processListData(data.data, data.listName)
+            : Observable.of(data)
+        )
+        .mergeMap(data =>
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('listName') &&
+            data.functionCall == 'addDataItemToTable' &&
+            data.result == true
+            )
+            ||
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('listName') &&
+            data.functionCall == 'processListData' &&
+            data.result == true
+            )
+            ? this.dataContextService.emitValues([data.listName])
+            : Observable.of(data)
+        )
 
     return addRow$
 }
@@ -1807,7 +1853,7 @@ let delete$ =
         data.result == true &&
         data.functionCall == 'getIndexValue'
         )
-        ? this.dataContextService.updateStateValue(data.data.objectId, this.utilsService.deleteState, data.data.tableName, data.data)
+        ? this.dataContextService.updateStateValue(data.data.indexValue, this.utilsService.deleteState, data.data.tableName, data.data)
         : Observable.of(data)
     )
     .mergeMap(data => 
@@ -1866,14 +1912,14 @@ prepDataForApi(listDataArray:Array<Object>, ):Array<Observable<any>> {
                         _rsltArray.push(this.commonApiService.addItem(listName, this.utilsService.hostWeb, fieldArray))
 
                     } else if (_item.hasOwnProperty('State') && _item['State'] == this.utilsService.deleteState) {
-                        _rsltArray.push(this.commonApiService.deleteItem(listName, _item['ItemId'], this.utilsService.hostWeb))
+                        _rsltArray.push(this.commonApiService.deleteItem(listName, _item['ID'], this.utilsService.hostWeb))
 
                     } else if (_item.hasOwnProperty('State') && _item['State'] == this.utilsService.updateState) {
                         let fieldsArray = this.createFieldArray(_item, listName);
-                        _rsltArray.push(this.commonApiService.updateItem(listName, this.utilsService.hostWeb, _item['ItemId'], fieldsArray))
+                        _rsltArray.push(this.commonApiService.updateItem(listName, this.utilsService.hostWeb, _item['ID'], fieldsArray))
 
                     } else if (_item.hasOwnProperty('State') && _item['State'] == this.utilsService.inertState) {
-                        this.logService.log(`item flagged as intert, saving item not required`, this.utilsService.infoStatus, true)
+                        this.logService.log(`item flagged as inert, saving item not required`, this.utilsService.infoStatus, true)
                     }
                 })
             }

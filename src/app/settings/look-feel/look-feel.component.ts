@@ -12,6 +12,7 @@ export class LookFeelComponent implements OnInit {
     public headerColourValue:string;
     public headerFontColourValue:string;
     public highlightColourValue:string;
+    public highlightFontColourValue:string;
     
     constructor(private scriptService: ScriptService,
                 private utilsService: UtilsService,
@@ -24,6 +25,7 @@ export class LookFeelComponent implements OnInit {
             this.headerColourValue = data.headerColour
             this.headerFontColourValue = data.headerFontColour
             this.highlightColourValue = data.highlightColour
+            this.highlightFontColourValue = data.highlightFontColour
         })
         this.settingsService.getSettings()
     }    
@@ -34,11 +36,15 @@ export class LookFeelComponent implements OnInit {
     
     headerFontColourSet(event){
         this.headerFontColourValue = event
-    }   
+    }
 
     highlightColourSet(event){
         this.highlightColourValue = event
     }
+
+    highlightFontColourSet(event){
+        this.highlightFontColourValue = event
+    }    
 
     saveUpdates(event) {
         this.scriptService.updateSetting(this.prepDataForUpdate())
@@ -68,7 +74,8 @@ export class LookFeelComponent implements OnInit {
         return [
             {fieldName: 'HeaderColour', fieldValue: this.headerColourValue},
             {fieldName: 'HeaderFontColour', fieldValue: this.headerFontColourValue},
-            {fieldName: 'HighlightColour', fieldValue: this.highlightColourValue}
+            {fieldName: 'HighlightColour', fieldValue: this.highlightColourValue},
+            {fieldName: 'HighlightFontColour', fieldValue: this.highlightFontColourValue}
             ]
     }     
 }

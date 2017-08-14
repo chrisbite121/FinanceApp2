@@ -11,6 +11,7 @@ export interface ISettings {
     verbose: boolean,
     headerColour: string,
     highlightColour: string,
+    highlightFontColour: string,
     headerFontColour: string
 }
 
@@ -23,6 +24,7 @@ export interface IAppSettings {
     useLoggingList: boolean,
     useWorkDaysList: boolean,
     logginListReady: boolean,
+    initAppComplete: boolean,
     appUrl: string,
     hostUrl: string
 }

@@ -27,15 +27,16 @@ const userControlledsettings: ISettings = {
     //Sharepoint Mode needs to be removed from here
     //this value is set in application controlled settings
     sharePointMode: false,
-    autoSave: true,
+    autoSave: false,
     workingHoursInDay: 7.5,
     tsWeighting: 0.2,
     listAutoCheck: false,
     persist: false,
     verbose: false,
-    headerColour: 'c0cee5',
-    headerFontColour: '000000',
-    highlightColour: 'ccffff'
+    headerColour: '#e8effc',
+    headerFontColour: '#6b6b6b',
+    highlightFontColour: '#e8effc',
+    highlightColour: '#7ea8a8'
 }
 
 const ApplicationControlledSettings = {
@@ -47,8 +48,9 @@ const ApplicationControlledSettings = {
     useSettingsList: true,
     useLoggingList: true,
     useWorkDaysList: true,
-
     logginListReady: false,
+
+    initAppComplete: false,
     hostUrl: '',
     appUrl: '',
 
@@ -98,6 +100,14 @@ export class SettingsService {
 
     get appUrl(){
         return this._appSettings.appUrl
+    }
+
+    get initAppComplete(){
+        return this._appSettings.initAppComplete
+    }
+
+    set initAppComplete(value:boolean) {
+        this._appSettings.initAppComplete = value
     }
 
     set loggingListReady(value:boolean) {
@@ -300,6 +310,14 @@ export class SettingsService {
 
     get year(){
         return this._settings.year;
+    }
+
+    get highlightColour(){
+        return this._settings.highlightColour
+    }
+
+    get highlightFontColour(){
+        return this._settings.highlightFontColour
     }
 
     getSettingOptions(attr: any): Observable<any> {

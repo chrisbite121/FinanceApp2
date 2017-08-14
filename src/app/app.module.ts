@@ -36,7 +36,7 @@ import { appRoutes } from './routes'
 @NgModule({
     imports: [
         BrowserModule,
-        RouterModule.forRoot(appRoutes),
+        RouterModule.forRoot(appRoutes,{ useHash:true}),
         Tab1Module,
         SummaryModule,
         SettingsModule

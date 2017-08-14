@@ -394,10 +394,10 @@ export class AggregateComponent implements OnInit, AfterViewInit {
                 }            
         })
 
-        this.uiStateService.uiState().subscribe(data => {
-            this.uiState = data;
+        // this.uiStateService.uiState().subscribe(data => {
+        //     this.uiState = data;
             
-        })
+        // })
         this.workdayService.getWorkdayStream().subscribe(data => {
             if (!this.wdGridOptions.rowData){
                 this.wdGridOptions.rowData = <Array<IYear>>data;
@@ -417,7 +417,7 @@ export class AggregateComponent implements OnInit, AfterViewInit {
                                         () => console.log('get app data completed')
                                     );
         //get inital ui state values
-        this.uiStateService.updateState();
+        // this.uiStateService.updateState();
 
     }
 
@@ -432,12 +432,12 @@ export class AggregateComponent implements OnInit, AfterViewInit {
     }
 
     addResourceRow(){
-        this.dataContext.addResourceRow();
+        //this.dataContext.addResourceRow();
         return
     }
 
     addMaterialRow(){
-        this.dataContext.addMaterialRow();
+        //this.dataContext.addMaterialRow();
         return
     }    
     

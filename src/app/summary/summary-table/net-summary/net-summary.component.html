@@ -1,1 +1,12 @@
-Net Summary Component
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <h3>Net Summary</h3>
+    </div>
+</div>
+
+<ag-grid-angular #agGrid15
+                        [style.height.px]="nsTableHeight" 
+                        [style.width.px]="nsTableWidth"
+                        class="ag-fresh"  
+            [gridOptions]="nsGridOptions">
+</ag-grid-angular>

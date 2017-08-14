@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -10,13 +10,15 @@ import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 
+import { Subscription } from 'rxjs/subscription'
+
 import { IYear } from '../../model/year.model'
 @Component({
     selector: 'resource',
     templateUrl: './resource.component.html',
     styleUrls: ['./resource.component.css']
 })
-export class ResourceComponent implements OnInit, AfterViewInit {
+export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
     public title:string = 'Resources';
     public headerStyle = 'ag-header-cell';
 
@@ -49,14 +51,22 @@ export class ResourceComponent implements OnInit, AfterViewInit {
     //totals
     public prtTableWidth: number = 2100;
 
-    public _backgroundColour: string = '#99e7ff';
+    // public _backgroundColour: string = '#99e7ff';
     
     //used to track cell focus
     public _focusCell:any
     public _focusTable:string
 
+
+    //continuous streams that need to be destroyed on exit
+    public resouceStream: Subscription
+    public totalStream: Subscription
+    public workdayStream: Subscription
+    public resourceContextStream: Subscription
+    public totalContextStream: Subscription
+
     constructor(private tableService: TableService, 
-                private dataContext: DataContextService,
+                private dataContextService: DataContextService,
                 private uiStateService: UiStateService,
                 private workdayService: WorkdayService,
                 private scriptService: ScriptService,
@@ -85,13 +95,10 @@ export class ResourceComponent implements OnInit, AfterViewInit {
         this.puGridOptions.singleClickEdit = true;
         this.puGridOptions.enableCellExpressions = true;
         this.puGridOptions.onCellValueChanged = ($event: any) => {
-            
-            //set focus details
             this._focusCell = this.puGridOptions.api.getFocusedCell()
             this._focusTable = 'puGridOptions'
-
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber()); 
-            
         };
         this.puGridOptions.context = {};
         this.puGridOptions.rowSelection = 'single';
@@ -102,6 +109,7 @@ export class ResourceComponent implements OnInit, AfterViewInit {
         this.ahGridOptions.onCellValueChanged = ($event: any) => {
             this._focusCell = this.ahGridOptions.api.getFocusedCell()
             this._focusTable = 'ahGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         // this.ahGridOptions.rowSelection = 'single';
@@ -113,6 +121,7 @@ export class ResourceComponent implements OnInit, AfterViewInit {
         this.prGridOptions.onCellValueChanged = ($event: any) => {
             this._focusCell = this.prGridOptions.api.getFocusedCell()
             this._focusTable = 'prGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         // this.prGridOptions.rowSelection = 'single';
@@ -152,9 +161,14 @@ export class ResourceComponent implements OnInit, AfterViewInit {
             this.prtGridOptions.columnDefs = table;
         });
 
-        this.dataContext.getResourceDataStream().subscribe(data => {
-            console.error('RESOURCE DATA RECEIVED')
-            console.log(data);
+        this.resouceStream = this.dataContextService.getResourceDataStream().subscribe(data => {
+           console.error('RESOURCE DATA RECEIVED')
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            }
 
             if (!this.puGridOptions.rowData) {
                 this.puGridOptions.rowData = data;
@@ -174,54 +188,59 @@ export class ResourceComponent implements OnInit, AfterViewInit {
                 this.prGridOptions.api.setRowData(data);
             }
 
-            if(this.puGridOptions.api &&
-                this.ahGridOptions.api &&
-                this.prGridOptions.api 
-                ) {
-                    this.applyCellHighlights(data);  
-
-                }
             this.resizeTables(data.length);
-            this.setCellFocus();
         })
         
-        this.dataContext.getTotalDataStream().subscribe(data => {
-            console.log('TOTAL DATA RECEIVED')
-            console.log(data)
-
+        this.totalStream = this.dataContextService.getTotalDataStream().subscribe(data => {
             if (!this.prtGridOptions.rowData) {
                 this.prtGridOptions.rowData = data;
             } else if (this.prtGridOptions.api) {
                 this.prtGridOptions.api.setRowData(data);
             }
 
-            if(this.prtGridOptions.api) {
-                    this.applyTotalCellHighlights(data);  
-                }            
         })
 
-        this.uiStateService.uiState().subscribe(data => {
-            this.uiState = data;
-        })
-        this.workdayService.getWorkdayStream().subscribe(data => {
+        this.workdayStream = this.workdayService.getWorkdayStream().subscribe(data => {
             if (!this.wdGridOptions.rowData){
                 this.wdGridOptions.rowData = <Array<IYear>>data;
             } else if (this.wdGridOptions.api) {
                 this.wdGridOptions.api.setRowData(data)
             }
 
-
-
-
         });
-        this.workdayService.getWorkdayData();
-        this.scriptService.getAppData([this.utilsService.financeAppResourceData, 
-                                        this.utilsService.financeAppTotalsData],
-                                        this.settingsService.year)
-                                        .subscribe(this.getSubscriber());
-        //get inital ui state values
-        this.uiStateService.updateState();
 
+        this.resourceContextStream = this.dataContextService.getResourceContextStream().subscribe(data => {
+            let _resourceDataName = 'resourceData'    
+            if(typeof(data)=='object'){
+                if(this.puGridOptions){
+                    this.puGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContextService[_resourceDataName]))
+                    this.puGridOptions.context.arrayName = _resourceDataName
+                }
+
+                if(this.prGridOptions){
+                    this.prGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContextService[_resourceDataName]))
+                    this.prGridOptions.context.arrayName = _resourceDataName
+                }
+
+                if(this.ahGridOptions){
+                    this.ahGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContextService[_resourceDataName]))
+                    this.ahGridOptions.context.arrayName = _resourceDataName            
+                }
+            }
+        })
+
+        this.totalContextStream = this.dataContextService.getTotalContextStream().subscribe(data => {
+            if(typeof(data) == 'object') {
+                if(this.prtGridOptions) {
+                    let _totalsDataName = 'totalsData'
+                    this.prtGridOptions.context.totalsData = JSON.parse(JSON.stringify(this.dataContextService[_totalsDataName]))
+                    this.prtGridOptions.context.arrayName = _totalsDataName
+                }
+            }
+        })
+
+
+        this.refreshGrid()
     }
 
     ngAfterViewInit () {
@@ -233,31 +252,56 @@ export class ResourceComponent implements OnInit, AfterViewInit {
         }
     }
 
+    ngOnDestroy(){
+        this.resouceStream.unsubscribe()
+        this.totalStream.unsubscribe()
+        this.workdayStream.unsubscribe()
+        this.resourceContextStream.unsubscribe()
+        this.totalContextStream.unsubscribe()
+    }
+
     addResourceRow(){
-        this.scriptService.addDataRow(this.utilsService.financeAppResourceData)
+        this.scriptService.addDataRow(this.utilsService.financeAppResourceData, this.settingsService.year, this.settingsService.autoSave)
             .subscribe(this.getSubscriber());
         return
     }
 
     deleteResourceRow(){
-        let selectedNode = this.puGridOptions.api.getSelectedNodes();
-        if (selectedNode[0] && 
-            selectedNode[0].data && 
-            selectedNode[0].data.ID) {
+        
+        let selectedNode:any = this.puGridOptions.api.getSelectedNodes();
+        console.log(selectedNode)
+        
+        if (!Array.isArray(selectedNode)) {
+            alert('no row selected');
+            return
+        }
+
+        if (selectedNode.length !== 1) {
+            alert('only 1 row must be selected to perform the delete operation')
+            return
+        }
+
+        if (selectedNode[0].hasOwnProperty('data') && 
+            selectedNode[0].data.hasOwnProperty('ID')) {
                 this.scriptService.deleteDataRow(this.utilsService.financeAppResourceData,
-                                                selectedNode[0].data.ID)
+                selectedNode[0].data.ID)
                     .subscribe(this.getSubscriber());
-            } else {
-                alert('no row selected');
-            }
+                    } else {
+                        alert('something has gone wrong, required data values are not available to delete row')
+                    }
         return
     }
 
     refreshGrid(){
-        this.scriptService.getAppData([this.utilsService.financeAppResourceData, 
-                                        this.utilsService.financeAppTotalsData],
-                                        this.settingsService.year)
-                                        .subscribe(this.getSubscriber());
+        if(this.settingsService.initAppComplete){
+            this.workdayService.getWorkdayData();
+            this.scriptService.getAppData([this.utilsService.financeAppResourceData, 
+                                            this.utilsService.financeAppTotalsData],
+                                            this.settingsService.year)
+                                                .subscribe(this.getSubscriber());
+        } else {
+            console.log('waiting for application to complete before loading data')
+        }
     }
 
     saveUpdates(){
@@ -265,90 +309,92 @@ export class ResourceComponent implements OnInit, AfterViewInit {
             .subscribe(this.getSubscriber())
     }
 
-    applyCellHighlights(tableData: any){
-        let bkColour = this._backgroundColour;
-        let data:Array<any> = this.constructHighlightsObject(tableData);
-        this.puGridOptions.columnDefs.forEach((column:any) => {
-            //highlight updated cells
-            return this.applyCellStyle(column,data, bkColour);
-        })
-        this.ahGridOptions.columnDefs.forEach((column:any) => {
-            //highlight updated cells
-            return this.applyCellStyle(column,data, bkColour);
-        })
-        this.prGridOptions.columnDefs.forEach((column:any) => {
-            //highlight updated cells
-            return this.applyCellStyle(column,data, bkColour);
-        })
+    // applyCellHighlights(tableData: any){
+    //     let bkColour = this._backgroundColour;
+    //     let data:Array<any> = this.constructHighlightsObject(tableData);
+    //     this.puGridOptions.columnDefs.forEach((column:any) => {
+    //         //highlight updated cells
+    //         return this.applyCellStyle(column,data, bkColour);
+    //     })
+    //     this.ahGridOptions.columnDefs.forEach((column:any) => {
+    //         //highlight updated cells
+    //         return this.applyCellStyle(column,data, bkColour);
+    //     })
+    //     this.prGridOptions.columnDefs.forEach((column:any) => {
+    //         //highlight updated cells
+    //         return this.applyCellStyle(column,data, bkColour);
+    //     })
 
-        this.puGridOptions.api.setColumnDefs(this.puGridOptions.columnDefs);
-        this.ahGridOptions.api.setColumnDefs(this.ahGridOptions.columnDefs);
-        this.prGridOptions.api.setColumnDefs(this.prGridOptions.columnDefs);
-    }
+    //     this.puGridOptions.api.setColumnDefs(this.puGridOptions.columnDefs);
+    //     this.ahGridOptions.api.setColumnDefs(this.ahGridOptions.columnDefs);
+    //     this.prGridOptions.api.setColumnDefs(this.prGridOptions.columnDefs);
+    // }
 
-    applyTotalCellHighlights(tableData: any){
-        let bkColour = this._backgroundColour;
-        let data:Array<any> = this.constructHighlightsObject(tableData);
-        console.log(data);
-        console.log(this.prtGridOptions.columnDefs)
-        this.prtGridOptions.columnDefs.forEach((column:any) => {
-            //highlight updated cells
-            return this.applyCellStyle(column,data, bkColour);
-        })
-        this.prtGridOptions.api.setColumnDefs(this.prtGridOptions.columnDefs);
+    // applyTotalCellHighlights(tableData: any){
+    //     let bkColour = this._backgroundColour;
+    //     let data:Array<any> = this.constructHighlightsObject(tableData);
+    //     console.log(data);
+    //     console.log(this.prtGridOptions.columnDefs)
+    //     this.prtGridOptions.columnDefs.forEach((column:any) => {
+    //         //highlight updated cells
+    //         return this.applyCellStyle(column,data, bkColour);
+    //     })
+    //     this.prtGridOptions.api.setColumnDefs(this.prtGridOptions.columnDefs);
 
-    }
+    // }
 
-    applyCellStyle(column: any, data: any, bkColour: string){
-            column.cellStyle = function(params: any){
-                let fldName = params.colDef.field;
-                let rowID = params.data.ID;
-                console.log(rowID)
-                let highlightCell = false;
-                if (data.length > 0) {
+    // applyCellStyle(column: any, data: any, bkColour: string){
+    //         column.cellStyle = function(params: any){
+    //             let fldName = params.colDef.field;
+    //             let rowID = params.data.ID;
+    //             console.log(rowID)
+    //             let highlightCell = false;
+    //             if (data.length > 0) {
                     
-                    data.forEach(function(dataCell: any){
-                         if(dataCell.fieldName == fldName &&
-                            dataCell.ID == rowID) {
-                                highlightCell = true;
-                            }
-                    });
-                }
-                return (highlightCell? 
-                        {backgroundColor: bkColour}:
-                        {backgroundColor: '#ffff'})
+    //                 data.forEach(function(dataCell: any){
+    //                      if(dataCell.fieldName == fldName &&
+    //                         dataCell.ID == rowID) {
+    //                             highlightCell = true;
+    //                         }
+    //                 });
+    //             }
+    //             return (highlightCell? 
+    //                     {backgroundColor: bkColour}:
+    //                     {backgroundColor: '#ffff'})
 
-            }
-    }
+    //         }
+    // }
 
-    constructHighlightsObject(tableData:any){
-        let data:Array<any> = []
-        if (tableData.length > 0){
-            tableData.forEach((rowData:any)=> {
-                if (rowData.Highlights && 
-                    rowData.Highlights.length>0) {
-                         rowData.Highlights.forEach((highlight:any) => {
-                            data.push(highlight);
-                        })
+    // constructHighlightsObject(tableData:any){
+    //     let data:Array<any> = []
+    //     if (tableData.length > 0){
+    //         tableData.forEach((rowData:any)=> {
+    //             if (rowData.Highlights && 
+    //                 rowData.Highlights.length>0) {
+    //                      rowData.Highlights.forEach((highlight:any) => {
+    //                         data.push(highlight);
+    //                     })
 
-                    }
-            })   
-        }
-        return data
-    }
+    //                 }
+    //         })   
+    //     }
+    //     return data
+    // }
 
     resizeTables(noRows: number) {
-        this.puTableHeight = (noRows * 25) + 40;
-        this.ahTableHeight = (noRows * 25) + 40;
-        this.prTableHeight = (noRows * 25) + 40;
+        this.wdTableWidth = 1520
 
-        this.puTableWidth = 1800;
-        this.ahTableWidth = 1800;
-        this.prTableWidth = 2000;
+        this.puTableHeight = (noRows * 25) + 30;
+        this.ahTableHeight = (noRows * 25) + 30;
+        this.prTableHeight = (noRows * 25) + 30;
+
+        this.puTableWidth = 1620;
+        this.ahTableWidth = 1720;
+        this.prTableWidth = 1920;
 
         //Totals
 
-        this.prtTableWidth = 2100;
+        this.prtTableWidth = 1920;
 
     }
 
@@ -396,4 +442,22 @@ export class ResourceComponent implements OnInit, AfterViewInit {
             }
         }       
     }
+
+    // updateContext() {
+    //     let _resourceDataName = 'resourceData'
+    //     let _totalsDataName = 'totalsData'
+
+    //     console.log(JSON.parse(JSON.stringify(this.dataContext[_resourceDataName])))
+    //     this.puGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
+    //     this.puGridOptions.context.arrayName = _resourceDataName
+
+    //     this.prGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
+    //     this.prGridOptions.context.arrayName = _resourceDataName
+
+    //     this.ahGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
+    //     this.ahGridOptions.context.arrayName = _resourceDataName
+        
+    //     this.prtGridOptions.context.totalsData = JSON.parse(JSON.stringify(this.dataContext[_totalsDataName]))
+    //     this.prtGridOptions.context.arrayName = _totalsDataName
+    // }
 }

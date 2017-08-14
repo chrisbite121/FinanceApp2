@@ -1279,7 +1279,8 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
 
         let addItem$ = new Observable((observer:Observer<any>) => {
 
-            let clientContext
+            let clientContext, context, list, itemCreateInfo, listItem, itemId;
+
             try {
                 clientContext = new SP.ClientContext(this.appUrl);
             } catch (e) {
@@ -1289,8 +1290,6 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 return;
             }
             
-            let context; 
-
             if (contextType == this.utilsService.hostWeb) {
                 this.logService.log('contextType == this.utils.hostweb', this._info, true);
                 try {
@@ -1303,7 +1302,6 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 }
             
             } else if (contextType == this.utilsService.appWeb){
-                //this.logService.log('contextType = appWeb', this._info, true)
                 context = clientContext;
             } else {
                 this.logService.log('unable to determine context type: Create List failed', this._error, false)
@@ -1311,9 +1309,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 return;
             }
 
-            let list, itemCreateInfo, listItem, itemId
             try {
-                //this.logService.log('setting up itemCreationInformation object for function: addItem', this._info, true);
                 list = context.get_web().get_lists().getByTitle(listName);
 
                 itemCreateInfo = new SP.ListItemCreationInformation();
@@ -1326,11 +1322,10 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             }
             
             try {
-                //this.logService.log('defining list item for function: addItem', this._info, true);
-
                 itemValues.forEach(element => {
-                    if (element.fieldName === 'ItemId') {
+                    if (element.fieldName == 'ItemId') {
                         itemId = element.fieldValue
+                        console.error(itemId)
                     }
                     this.logService.log(`adding field to list ${listName} with values...`, this._info, true)
                     this.logService.log(String(element.fieldName) + ': ' + String(element.fieldValue), this._info, true);
@@ -1346,7 +1341,6 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
 
 
             try {
-                //this.logService.log('loading list item for function: addItem', this._info, true);
                 listItem.update();
                 clientContext.load(listItem);
             } catch (e) {
@@ -1356,19 +1350,17 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 return;
             }
             
-
-            //this.logService.log('executing JSOM query for function: addItem', this._info, true);
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
-                let newItemId = listItem.get_id();
+                let ID = listItem.get_id();
                 let resultMsg = `Item successfully created in List: ${listName}`
                 
                 let result:IAddItemResult = {
                     apiCall: this.utilsService.apiCallAddItem,
                     listName: listName,
-                    oldItemId: itemId,
-                    newItemId: newItemId,
+                    itemId: itemId,
+                    ID: ID,
                     result: true
                 }
                 observer.next(result);
@@ -1377,7 +1369,8 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: this.utilsService.apiCallAddItem,
                     reportResult: this.utilsService.successStatus,
                     listName: listName,
-                    newItemId: newItemId,
+                    itemId: itemId,
+                    ID: ID,
                     itemValues: itemValues
                 }
                 observer.next(reportResult)                
@@ -1395,8 +1388,8 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 let result:IAddItemResult = {
                     apiCall: this.utilsService.apiCallAddItem,
                     listName: listName,
-                    oldItemId: itemId,
-                    newItemId: null,
+                    itemId: itemId,
+                    ID: null,
                     result: false
                 }
                 observer.next(result);                
@@ -1526,9 +1519,9 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
         return addItem$
     }    
 
-    updateItem(listName: string, contextType: string, itemId: string, itemValues: Array<IItemPropertyModel>): Observable<any>{
+    updateItem(listName: string, contextType: string, ID: string, itemValues: Array<IItemPropertyModel>): Observable<any>{
         this.logService.log('Update Item funtion called', this._info, true);
-        this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, itemId parameter: ${itemId}, itemValues parameter: ${itemValues}`)
+        this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, ID parameter: ${ID}, itemValues parameter: ${itemValues}`)
 
         let updateItem$ = new Observable((observer:Observer<any>) => {
 
@@ -1567,7 +1560,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             let list, listItem;
             try {
                 list = context.get_web().get_lists().getByTitle(listName);
-                listItem = list.getItemById(itemId);
+                listItem = list.getItemById(ID);
                 itemValues.forEach((element, index, array) => {
                     listItem.set_item(element.fieldName, element.fieldValue);
                 })
@@ -1584,11 +1577,13 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
+                let ID = listItem.get_id();
+
                 let resultMsg = 'updated list item successfully';
                 let result:IUpdateItemResult = {
                     apiCall: this.utilsService.apiCallUpdateItem,
                     listName: listName,
-                    itemId: itemId,
+                    ID: ID,
                     result: true
                 }
                 observer.next(result);
@@ -1607,14 +1602,18 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             }
 
             function failure(sender, args) {
+                //let ID = listItem.get_id();
+
                 let apiResult = 'Failed to UPDATE ITEM: ' + args.get_message() + '  ' + args.get_stackTrace();
                 this.logService.log(apiResult, this._error, false);
+
                 let resultMsg = `Request failed to updateItem to list ${listName}`
                 this.logService.log(resultMsg, this._error, false);
+
                 let result:IUpdateItemResult = {
                     apiCall: this.utilsService.apiCallUpdateItem,
                     listName: listName,
-                    itemId: itemId,
+                    ID: null,
                     result: false
                 }
                 observer.next(result);
@@ -1945,9 +1944,9 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
         return getItems$ 
     }
 
-    deleteItem(listName: string, itemId: number, contextType: string):Observable<any>{
+    deleteItem(listName: string, ID: number, contextType: string):Observable<any>{
         this.logService.log('delete item funtion called', this._info, true);
-        this.logService.log(`listName parameter: ${listName}, itemId parameter: ${itemId}, contextType parameter: ${contextType}`)
+        this.logService.log(`listName parameter: ${listName}, itemId parameter: ${ID}, contextType parameter: ${contextType}`)
 
         let deleteItem$ = new Observable((observer:Observer<any>) => {
 
@@ -1986,7 +1985,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             let web, listItem;
             try {        
                 web = context.get_web();
-                listItem = web.get_lists().getByTitle(listName).getItemById(itemId);
+                listItem = web.get_lists().getByTitle(listName).getItemById(ID);
                 listItem.deleteObject();
             } catch (e) {
                 this.logService.log('error loading context information for function deleteItem', this._error, false);
@@ -1998,11 +1997,12 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
-                let resultMsg = `Item with item id ${itemId} deleted successfully on list: ${listName}`
+                let ID = listItem.get_id();
+                let resultMsg = `Item with item id ${ID} deleted successfully on list: ${listName}`
                 let result: IDeleteItemResult = {
                     apiCall: this.utilsService.apiCallDeleteItem,
                     listName: listName,
-                    itemId: String(itemId),
+                    ID: ID,
                     result: true
                 }
                 observer.next(result);
@@ -2011,7 +2011,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: this.utilsService.apiCallDeleteItem,
                     reportResult: this.utilsService.successStatus,
                     listName: listName,
-                    itemId: itemId.toString()
+                    ID: ID
                 }
                 observer.next(reportResult)
 
@@ -2022,11 +2022,11 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
 
 
             function failure(sender, args) {
-                let resultMsg = `Failed to delete item ${itemId} on list ${listName}` + args.get_message() + ' <br/> ' + args.get_stackTrace()
+                let resultMsg = `Failed to delete item ${ID} on list ${listName}` + args.get_message() + ' <br/> ' + args.get_stackTrace()
                 let result: IDeleteItemResult = {
                     apiCall: this.utilsService.apiCallDeleteItem,
                     listName: listName,
-                    itemId: String(itemId),
+                    ID: null,                                    
                     result: false
                 }                
                 observer.next(result);
@@ -2034,8 +2034,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 let reportResult = {
                     reportHeading: this.utilsService.apiCallDeleteItem,
                     reportResult: this.utilsService.failStatus,
-                    listName: listName,
-                    itemId: itemId.toString()
+                    listName: listName
                 }
                 observer.next(reportResult)
 

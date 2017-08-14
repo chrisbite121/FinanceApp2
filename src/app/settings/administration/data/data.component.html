@@ -24,6 +24,47 @@
   </div>
 </div>
 
+
+  <br/>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Resource List'" 
+                [id]="'resourceToggle'" 
+                [value]="includeResourceList"
+                (toggleEvent)='includeResourceSelect($event)'
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Material List'" 
+                [id]="'materialToggle'" 
+                [value]="includeMaterialList" 
+                (toggleEvent)='includeMaterialSelect($event)'
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Total List'" 
+                [id]="'totalToggle'" 
+                [value]="includeTotalList"
+                (toggleEvent)='includeTotalSelect($event)'
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+  <div class="ms-Grid-row">
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+      <of-toggle [innerlabel]="'Summary List'" 
+                [id]="'summaryToggle'" 
+                [value]="includeSummaryList"
+                (toggleEvent)='includeSummarySelect($event)'
+                [disable]='false'></of-toggle>
+    </div>
+  </div>
+
+
+
 <div *ngIf='logs.length' class="container-fluid tableContainer">
     <div *ngFor = "let log of logs">
         <api-logger>

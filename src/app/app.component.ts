@@ -30,6 +30,8 @@ export class AppComponent  {
                     this.getSharePointPermissions()
                 } else {
                     this.logService.log('Application is not in sharepoint mode', this.utilsService.infoStatus, false)
+                    // grid components need to know if init call complete before they attempt to load data
+                    this.settingsService.initAppComplete = true;
                 }
               }
 
@@ -70,6 +72,8 @@ export class AppComponent  {
                 },
                 () => {
                     this.logService.log('app initialisation calls complete')
+                    // grid components need to know if init call complete before they attempt to load data
+                    this.settingsService.initAppComplete = true;
                     console.log('app initialisation calls complete')
                 }
         )

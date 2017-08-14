@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -10,21 +10,26 @@ import { SettingsService } from '../../../service/settings.service'
 import { UtilsService } from '../../../service/utils.service'
 import { LogService } from '../../../service/log.service'
 
+import { Subscription } from 'rxjs/subscription'
+
 @Component({
     selector: 'gross-summary',
     templateUrl: './gross-summary.component.html',
     styleUrls: ['./gross-summary.component.css']
 })
-export class GrossSummaryComponent implements OnInit {
+export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public gsGridOptions:GridOptions
 
-    gsTableHeight: number = 60;
-    gsTableWidth: number = 1000;
+    gsTableHeight: number = 45;
+    gsTableWidth: number = 1400;
 
     public _focusCell:any
     public _focusTable:string
-    public _backgroundColour: string = '#99e7ff';
+    // public focusCellStream: Subscription
+
+    public summaryData: Subscription;
+    public gsSummaryContextStream: Subscription
 
     constructor(private tableService: TableService, 
                 private dataContextService: DataContextService,
@@ -32,52 +37,96 @@ export class GrossSummaryComponent implements OnInit {
                 private scriptService: ScriptService,
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
-                private logService: LogService) {
+                private logService: LogService,
+                private el: ElementRef) {
 
         //initialise gridoptions objects
         this.gsGridOptions = <GridOptions>{};
 
         //Summary Table gridoptions
         this.gsGridOptions.context = {}
+
         this.gsGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusTable = 'gsGridOptions'
+
             this._focusCell = this.gsGridOptions.api.getFocusedCell()
+            this._focusTable = 'gsGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber())
+
         }
         this.gsGridOptions.onGridReady = () => {
-            this.gsGridOptions.headerHeight = 0
+            this.gsGridOptions.api.setHeaderHeight(0)
         }
 
         this.gsGridOptions.singleClickEdit = true;
         this.gsGridOptions.enableColResize = true;
+        this.gsGridOptions.rowHeight = 40
     }
 
     ngOnInit(){
-        //ERROR WITH THIS APPROACH
-        //APP NEEDS TO FINISH INIT CALL BEFORE CALLING THIS CODE
+        this.tableService.getTable('GrossSummary').subscribe(table => {
+            this.gsGridOptions.columnDefs = table;
+        })
 
-        // this.tableService.getTable('GrossSummary').subscribe(table => {
-        //     this.gsGridOptions.columnDefs = table;
+        this.summaryData = this.dataContextService.getSummaryDataStream().subscribe(data => {
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            }
+
+            if(!this.gsGridOptions.rowData){
+                this.gsGridOptions.rowData = data;
+            } else if (this.gsGridOptions.api) {
+                this.gsGridOptions.api.setRowData(data)
+            }
+
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            // let focusedCellData = this.uiStateService.getFocusCellData()
+            // if(this[focusedCellData.gridOptions]) {
+            //     // console.error('setting editing cell')
+            //     // console.log(focusedCellData)
+            //     this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+            //     this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            // }
+        })
+
+        this.gsSummaryContextStream = this.dataContextService.getResourceContextStream().subscribe(data => {
+            let _summaryDataName = 'summaryData'    
+            if(typeof(data)=='object'){
+                if(this.gsGridOptions){
+                    this.gsGridOptions.context.summaryData = JSON.parse(JSON.stringify(this.dataContextService[_summaryDataName]))
+                    this.gsGridOptions.context.arrayName = _summaryDataName
+                }
+            }
+        })
+
+        // this.focusCellStream = this.uiStateService.getFocusCellDataStream().subscribe(data => {
+        //     if(this[data.gridOptions]){
+        //         console.log(data.rowIndex)
+        //         console.log(data.columnId)
+        //         console.log('setting gross summary focus cell')
+        //         this[data.gridOptions].api.setFocusedCell(data.rowIndex, data.columnId)
+        //         this[data.gridOptions].api.startEditingCell({colKey: data.columnId,rowIndex: data.rowIndex})
+        //     }
         // })
 
-        // this.dataContextService.getSummaryDataStream().subscribe(data => {
-        //     console.log(data);
+        if(this.settingsService.initAppComplete) {
+            this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
+                                        this.settingsService.year)
+                                            .subscribe(this.getSubscriber())
+        }
+    }
 
-        //     if(!this.gsGridOptions.rowData){
-        //         this.gsGridOptions.rowData = data;
-        //     } else if (this.gsGridOptions.api) {
-        //         this.gsGridOptions.api.setRowData(data)
-        //     }
+    ngAfterViewInit(){
+     
+    }
 
-        //     if(this.gsGridOptions.api) {
-        //         this.applySummaryCellHighlights(data);
-        //     }
-        //     this.setCellFocus();  
-        // })
-
-        // this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
-        //                             this.settingsService.year)
-        //                                 .subscribe(this.getSubscriber())
+    ngOnDestroy(){
+        this.summaryData.unsubscribe()
+        this.gsSummaryContextStream.unsubscribe()
+        // this.focusCellStream.unsubscribe()
     }
 
     getSubscriber() {
@@ -88,69 +137,23 @@ export class GrossSummaryComponent implements OnInit {
         }
      }
     
-    applySummaryCellHighlights(tableData: any) {
-        let bkColour = this._backgroundColour;
-        let data:Array<any> = this.constructHighlightsObject(tableData);
+    // setCellFocus(){
+    //     if (this._focusCell && 
+    //         this._focusCell.rowIndex >=0 &&
+    //         this._focusCell.column &&
+    //         this._focusCell.column.colId &&
+    //         this._focusTable &&
+    //         this[this._focusTable] &&
+    //         this[this._focusTable].api
+    //         ) {
+    //         try { //set focused column
+    //             this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
+    //             this[this._focusTable].api.tabToNextCell()
+    //         } catch (e) {
+    //             this.logService.log(`error tyring to set cell focus on focusTable: ${this._focusTable}` )
+    //         }
+    //     }       
+    // }
 
-        this.gsGridOptions.columnDefs.forEach((column:any) => {
-            //highlight updated cells
-            return this.applyCellStyle(column,data, bkColour);
-        })
-        this.gsGridOptions.api.setColumnDefs(this.gsGridOptions.columnDefs);        
-    }
-
-    applyCellStyle(column: any, data: any, bkColour: string){
-            column.cellStyle = function(params: any){
-                let fldName = params.colDef.field;
-                let rowId = params.data.ItemId;
-                let highlightCell = false;
-                if (data.length > 0) {
-                    
-                    data.forEach(function(dataCell: any){
-                         if(dataCell.fieldName == fldName &&
-                            dataCell.ItemId == rowId) {
-                                highlightCell = true;
-                            }
-                    });
-                }
-                return (highlightCell? 
-                        {backgroundColor: bkColour}:
-                        {backgroundColor: '#ffff'})
-            }
-    }
-
-    constructHighlightsObject(tableData:any){
-        let data:Array<any> = []
-        if (tableData.length > 0){
-            tableData.forEach((rowData:any)=> {
-                if (rowData.Highlights && 
-                    rowData.Highlights.length>0) {
-                         rowData.Highlights.forEach((highlight:any) => {
-                            data.push(highlight);
-                        })
-
-                    }
-            })   
-        }
-        return data
-    }
-    
-    setCellFocus(){
-        if (this._focusCell && 
-            this._focusCell.rowIndex >=0 &&
-            this._focusCell.column &&
-            this._focusCell.column.colId &&
-            this._focusTable &&
-            this[this._focusTable] &&
-            this[this._focusTable].api
-            ) {
-            try { //set focused column
-                this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-                this[this._focusTable].api.tabToNextCell()
-            } catch (e) {
-                this.logService.log(`error tyring to set cell focus on focusTable: ${this._focusTable}` )
-            }
-        }       
-    }
 
 }

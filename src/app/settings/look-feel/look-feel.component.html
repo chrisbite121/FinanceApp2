@@ -29,6 +29,16 @@
     </div>
   </div>
 
+  HIGHLIGHT FONT COLOUR NOT HOOKEDUP TO SETTINGS LIST
+  <div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        Highlight Font Colour
+     </div>
+    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <of-textfield [innerlabel]="'Highlight Font Colour'" [id]="'highlightfontcolour'" (textEntered)='highlightFontColourSet($event)' [defaultValue]="highlightFontColourValue"></of-textfield>
+    </div>
+  </div>  
+
   <div class="ms-Grid-row">
      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
         <of-button (buttonClicked)='saveUpdates($event)' 

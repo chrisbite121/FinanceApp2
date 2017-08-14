@@ -241,7 +241,8 @@ export class ListService {
             { Id: 10, Name: "Persist", Type: this._boolean, Required: this._false },
             { Id: 11, Name: "Verbose", Type: this._boolean, Required: this._false },
             { Id: 12, Name: "HeaderColour", Type: this._text, Required: this._false },
-            { Id: 13, Name: "HeaderFontColour", Type: this._text, Required: this._false }
+            { Id: 13, Name: "HeaderFontColour", Type: this._text, Required: this._false },
+            { Id: 14, Name: "HighlightFontColour", Type: this._text, Required: this._false }
         ]
 
         this.FinanceAppLogsData = [

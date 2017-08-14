@@ -154,22 +154,22 @@ export interface IItemPropertyModel {
 export interface IAddItemResult {
     apiCall: string,
     listName: string,
-    oldItemId: string,
-    newItemId: string,
+    itemId: string,
+    ID: string,
     result: boolean
 }
 
 export interface IUpdateItemResult {
     apiCall: string,
     listName: string,
-    itemId: string,
+    ID: string,
     result: boolean
 }
 
 export interface IDeleteItemResult {
     apiCall: string,
     listName: string,
-    itemId: string,
+    ID: any,
     result: boolean
 }
 

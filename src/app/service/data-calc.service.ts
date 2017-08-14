@@ -44,7 +44,7 @@ export class DataCalcService {
                         (row.PUDec * _workingdays.December)) *
                         row.PRDayRate
         }
-        return result
+        return this.mathRound(result)
     }
 
     ahTotalHours(row: IResourceModel): number{
@@ -63,7 +63,7 @@ export class DataCalcService {
                         Number(row.AHNov) +
                         Number(row.AHDec) 
 
-        return result
+        return this.mathRound(result)
     }
 
     prMonth(row: IResourceModel, monthLong: string): number{
@@ -90,13 +90,13 @@ export class DataCalcService {
             }
         }
 
-        return result;
+        return this.mathRound(result);
     }
 
     prYtdTotal(row: IResourceModel): number {
         let result = 0;
         result = (row.AHTotalHours/this._workingHoursInDay) * row.PRDayRate;
-        return result;
+        return this.mathRound(result);
     }
 
     prLbe(row:IResourceModel): number {
@@ -113,18 +113,18 @@ export class DataCalcService {
                     Number(row.PROct) +
                     Number(row.PRNov) +
                     Number(row.PRDec)
-        return result;
+        return this.mathRound(result);
     }
 
     prYtdVarianceToBudget(row: IResourceModel):number {
         let result = 0
         result = row.PRYtdTotal - row.PRBudget
-        return result
+        return this.mathRound(result)
     }
     prForecastVarianceToBudget(row: IResourceModel):number {
         let result = 0
         result = row.PRLbe - row.PRBudget
-        return result
+        return this.mathRound(result)
     }
 
     tsMonth(row: IResourceModel, monthLong: string): number {
@@ -142,7 +142,7 @@ export class DataCalcService {
             result = 0;
         }
 
-        return result;
+        return this.mathRound(result);
     }
 
     tsForecast(row: IResourceModel): number {
@@ -160,7 +160,7 @@ export class DataCalcService {
                     Number(row.TSNov) +
                     Number(row.TSDec)
 
-        return result
+        return this.mathRound(result)
     }
 
     atsYtdTotal(row:IResourceModel): number{
@@ -177,7 +177,7 @@ export class DataCalcService {
                     Number(row.ATSOct) +
                     Number(row.ATSNov) +
                     Number(row.ATSDec)
-        return result
+        return this.mathRound(result)
     }
 
     rtsMonth(row:IResourceModel, monthLong:string): number {
@@ -190,11 +190,11 @@ export class DataCalcService {
         result = Number(row['PU' + monthShort]) :
         result = ATSMonthValue
 
-        return result
+        return this.mathRound(result)
     }
 
     rtsYtdTotal(row:IResourceModel):number {
-        return row.ATSYtdTotal;
+        return this.mathRound(row.ATSYtdTotal);
     }
 
     rtsLbe(row:IResourceModel):number{
@@ -211,7 +211,7 @@ export class DataCalcService {
                     Number(row.RTSOct) +
                     Number(row.RTSNov) +
                     Number(row.RTSDec)
-        return result
+        return this.mathRound(result)
     }
 
     rtsYtdVarianceToBudget(row:IResourceModel): number {
@@ -236,7 +236,7 @@ export class DataCalcService {
                     Number(row.MatOct) +
                     Number(row.MatNov) +
                     Number(row.MatDec)
-        return result;
+        return this.mathRound(result);
     }
 
     matLbe(row): number {
@@ -259,7 +259,7 @@ export class DataCalcService {
                 result += Number(row[field])
             }
         })
-        return result;
+        return this.mathRound(result);
     }
 
     //MATERIALS TOTALS
@@ -270,7 +270,7 @@ export class DataCalcService {
                 result += Number(row[field])
             }
         })
-        return result;
+        return this.mathRound(result);
     }
 
 //SUM TOTALS
@@ -310,8 +310,49 @@ sumTotal(filteredYearData:ITotalModel, field:string):number{
     } else {
         console.error(`unable to find values for field ${field} - in totals object to run sum total function`)
     }
-    return result;
-}      
+    return this.mathRound(result);
+}
+
+sumSummaryField(filteredYearData:ITotalModel[], field:string):number{
+    let result = 0
+    filteredYearData.forEach((row:ITotalModel) => {
+            if (Number(row[field])){
+                result += Number(row[field])
+            }        
+    })
+    return this.mathRound(result)
+}
+
+difference(value1:number, value2:number) {
+    return value1 - value2
+}
+
+percentageVariance(value1: number, value2: number){
+    let result = 0
+    if (value2 == 0) {
+        value2 = 1
+    }
+
+    result = (value1/value2)*100
+
+    return Math.round(result)
+}
+
+ragValue(percentageValue: number) {
+    if (percentageValue >= 0) {
+        return 'Green'
+    } else if (percentageValue >= -10) {
+        return 'Amber'
+    } else if (percentageValue < -10) {
+        return 'Red'
+    } else {
+        return 'ERROR'
+    }
+}
+
+mathRound(num:number):number{
+ return Math.round(num * 100) / 100
+}
 
 
     getShortMonth(monthLong: string): string {

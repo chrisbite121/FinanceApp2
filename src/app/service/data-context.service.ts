@@ -41,6 +41,12 @@ export class DataContextService {
     private totalDataStream: Subject<any> = new Subject();
     private materialDataStream: Subject<any> = new Subject();
     private summaryDataStream: Subject<any> = new Subject();
+
+    private resourceContextStream: Subject<any> = new Subject();
+    private totalContextStream: Subject<any> = new Subject();
+    private materialContextStream: Subject<any> = new Subject();
+    private summaryContextStream: Subject<any> = new Subject();
+
     private _ResourceData:IResourceModel[]
     private _TotalData:ITotalModel[]
     private _MaterialData: IMatModel[]
@@ -97,6 +103,51 @@ export class DataContextService {
 
     }
 
+    getResourceDataStream(): Observable<any> {
+        let filteredResourceDataStream = this.resourceDataStream.asObservable().map((data, index) => {
+            return data.filter((row:any)=> row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
+        })
+        return filteredResourceDataStream
+    }
+
+    getTotalDataStream(): Observable<any> {
+        let filteredTotalDataStream = this.totalDataStream.asObservable().map((data, index) => {
+            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
+        })
+        return filteredTotalDataStream
+    }
+
+    getMaterialDataStream(): Observable<any> {
+        let filteredMaterialDataStream = this.materialDataStream.asObservable().map((data,index) => {
+            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
+        })
+        return filteredMaterialDataStream
+    }
+
+    getSummaryDataStream(): Observable<any> {
+        let filteredSummaryDataStream = this.summaryDataStream.asObservable().map((data,index) => {
+            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
+        })
+        return filteredSummaryDataStream
+    }
+
+    getResourceContextStream(): Observable<any> {
+        return this.resourceContextStream.asObservable()
+    }
+
+    getMaterialContextStream():Observable<any> {
+        return this.materialContextStream.asObservable()
+    }
+
+    getTotalContextStream():Observable<any> {
+        return this.totalContextStream.asObservable()
+    }
+
+    getSummaryContextStream():Observable<any> {
+        return this.summaryContextStream.asObservable()
+    }
+
+
 processListData(data:Array<Object>, listName: string):Observable<any> {
 
     this.logService.log(`Process List Data Function called for list: ${listName}`, this.utilsService.infoStatus, false);
@@ -132,8 +183,17 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                         Object.defineProperty(_item, 'ID', {
                             value: item['ID'],
                             writable: true
-                        }) 
+                        })
+                } else {
+                    this.logService.log(`processListData error: unable to update ID for item, cannot find property on list: ${listName}`, this.utilsService.errorStatus, false)
                 }
+
+                //process State value, this needs to be updated to inert as its an existing item
+                console.log(`updating state for item on list: ${listName}`)
+                Object.defineProperty(_item, 'State', {
+                    value: this.utilsService.inertState,
+                    writable: true
+                })
                 
                 // add item array to correct table
                 this.addDataToTable(listName, _item)
@@ -183,7 +243,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
         let _itemId = this.utilsService.generateItemId()
         switch (listName) {
             case this.utilsService.financeAppMaterialData:
-                _item = JSON.parse(JSON.stringify(newMaterialDataRow))
+                _item = JSON.parse(JSON.stringify(newMaterialRow))
                 _item['State'] = 'create'
                 _item['Highlights'] = [];
                 _item['ListName'] = listName;
@@ -193,7 +253,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 _item['ID'] = _itemId;
             break;
             case this.utilsService.financeAppResourceData:
-                _item = JSON.parse(JSON.stringify(newDataRow))
+                _item = JSON.parse(JSON.stringify(newResourceRow))
                 _item['State'] = 'create'
                 _item['Highlights'] = [];
                 _item['ListName'] = listName;
@@ -203,7 +263,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 _item['ID'] = _itemId;
             break;
             case this.utilsService.financeAppTotalsData:
-                _item = JSON.parse(JSON.stringify(newTotalDataRow))
+                _item = JSON.parse(JSON.stringify(newTotalRow))
                 _item['Placeholder1'] = 'TOTAL (Incl Resource Costs)'
                 _item['Placeholder4'] = 'Resource Totals'
                 _item['Placeholder5'] = 'Resource T&S Totals'
@@ -217,13 +277,29 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 _item['ID'] = _itemId;
             break
             case this.utilsService.financeAppSummaryData:
-                _item = JSON.parse(JSON.stringify(newSummaryDataRow))
+                _item = JSON.parse(JSON.stringify(newSummaryRow))
                 _item['State'] = 'create';
                 _item['ListName'] = listName;
                 _item['Year'] = this.settingsService.year;
                 _item['ItemId'] = _itemId;
                 //temporarily assign itemid as ID until object is saved
                 _item['ID'] = _itemId;
+                //fixed header columns
+                _item['CostTitle'] = 'Cost'
+                _item['BaselineCostHeader'] = 'Baseline Cost'
+                _item['LbeCostHeader'] = 'LBE Cost'
+                _item['YtdCostHeader'] = 'YTD - Cost'
+                _item['VarianceCostHeader'] = 'Variance'
+                _item['GrossTitle'] = 'Finance Benefit (Gross)'
+                _item['BaselineGrossHeader'] = 'Baseline Benefit'
+                _item['LbeGrossHeader'] = 'LBE Benefit'
+                _item['YtdGrossHeader'] = 'YTD - Benefit'
+                _item['VarianceGrossHeader'] = 'Variance'
+                _item['NetTitle'] = 'Financial Benefit (Net)'
+                _item['BaselineNetHeader'] = 'Baseline Benefit'
+                _item['LbeNetHeader'] = 'LBE Benefit'
+                _item['YtdNetHeader'] = 'YTD - Net Benefit'
+                _item['VarianceNetHeader'] = 'Variance'
             break;
             default:
                 this.logService.log(`process list data error: unable to determine listName ${listName}, reverting to blank object palceholder`, this.utilsService.errorStatus, false)
@@ -233,46 +309,151 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
         return _item
     }
 
-    CreateDummyDataItem(listName:string):Observable<any>{
-        let dummy$ = new Observable((observer:Observer<any>) => {
-            
+emitContextValues(listArray:Array<string>):Observable<any>{
+    let emit$ = new Observable((observer:Observer<any>) => {
+        if(Array.isArray(listArray)){
+        //emit values
+        listArray.forEach(listName => {
             try {
-                //no data found for for list, create placeholder data
-                //set base template of item and update internal field values
-                let _item = this.createPlaceholderObject(listName)
-
-                if (_item && typeof(_item) == 'object') {
-                    observer.next({
-                        functionCall: 'CreateDummyDataItem',
-                        result: true,
-                        listName: listName,
-                        item: _item
-                    })
-                } else {
-                    let _msg = `error creating placeholder data for listName ${listName} at function call: addDummyDataItem`
-                    this.logService.log(_msg, this.utilsService.errorStatus, false)
-                    observer.next({
-                        reportHeading: 'CreateDummyDataItem',
-                        reportResult: this.utilsService.errorStatus,
-                        message: _msg
-                    })
+                switch (listName) {
+                    case this.utilsService.financeAppResourceData:
+                        this.resourceContextStream.next(this._ResourceData);
+                    break;
+                    case this.utilsService.financeAppMaterialData:
+                        this.materialContextStream.next(this._MaterialData);
+                    break;
+                    case this.utilsService.financeAppTotalsData:
+                        this.totalContextStream.next(this._TotalData);
+                    break;
+                    case this.utilsService.financeAppSummaryData:
+                        this.summaryContextStream.next(this._SummaryData)
+                    break;
+                    default:
+                        let _msg = `emitContextValues Error: unable to determine which data set to refresh`
+                        this.logService.log(_msg, this.utilsService.errorStatus, false);
+                        observer.next({
+                            reportHeading: 'emitContextValues',
+                            reportResult: this.utilsService.failStatus,
+                            listName: listName,
+                            message: _msg
+                        })
+                        observer.complete()
+                    break;
                 }
             } catch (e) {
-                let _msg = `error creating placeholder data for listName ${listName} at function call: addDummyDataItem`
+                let _msg ='Error: error emitting context data stream'
                 this.logService.log(_msg, this.utilsService.errorStatus, false)
                 observer.next({
-                    reportHeading: 'CreateDummyDataItem',
-                    reportResult: this.utilsService.errorStatus,
-                    message: _msg
+                    reportHeading: 'emitContextValues',
+                    reportResult: this.utilsService.failStatus,
+                    listName: listName,
+                    message: _msg,
+                    error: e
                 })
+                observer.complete()
             }
+        })
+        
+
+
+        observer.next({
+            functionCall: 'emitContextValues',
+            listArray: listArray,
+            result: true
+        })
+        observer.next({
+            reportHeading: 'emitContextValues',
+            reportResult: this.utilsService.successStatus,
+            listArray: listArray,
+        })
+    } else {
+        observer.next({
+            reportheading: 'emitContextValues',
+            reportResult: this.utilsService.errorStatus,
+            message: 'error status: listArray is not of type Array'
+        })
+    }
+    observer.complete()
+    })
+        
+    return emit$
+
+}
+
+
+    // CreateDummyDataItem(listName:string):Observable<any>{
+    //     let dummy$ = new Observable((observer:Observer<any>) => {
+            
+    //         try {
+    //             //no data found for for list, create placeholder data
+    //             //set base template of item and update internal field values
+    //             let _item = this.createPlaceholderObject(listName)
+
+    //             if (_item && typeof(_item) == 'object') {
+    //                 observer.next({
+    //                     functionCall: 'CreateDummyDataItem',
+    //                     result: true,
+    //                     listName: listName,
+    //                     item: _item
+    //                 })
+    //             } else {
+    //                 let _msg = `error creating placeholder data for listName ${listName} at function call: addDummyDataItem`
+    //                 this.logService.log(_msg, this.utilsService.errorStatus, false)
+    //                 observer.next({
+    //                     reportHeading: 'CreateDummyDataItem',
+    //                     reportResult: this.utilsService.errorStatus,
+    //                     message: _msg
+    //                 })
+    //             }
+    //         } catch (e) {
+    //             let _msg = `error creating placeholder data for listName ${listName} at function call: addDummyDataItem`
+    //             this.logService.log(_msg, this.utilsService.errorStatus, false)
+    //             observer.next({
+    //                 reportHeading: 'CreateDummyDataItem',
+    //                 reportResult: this.utilsService.errorStatus,
+    //                 message: _msg
+    //             })
+    //         }
             
 
 
-            observer.complete()
-        })
-        return dummy$
-    }
+    //         observer.complete()
+    //     })
+    //     return dummy$
+    // }
+
+addDataItemToTable(listName:string, item):Observable<any> {
+    let add$ = new Observable((observer:Observer<any>) => {
+        try {
+            this.addDataToTable(listName, item)
+
+            observer.next({
+                functionCall: 'addDataItemToTable',
+                result: true,
+                listName: listName,
+                item: item
+            })
+
+            observer.next({
+                reportHeading: 'addDataItemToTable',
+                reportResult: this.utilsService.successStatus,
+                listName: listName,
+                item: item
+            })
+        } catch (e) {
+            observer.next({
+                reportHeading: 'addDataItemToTable',
+                reportResult: this.utilsService.errorStatus,
+                message: `error trying to call function addDataToTable from within function addDataItemToTable with listName: ${listName}`,
+                error: e
+            })
+        }
+
+        observer.complete()
+        
+    })
+    return add$
+}
 
     addDataToTable(listName:string, item:any){
         switch (listName) {
@@ -306,9 +487,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 } else {
                     console.error('ADDING SUMMARY DATA')
                     this._SummaryData = new Array();
-                    console.log(item)
                     this._SummaryData.push(item)
-                    console.log(this._SummaryData)
                 }
             break
             default:
@@ -377,11 +556,8 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
         let clear$ = new Observable((observer:Observer<any>) => {
             if(Array.isArray(listArray)) {
                 listArray.forEach(listName => {
-                    console.log('getting tableName')
                     let _tableName = this.getTableName(listName)
 
-                    console.log(`tableName for list ${listName}`)
-                    console.log(this[_tableName])
                     if(_tableName && Array.isArray(this[_tableName])) {
                         this[_tableName] = []
 
@@ -437,72 +613,42 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
         return this._SummaryData
     }
 
-    updateStateAfterApiCall(listName, itemId, apiCall):Observable<any> {
-        let updateState$ = new Observable((observer:Observer<any>) => {
-            let _listName:string = '' 
-            
-            switch(listName) {
-                case this.utilsService.financeAppResourceData:
-                    _listName = this._ResourceDataName
-                break;
-                case this.utilsService.financeAppMaterialData:
-                    _listName = this._MaterialDataName
-                break;
-                case this.utilsService.financeAppTotalsData:
-                    _listName = this._TotalDataName
-                break;
-            }
+    // updateStateAfterApiCall(listName, ID, apiCall):Observable<any> {
+    //     console.log('update state after api call function called')
+    //     console.log(listName, ID, apiCall)
+    //     let updateState$ = new Observable((observer:Observer<any>) => {
+    //         let _tableName:string = this.getTableName(listName) 
 
-            try {
-                let indexValue = this[_listName].findIndex(element => {
-                    return element['ItemId'] == itemId
-                })
+    //         try {
+    //             let indexValue = this.getItemIndex(ID, _tableName)
 
-                this[_listName][indexValue]['State'] = this.utilsService.inertState
+    //             this[_tableName][indexValue]['State'] = this.utilsService.inertState
 
-                observer.next({
-                    functionCall:'updateStateAfterApiCall',
-                    result: 'complete'
-                })
-            } catch (e) {
-                this.logService.log(`failed to update state of listitem in list ${listName} with id ${itemId}`, 
-                            this.utilsService.errorStatus, 
-                            false)
-            }
+    //             observer.next({
+    //                 functionCall:'updateStateAfterApiCall',
+    //                 result: 'complete'
+    //             })
 
-            observer.complete()
-            })
+    //             observer.next({
+    //                 reportHeading: 'updateStateAfterApiCall',
+    //                 reportResult: this.utilsService.successStatus,
+    //                 listName: listName,
+    //                 apiCall: apiCall,
+    //                 id: ID
+    //             })
+    //         } catch (e) {
+    //             this.logService.log(`failed to update state of listitem in list ${listName} with id ${ID}`, 
+    //                         this.utilsService.errorStatus, 
+    //                         false)
+    //         }
 
-            return updateState$
-    }
+    //         observer.complete()
+    //         })
 
-    getResourceDataStream(): Observable<any> {
-        let filteredResourceDataStream = this.resourceDataStream.asObservable().map((data, index) => {
-            return data.filter((row:any)=> row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
-        })
-        return filteredResourceDataStream
-    }
+    //         return updateState$
+    // }
 
-    getTotalDataStream(): Observable<any> {
-        let filteredTotalDataStream = this.totalDataStream.asObservable().map((data, index) => {
-            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
-        })
-        return filteredTotalDataStream
-    }
 
-    getMaterialDataStream(): Observable<any> {
-        let filteredMaterialDataStream = this.materialDataStream.asObservable().map((data,index) => {
-            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
-        })
-        return filteredMaterialDataStream
-    }
-
-    getSummaryDataStream(): Observable<any> {
-        let filteredSummaryDataStream = this.summaryDataStream.asObservable().map((data,index) => {
-            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
-        })
-        return filteredSummaryDataStream
-    }
 
     // getTab1Data(): void  {
     //     this.calcResourceValues()
@@ -593,7 +739,7 @@ extractProperties(event): Observable<any>{
 preProcessData(data): Observable<any>{
     let process$ = new Observable((observer:Observer<any>) => {
         if (!Number(data.newValue)) {
-            let _msg = `updateTable Error: Type error cannot convert newValue to number`
+            let _msg = `updateTable Error: Type error cannot convert newValue to number - ${data.newValue}`
             this.logService.log(_msg, this.utilsService.errorStatus, false);
             ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
             observer.next({
@@ -623,7 +769,7 @@ preProcessData(data): Observable<any>{
             observer.next({
                 reportHeading: 'preProcesData',
                 reportResult: this.utilsService.successStatus,
-                listName: data.listname,
+                listName: data.listName,
                 data: data
             })
         }
@@ -699,102 +845,125 @@ getIndexValue(listName:string, ID:number, data:any): Observable<any>{
                 observer.next({
                     reportHeading: 'getIndexValue',
                     reportResult: this.utilsService.failStatus,
-                    message: _msg
+                    message: _msg,
+                    error: e
                 })
                 observer.complete()
-            }       
-        switch(tableName) {
-            case this._ResourceDataName:
-                try {
-                    //find index Value in Data Object
-                    data['indexValue'] = this.findResourceIndex(ID);
-                } catch (e) {
-                    this.logService.log(e, this.utilsService.errorStatus, false);
-                    ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
-                    let _msg = `updateTable Error: unable to determine the ItemId of the affected object, update table failed for tableName: ${tableName}`
-                    this.logService.log(_msg, this.utilsService.errorStatus, false);
-                    observer.next({
-                        reportHeading: 'getIndexValue',
-                        reportResult: this.utilsService.errorStatus,
-                        message: _msg
-                    })
-                    observer.complete()
-                }                    
-            break;
-            case this._MaterialDataName:
-                try {
-                    //find index Value in Data Object
-                    data['indexValue'] = this.findMaterialIndex(ID);
-                } catch (e) {
-                    this.logService.log(e, this.utilsService.errorStatus, false);
-                    ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
-                    let _msg = `updateTable Error: unable to determine the ID of the affected object, update table failed for tableName: ${tableName}`
-                    this.logService.log(_msg, this.utilsService.errorStatus, false);
-                    observer.next({
-                        reportHeading: 'getIndexValue',
-                        reportResult: this.utilsService.errorStatus,
-                        message: _msg
-                    })
-                    observer.complete()
-                }
-            break;
-            case this._SummaryDataName:
-                try {
-                    //find index Value in Data Object
-                    data['indexValue'] = this.findSummaryIndex(ID);
-                } catch (e) {
-                    this.logService.log(e, this.utilsService.errorStatus, false);
-                    ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
-                    let _msg = `updateTable Error: unable to determine the ID of the affected object, update table failed for tableName: ${tableName}`
-                    this.logService.log(_msg, this.utilsService.errorStatus, false);
-                    observer.next({
-                        reportHeading: 'getIndexValue',
-                        reportResult: this.utilsService.errorStatus,
-                        message: _msg
-                    })
-                    observer.complete()
-                }
-            break;
-            case this._TotalDataName:
-                try {
-                    if(data.ID) {
-                        //find index Value in Data Object
-                        data['indexValue'] = this.findTotalsIndex(data.ID);
-                    } else {
-                        let _msg = `error unable to locate ID value from data object, functionCall: getIndexValue, tableName: ${tableName}, Year Value: ${data.year}`
-                        this.logService.log(_msg, this.utilsService.errorStatus, false)
-                        observer.next({
-                            reportHeading: 'getIndexValue',
-                            reportValue: this.utilsService.errorStatus,
-                            message: _msg
-                        })
-                        observer.complete()
-                    }
-                    
-                } catch (e) {
-                    this.logService.log(e, this.utilsService.errorStatus, false);
-                    let _msg = `updateTable Error: unable to determine the ID of the affected object, update table failed for tableName: ${tableName}`
-                    this.logService.log(_msg, this.utilsService.errorStatus, false);
-                    observer.next({
-                        reportHeading: 'getIndexValue',
-                        reportResult: this.utilsService.errorStatus,
-                        message: _msg
-                    })
-                    observer.complete()
-                }
-            break;
-            default:
-                let _msg = `unable to locate listName to use with tableName: ${tableName}`
-                observer.next({
-                        reportHeading: 'getIndexValue',
-                        reportResult: this.utilsService.errorStatus,
-                        message: _msg
-                })
-                this.logService.log(_msg, this.utilsService.errorStatus, false)
-                observer.complete()
-            break;
-        }
+            }
+            let indexValue
+            try {
 
+                 indexValue = this.getItemIndex(ID, tableName);
+                 data['indexValue'] = indexValue
+            } catch (e){
+                let _msg = `error getting itemIndex from listName: ${listName} and tableName: ${tableName} in function call getIndexValue`
+                this.logService.log(_msg, this.utilsService.errorStatus, false)
+                this.logService.log(e, this.utilsService.errorStatus, false)
+                observer.next({
+                    reportHeading: 'getIndexValue',
+                    reportResult: this.utilsService.failStatus,
+                    message: _msg,
+                    error: e
+                })
+                observer.complete()
+            }                
+
+            
+        // switch(tableName) {
+        //     case this._ResourceDataName:
+        //         try {
+        //             //find index Value in Data Object
+        //             // data['indexValue'] = this.findResourceIndex(ID);
+        //             data['indexValue'] = this.getItemIndex(ID, this._ResourceDataName);
+        //         } catch (e) {
+        //             this.logService.log(e, this.utilsService.errorStatus, false);
+        //             ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+        //             let _msg = `updateTable Error: unable to determine the ItemId of the affected object, update table failed for tableName: ${tableName}`
+        //             this.logService.log(_msg, this.utilsService.errorStatus, false);
+        //             observer.next({
+        //                 reportHeading: 'getIndexValue',
+        //                 reportResult: this.utilsService.errorStatus,
+        //                 message: _msg
+        //             })
+        //             observer.complete()
+        //         }                    
+        //     break;
+        //     case this._MaterialDataName:
+        //         try {
+        //             //find index Value in Data Object
+        //             // data['indexValue'] = this.findMaterialIndex(ID);
+        //             data['indexValue'] = this.getItemIndex(ID, this._MaterialDataName);
+        //         } catch (e) {
+        //             this.logService.log(e, this.utilsService.errorStatus, false);
+        //             ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+        //             let _msg = `updateTable Error: unable to determine the ID of the affected object, update table failed for tableName: ${tableName}`
+        //             this.logService.log(_msg, this.utilsService.errorStatus, false);
+        //             observer.next({
+        //                 reportHeading: 'getIndexValue',
+        //                 reportResult: this.utilsService.errorStatus,
+        //                 message: _msg
+        //             })
+        //             observer.complete()
+        //         }
+        //     break;
+        //     case this._SummaryDataName:
+        //         try {
+        //             //find index Value in Data Object
+        //             // data['indexValue'] = this.findSummaryIndex(ID);
+        //             data['indexValue'] = this.getItemIndex(ID, this._SummaryDataName);
+        //         } catch (e) {
+        //             this.logService.log(e, this.utilsService.errorStatus, false);
+        //             ///UPDATE UI STATE SERVICE TO NOTIFIY OF ERROR
+        //             let _msg = `updateTable Error: unable to determine the ID of the affected object, update table failed for tableName: ${tableName}`
+        //             this.logService.log(_msg, this.utilsService.errorStatus, false);
+        //             observer.next({
+        //                 reportHeading: 'getIndexValue',
+        //                 reportResult: this.utilsService.errorStatus,
+        //                 message: _msg
+        //             })
+        //             observer.complete()
+        //         }
+        //     break;
+        //     case this._TotalDataName:
+        //         try {
+        //             if(data.ID) {
+        //                 //find index Value in Data Object
+        //                 // data['indexValue'] = this.findTotalsIndex(data.ID);
+        //                 data['indexValue'] = this.getItemIndex(data.ID, this._TotalDataName);
+        //             } else {
+        //                 let _msg = `error unable to locate ID value from data object, functionCall: getIndexValue, tableName: ${tableName}, Year Value: ${data.year}`
+        //                 this.logService.log(_msg, this.utilsService.errorStatus, false)
+        //                 observer.next({
+        //                     reportHeading: 'getIndexValue',
+        //                     reportValue: this.utilsService.errorStatus,
+        //                     message: _msg
+        //                 })
+        //                 observer.complete()
+        //             }
+                    
+        //         } catch (e) {
+        //             this.logService.log(e, this.utilsService.errorStatus, false);
+        //             let _msg = `updateTable Error: unable to determine the ID of the affected object, update table failed for tableName: ${tableName}`
+        //             this.logService.log(_msg, this.utilsService.errorStatus, false);
+        //             observer.next({
+        //                 reportHeading: 'getIndexValue',
+        //                 reportResult: this.utilsService.errorStatus,
+        //                 message: _msg
+        //             })
+        //             observer.complete()
+        //         }
+        //     break;
+        //     default:
+        //         let _msg = `unable to locate listName to use with tableName: ${tableName}`
+        //         observer.next({
+        //                 reportHeading: 'getIndexValue',
+        //                 reportResult: this.utilsService.errorStatus,
+        //                 message: _msg
+        //         })
+        //         this.logService.log(_msg, this.utilsService.errorStatus, false)
+        //         observer.complete()
+        //     break;
+        // }
         if (!data.hasOwnProperty('indexValue') || data.indexValue < 0) {
             let _msg = `updateTable Error: can't find indexValue`
             this.logService.log(_msg, this.utilsService.errorStatus, false);
@@ -808,7 +977,9 @@ getIndexValue(listName:string, ID:number, data:any): Observable<any>{
                 functionCall: 'getIndexValue',
                 result: true,
                 data: data,
-                listName: listName
+                listName: listName,
+                indexValue: indexValue,
+                tableName: tableName
             })
 
             observer.next({
@@ -843,8 +1014,8 @@ UTUpdateData(data):Observable<any>{
                     })
 
                     observer.next({
-                        functionCall: 'UTUpdateData',
-                        result: this.utilsService.successStatus,
+                        reportHeading: 'UTUpdateData',
+                        reportResult: this.utilsService.successStatus,
                         listName: data.listName
                     })
                 } catch (e) {
@@ -866,30 +1037,49 @@ UTUpdateData(data):Observable<any>{
 }
 
 updateStateValue(indexValue:number, stateValue:string, tableName:string, data:any):Observable<any>{
+    console.log('updateStateValue function called')
+    console.log(indexValue, stateValue, tableName, data)
     let state$ = new Observable((observer:Observer<any>) => {
         try {
             //SHOULD BE IN SEPERATE FUNCITON
-            this.updateState(indexValue, stateValue, data.tableName);  
+            if(this[tableName] &&
+                Array.isArray(this[tableName]) &&
+                this[tableName][indexValue] &&
+                this[tableName][indexValue]['State']) {
 
-            observer.next({
-                functionCall: 'updateStateValue',
-                result: true,
-                data: data
-            })
+                    this[tableName][indexValue]['State'] = stateValue
 
-            observer.next({
-                reportHeading: 'updateStateValue',
-                reportResult: this.utilsService.successStatus,
-                listName: data.listName
-            })
+                    observer.next({
+                        functionCall: 'updateStateValue',
+                        result: true,
+                        data: data
+                    })
+
+                    observer.next({
+                        reportHeading: 'updateStateValue',
+                        reportResult: this.utilsService.successStatus,
+                        listName: data.listName,
+                        itemIndex: indexValue
+                    })
+                } else {
+                    observer.next({
+                        reportHeading: 'updateStateValue',
+                        reportResult: this.utilsService.failStatus,
+                        message: `failed to located item and state property to update`,
+                        indexValue: indexValue,
+                        stateValue: stateValue,
+                        tableName: tableName,
+                        data: data
+                    })
+                }
         } catch (e) {
-            let _msg = `error updating state for ${data.tableName} with indexValue ${data.indexValue}`
+            let _msg = `error updating state for ${tableName} with indexValue ${indexValue}`
 
             this.logService.log(_msg, this.utilsService.errorStatus, false)
             observer.next({
                 reportHeading: 'updateStateValue',
                 reportResult: this.utilsService.errorStatus,
-                msg: _msg,
+                message: _msg,
                 error: e
             })
         }   
@@ -906,24 +1096,33 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
             switch (listName) {
                 case this.utilsService.financeAppResourceData:
                     this.calcResourceValues();
-
+                    this.calcTotalValues();
+                    this.calcSummaryValues();
                 break;
                 case this.utilsService.financeAppMaterialData:
                     this.calcMaterialValues();
-            
+                    this.calcTotalValues();
+                    this.calcSummaryValues();
+                break;
+                case this.utilsService.financeAppTotalsData:
+                    this.calcTotalValues();
+                    this.calcSummaryValues();
+                break;
+                case this.utilsService.financeAppSummaryData:
+                    this.calcSummaryValues();
                 break;
                 default:
                     this.logService.log(`UpdateTable Error: unable to determine which data set to refresh`, this.utilsService.errorStatus, false);
                     observer.next({
-                        functionCall: 'processCalculatedFields',
-                        result: this.utilsService.failStatus,
+                        reportHeading: 'processCalculatedFields',
+                        reportResult: this.utilsService.failStatus,
+                        listName: listName,
                         message: `failed to run process calculcated fields`
                     })                    
                     observer.complete()
                 break;
             }
-
-            this.calcTotalValues();
+            
             observer.next({
                 functionCall: 'processCalculatedFields',
                 result: true,
@@ -933,6 +1132,7 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
             observer.next({
                 reportHeading: 'processCalculatedFields',
                 reportResult: this.utilsService.successStatus,
+                listName: listName,
                 data: data? data: null
             })
 
@@ -941,6 +1141,8 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
             observer.next({
                 reportHeading: 'processCalculatedFields',
                 reportResult: this.utilsService.failStatus,
+                listName: listName,
+                error: e,
                 message: `failed to run process calculcated fields`
             })
         }
@@ -967,6 +1169,7 @@ emitValues(listArray:Array<string>): Observable<any>{
                     break;
                     case this.utilsService.financeAppTotalsData:
                         this.totalDataStream.next(this._TotalData);
+                    break;
                     case this.utilsService.financeAppSummaryData:
                         this.summaryDataStream.next(this._SummaryData)
                     break;
@@ -1021,15 +1224,87 @@ emitValues(listArray:Array<string>): Observable<any>{
     return emit$
 
 }
+//(data['itemId'], data['ID'], data['listName'], this.dataContextService.getTableName(data['listName'])
+updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string):Observable<any>{
+    let updateId$ = new Observable((observer:any) => {
+        if (this[tableName] &&
+            Array.isArray(this[tableName])) {
+                let _index = this[tableName].findIndex(element => {
+                    return +element.ID == +itemId
+                })
+
+                if (_index < 0) {
+                    observer.next({
+                        reportHeading: 'updateItemIdAfterAdd',
+                        reportResult: this.utilsService.errorStatus,
+                        message: `failed to find index: ${_index} for item with itemId: ${itemId} on table: ${tableName} and list: ${listName}`
+                    })
+                    observer.complete()
+                }
+
+                if(this[tableName][_index]) {
+                    this[tableName][_index]['ID'] = ID
+                } else {
+                    observer.next({
+                        reportHeading: 'updateItemIdAfterAdd',
+                        reportResult: this.utilsService.errorStatus,
+                        message: `failed to find item with index: ${_index} for item with itemId: ${itemId} on table: ${tableName} and list: ${listName}`
+                    })
+                    observer.complete()
+                }
+        } else {
+            observer.next({
+                reportHeading: 'updateItemIdAfterAdd',
+                reportResult: this.utilsService.errorStatus,
+                message: `failed to find table with table: ${tableName} and list: ${listName} for item with itemId ${itemId} and ID ${ID}`
+            })
+            observer.complete()            
+        }
+
+        observer.next({
+            functionCall: 'updateItemIdAfterAdd',
+            result: true,
+            itemId: itemId,
+            ID: ID,
+            listName: listName,
+            tableName: tableName,
+            apiCall: this.utilsService.apiCallAddField
+        })
+
+        observer.next({
+            reportHeading: 'updateItemIdAfterAdd',
+            reportResult: this.utilsService.successStatus,
+            listName: listName,
+            ID: ID
+        })
+        observer.complete()
+    })
+
+    return updateId$
+}
 
 
 
 ////////////
-    addDataRow(listName: string):Observable<any>{
+    createDataItem(listName: string):Observable<any>{
         let add$ = new Observable((observer:Observer<any>) => {
-            let tableName:string
             try {
-                tableName = this.getTableName(listName);
+                let _item = this.createPlaceholderObject(listName)
+
+                observer.next({
+                    functionCall: 'addDataRow',
+                    result: true,
+                    listName: listName,
+                    item: _item
+                })
+
+                observer.next({
+                    reportHeading: 'addDataRow',
+                    result: this.utilsService.successStatus,
+                    listName: listName,
+                    item:_item
+                })
+            
             } catch(e) {
                 let _msg = `error getting tableName from listName ${listName} in function call addDatarow`
                 this.logService.log(_msg, this.utilsService.errorStatus, false)
@@ -1041,46 +1316,46 @@ emitValues(listArray:Array<string>): Observable<any>{
                 })
                 observer.complete()
             }
-            switch(tableName) {
-                case this._ResourceDataName:
-                    this.addResourceRow()
-                    observer.next({
-                        functionCall: 'addDataRow',
-                        result: true,
-                        listName: listName,
-                        tableName: tableName
-                    })
-                break;
-                case this._MaterialDataName:
-                    this.addMaterialRow()
-                    observer.next({
-                        functionCall: 'addDataRow',
-                        result: true,
-                        listName: listName,
-                        tableName: tableName
-                    })
-                break;
-                case this._SummaryDataName:
-                    this.addSummaryRow()
-                    observer.next({
-                        runctionCall: 'addDataRow',
-                        result: true,
-                        listName: listName,
-                        tableName: tableName
-                    })
-                default:
-                    let _msg = `unable to determine data table to update with tableName: ${tableName}`
+            // switch(tableName) {
+            //     case this._ResourceDataName:
+            //         this.addResourceRow()
+            //         observer.next({
+            //             functionCall: 'addDataRow',
+            //             result: true,
+            //             listName: listName,
+            //             tableName: tableName
+            //         })
+            //     break;
+            //     case this._MaterialDataName:
+            //         this.addMaterialRow()
+            //         observer.next({
+            //             functionCall: 'addDataRow',
+            //             result: true,
+            //             listName: listName,
+            //             tableName: tableName
+            //         })
+            //     break;
+            //     case this._SummaryDataName:
+            //         this.addSummaryRow()
+            //         observer.next({
+            //             runctionCall: 'addDataRow',
+            //             result: true,
+            //             listName: listName,
+            //             tableName: tableName
+            //         })
+            //     default:
+            //         let _msg = `unable to determine data table to update with tableName: ${tableName}`
 
-                    this.logService.log(_msg, this.utilsService.errorStatus, false)
-                    observer.next({
-                        functionCall: 'addDataRow',
-                        result: false,
-                        message: _msg,
-                        listName: listName,
-                        tableName: tableName
-                    })
-                break
-            }
+            //         this.logService.log(_msg, this.utilsService.errorStatus, false)
+            //         observer.next({
+            //             functionCall: 'addDataRow',
+            //             result: false,
+            //             message: _msg,
+            //             listName: listName,
+            //             tableName: tableName
+            //         })
+            //     break
+            // }
         })
         return add$
     }
@@ -1115,41 +1390,41 @@ emitValues(listArray:Array<string>): Observable<any>{
     //     return delete$
     // }
 
-    addResourceRow(){
-        let _year:number = this.settingsService.year;
-        let _Id:number = this._ResourceData.length + 1;
-        let _newRow:IResourceModel = JSON.parse(JSON.stringify(newResourceRow));
-        _newRow.Year = _year
-        _newRow.ItemId = _Id
+    // addResourceRow(){
+    //     let _year:number = this.settingsService.year;
+    //     let _Id:number = this._ResourceData.length + 1;
+    //     let _newRow:IResourceModel = JSON.parse(JSON.stringify(newResourceRow));
+    //     _newRow.Year = _year
+    //     _newRow.ItemId = _Id
 
-        this._ResourceData.push(_newRow)
+    //     this._ResourceData.push(_newRow)
 
-        return
-    }
+    //     return
+    // }
 
-    addMaterialRow() {
-        let _year: number = this.settingsService.year;
-        let _Id: number = this._MaterialData.length + 1;
-        let _newRow:IMatModel = JSON.parse(JSON.stringify(newMaterialRow));
-        _newRow.Year = _year;
-        _newRow.ItemId = _Id;
+    // addMaterialRow() {
+    //     let _year: number = this.settingsService.year;
+    //     let _Id: number = this._MaterialData.length + 1;
+    //     let _newRow:IMatModel = JSON.parse(JSON.stringify(newMaterialRow));
+    //     _newRow.Year = _year;
+    //     _newRow.ItemId = _Id;
 
-        this._MaterialData.push(_newRow)
+    //     this._MaterialData.push(_newRow)
 
-        return
-    }
+    //     return
+    // }
 
-    addSummaryRow() {
-        let _year: number = this.settingsService.year;
-        let _Id: number = this._SummaryData.length + 1;
-        let _newRow:ISummaryModel = JSON.parse(JSON.stringify(newSummaryRow));
-        _newRow.Year = _year;
-        _newRow.ItemId = _Id;
+    // addSummaryRow() {
+    //     let _year: number = this.settingsService.year;
+    //     let _Id: number = this._SummaryData.length + 1;
+    //     let _newRow:ISummaryModel = JSON.parse(JSON.stringify(newSummaryRow));
+    //     _newRow.Year = _year;
+    //     _newRow.ItemId = _Id;
 
-        this._SummaryData.push(_newRow)
+    //     this._SummaryData.push(_newRow)
 
-        return        
-    }
+    //     return        
+    // }
 
 
 
@@ -1189,41 +1464,50 @@ emitValues(listArray:Array<string>): Observable<any>{
     //     // this.totalDataStream.next(this._TotalData)
     // }
 
-
-    findResourceIndex(ID: number) {
-       if(Array.isArray(this._ResourceData) && this._ResourceData) {
-            return this._ResourceData.findIndex((element:any):any => {
-                                return element.ID == ID
-                            })
-       } else {
-           return -1
-       }
-    }
-
-    findMaterialIndex(ID: number) {
-        if(Array.isArray(this._MaterialData) && this._MaterialData) {
-            return this._MaterialData.findIndex((element:any):any => {
-                                return element.ID == ID
-                            })
+    getItemIndex(ID: number, tableName:string){
+        if(Array.isArray(this[tableName]) && this[tableName]) {
+            return this[tableName].findIndex((element:any):any => {
+                return element.ID == ID
+            })
         } else {
             return -1
         }
     }
 
-    findTotalsIndex(ID: number) {
-        //what if this row does not exist?
-        if (Array.isArray(this._TotalData) && this._TotalData) {
-            return this._TotalData.findIndex((element:any):any => {
-                    return element.ID == ID
-                });
-        } else {
-            return -1
-        }
-    }
+    // findResourceIndex(ID: number) {
+    //    if(Array.isArray(this._ResourceData) && this._ResourceData) {
+    //         return this._ResourceData.findIndex((element:any):any => {
+    //                             return element.ID == ID
+    //                         })
+    //    } else {
+    //        return -1
+    //    }
+    // }
 
-    findSummaryIndex(objectId){
+    // findMaterialIndex(ID: number) {
+    //     if(Array.isArray(this._MaterialData) && this._MaterialData) {
+    //         return this._MaterialData.findIndex((element:any):any => {
+    //                             return element.ID == ID
+    //                         })
+    //     } else {
+    //         return -1
+    //     }
+    // }
 
-    }    
+    // findTotalsIndex(ID: number) {
+    //     //what if this row does not exist?
+    //     if (Array.isArray(this._TotalData) && this._TotalData) {
+    //         return this._TotalData.findIndex((element:any):any => {
+    //                 return element.ID == ID
+    //             });
+    //     } else {
+    //         return -1
+    //     }
+    // }
+
+    // findSummaryIndex(objectId){
+
+    // }    
 
     calcResourceValues(){
 
@@ -1247,7 +1531,8 @@ emitValues(listArray:Array<string>): Observable<any>{
         } else {
             //process calculated fields
             filteredResourceYearData.forEach((rowItem, index, array) => {
-                let indexValue = this.findResourceIndex(rowItem.ID);
+                // let indexValue = this.findResourceIndex(rowItem.ID);
+                let indexValue = this.getItemIndex(rowItem.ID, this._ResourceDataName);
                 //PUForecast
                 let updatedPUForecast = this.dataCalcService.puForecast(rowItem);
                 this.checkCalcValue2(rowItem, 'PUForecast',updatedPUForecast, indexValue);
@@ -1426,7 +1711,8 @@ emitValues(listArray:Array<string>): Observable<any>{
                 let indexValue
 
                 if (rowItem.hasOwnProperty('ID')) {
-                    indexValue = this.findMaterialIndex(rowItem.ID);
+                    // indexValue = this.findMaterialIndex(rowItem.ID);
+                    indexValue = this.getItemIndex(rowItem.ID, this._MaterialDataName);
                 } else {
                     this.logService.log(`cannot locate ID property in Material 
                                         list row item, unable to process Material data`, this.utilsService.errorStatus, false)
@@ -1500,7 +1786,8 @@ emitValues(listArray:Array<string>): Observable<any>{
         
         
         ID = filteredTotalYearData[0].ID
-        indexValue = this.findTotalsIndex(ID);
+        // indexValue = this.findTotalsIndex(ID);
+        indexValue = this.getItemIndex(ID, this._TotalDataName);
 
         if (indexValue < 0) {
             this.logService.log(`cannot find cached totals data for year ${this.settingsService.year} at function calcTotalValues`, this.utilsService.errorStatus, false)
@@ -1605,28 +1892,144 @@ emitValues(listArray:Array<string>): Observable<any>{
     }
 
     calcSummaryValues(){
+        let indexValue, ID;
+        // let grossSummaryArray: Array<string>
+        // let costSummaryArray: Array<string>
+        // let netSummaryArray: Array<string>
+
+        this.resetHighlights(this._SummaryDataName)
+
+        indexValue = this._SummaryData.findIndex((row:ISummaryModel) => {
+            return row.Year == this.settingsService.year
+        })
+
+        if (indexValue < 0 ) {
+            this.logService.log(`error unable to complete calcSummaryValues, unable to find summary row for year ${this.settingsService.year}`, this.utilsService.errorStatus, false)
+            return
+        }
+
+        if (this._SummaryData[indexValue] &&
+            this._SummaryData[indexValue]['ID']) {
+                ID = this._SummaryData[indexValue]['ID']
+        } else {
+                this.logService.log(`error unable to complete calcSummaryValues, unable to find ID value for row item with index ${indexValue}`, this.utilsService.errorStatus, false)
+                return
+        }
+
+        // costSummaryArray = [
+        //     'CostLbe',
+        //     'CostYtd',
+        //     'CostVariance',
+        //     'CostVairancePercentage',
+        //     'CostRag'
+        // ]
+
+        // grossSummaryArray = [
+        //     'GrossBenefitVariance',
+        //     'GrossBenefitVariancePercentage',
+        //     'GrossRag'
+        // ]
+
+        // netSummaryArray = [
+        //     'NetBenefitBaseline',
+        //     'LbeNetHeader',
+        //     'NetBenefitYtd',
+        //     'NetBenefitVariance',
+        //     'NetBenefitVariancePercentage',
+        //     'NetRag'
+        // ]
+
+        //Cost LBE
+        let costLbeFieldName = 'CostLbe'
+        let calculatedCostLbeValue = this.dataCalcService.sumSummaryField(this._TotalData, 'TLbe')
+        this.checkCalcValue(ID, costLbeFieldName, calculatedCostLbeValue, indexValue, this._SummaryDataName);
+
+        // Cost Ytd
+        let costYtdFieldName = 'CostYtd'
+        let calculatedCostYtdValue = this.dataCalcService.sumSummaryField(this._TotalData, 'TYtdTotal')
+        this.checkCalcValue(ID, costYtdFieldName, calculatedCostYtdValue, indexValue, this._SummaryDataName);
+
+        // Cost Variance
+        let costVarianceFieldName = 'CostVariance'
+        let calculatedCostVarianceValue = this.dataCalcService.difference(+(this._SummaryData[indexValue]['CostBaseline']), +(this._SummaryData[indexValue]['CostLbe']))
+        this.checkCalcValue(ID, costVarianceFieldName, calculatedCostVarianceValue, indexValue, this._SummaryDataName)
+
+        // Cost Variance Percentage
+        let costVariancePercentageName = 'CostVairancePercentage'
+        let calculatedCostVariancePercentageValue =this.dataCalcService.percentageVariance(calculatedCostVarianceValue, +this._SummaryData[indexValue]['CostBaseline'])
+        this.checkCalcValue(ID, costVariancePercentageName , calculatedCostVariancePercentageValue, indexValue, this._SummaryDataName)
+
+        // CostRag
+        let costRagName = 'CostRag'
+        let calculatedCostRagValue = this.dataCalcService.ragValue(calculatedCostVariancePercentageValue)
+        this.checkCalcValue(ID, costRagName, calculatedCostRagValue, indexValue, this._SummaryDataName)
+
+        // Gross Variance
+        let grossBenefitVarianceName = 'GrossBenefitVariance'
+        let calculatedGrossBenefitVarianceValue = this.dataCalcService.difference(+(this._SummaryData[indexValue]['GrossBenefitBaseline']), +(this._SummaryData[indexValue]['GrossBenefitLbe']))
+        this.checkCalcValue(ID, grossBenefitVarianceName, calculatedGrossBenefitVarianceValue, indexValue, this._SummaryDataName)
+
+        // Gross Variance Percentage
+        let grossBenefitVariancePercentageName = 'GrossBenefitVariancePercentage'
+        let calculatedGrossBenefitVariancePercentageValue =this.dataCalcService.percentageVariance(calculatedGrossBenefitVarianceValue, +this._SummaryData[indexValue]['GrossBenefitBaseline'])
+        this.checkCalcValue(ID, grossBenefitVariancePercentageName , calculatedGrossBenefitVariancePercentageValue, indexValue, this._SummaryDataName)
+
+        // GrossRag
+        let grossRagName = 'GrossRag'
+        let calculatedGrossRagValue = this.dataCalcService.ragValue(calculatedGrossBenefitVariancePercentageValue)
+        this.checkCalcValue(ID, grossRagName, calculatedGrossRagValue, indexValue, this._SummaryDataName)   
+        
+        // Net Baseline Benefit
+        let netBaselineBenefitName = 'NetBenefitBaseline'
+        let calculatedNetBenefitBaselineValue = this.dataCalcService.difference(+(this._SummaryData[indexValue]['GrossBenefitBaseline']),+(this._SummaryData[indexValue]['CostBaseline']))
+        this.checkCalcValue(ID, netBaselineBenefitName, calculatedNetBenefitBaselineValue, indexValue, this._SummaryDataName)
+
+        // Net Lbe Benefit
+        let netBenefitLbeName = 'NetBenefitLbe'
+        let calculatedNetBenefitLbeValue = this.dataCalcService.difference(+this._SummaryData[indexValue]['GrossBenefitLbe'], +(this._SummaryData[indexValue]['CostLbe']))
+        this.checkCalcValue(ID, netBenefitLbeName, calculatedNetBenefitLbeValue, indexValue, this._SummaryDataName)
+
+        // Net Ytd
+        let netBenefitYtdName = 'NetBenefitYtd'
+        let calculatedNetBenefitYtdValue = this.dataCalcService.difference(+this._SummaryData[indexValue]['GrossBenefitYtd'], +(this._SummaryData[indexValue]['CostYtd']))
+        this.checkCalcValue(ID, netBenefitYtdName, calculatedNetBenefitYtdValue, indexValue, this._SummaryDataName)
+
+        // Net Variance
+        let netBenefitVarianceName = 'NetBenefitVariance'
+        let calculatedNetBenefitVarianceValue = this.dataCalcService.difference(calculatedNetBenefitLbeValue, calculatedNetBenefitBaselineValue)
+        this.checkCalcValue(ID, netBenefitVarianceName, calculatedNetBenefitVarianceValue, indexValue, this._SummaryDataName)
+        
+        // Net Variance Percentage
+        let netBenefitVariancePercentageName = 'NetBenefitVariancePercentage'
+        let netBenefitVariancePercentageValue = this.dataCalcService.percentageVariance(calculatedNetBenefitVarianceValue, calculatedNetBenefitBaselineValue)
+        this.checkCalcValue(ID, netBenefitVariancePercentageName, netBenefitVariancePercentageValue, indexValue, this._SummaryDataName)
+
+        // NetRag
+        let netRagName = 'NetRag'
+        let calculatedNetRagValue = this.dataCalcService.ragValue(netBenefitVariancePercentageValue)
+        this.checkCalcValue(ID,netRagName, calculatedNetRagValue, indexValue, this._SummaryDataName)
 
     }
-
+  
     checkCalcValue(ID: number, 
                     field:string, 
-                    updatedValue:number, 
+                    updatedValue:any, 
                     indexValue:number, 
                     tableName:string){
         if (indexValue>=0 && 
             this.hasOwnProperty(tableName) &&
             this[tableName].hasOwnProperty(indexValue) &&
             this[tableName][indexValue].hasOwnProperty(field) &&
-            this[tableName][indexValue][field] !== Number(updatedValue)) {
+            this[tableName][indexValue][field] !== updatedValue) {
             
             // update the table with the new value
-            this[tableName][indexValue][field] = Number(updatedValue)
+            this[tableName][indexValue][field] = updatedValue
 
             // update state of row
             this.updateState(indexValue, this.utilsService.updateState, tableName);
 
             // add highlight 
-            this.markChange(indexValue, ID, field, tableName)
+            //this.markChange(indexValue, ID, field, tableName)
         }
     }
 
@@ -1637,9 +2040,8 @@ emitValues(listArray:Array<string>): Observable<any>{
                    indexValue: number){
             if (indexValue>=0 && rowItem[field] !== calcValue) {
                 rowItem[field] = calcValue
-                console.log('vaue changed')
                 this.updateState(indexValue, this.utilsService.updateState,this._ResourceDataName)
-                this.markChange(indexValue, rowItem.ID, field, this._ResourceDataName);
+                //this.markChange(indexValue, rowItem.ID, field, this._ResourceDataName);
             } 
 
     }
@@ -1656,8 +2058,8 @@ emitValues(listArray:Array<string>): Observable<any>{
     updateState(indexId: number, state: string, tableName: string){
         let currentState
 
-        if (this[tableName] &&
-            this[tableName][indexId]) {        
+        if (this.hasOwnProperty(tableName) &&
+            this[tableName][indexId]) {       
                 currentState = this[tableName][indexId]['State'];
         } else {
             this.logService.log(`updateSate Error: unable to locate tableName or indexId`, this.utilsService.errorStatus, false);
@@ -1672,12 +2074,12 @@ emitValues(listArray:Array<string>): Observable<any>{
         return
     }
 
-    markChange(indexValue:number, ID: number, fieldName: string, tableName: string){
-        let highlight:any = {
-            ID: ID,
-            fieldName: fieldName
-        }
-        this[tableName][indexValue]['Highlights'].push(highlight)
-        return
-    }
+    // markChange(indexValue:number, ID: number, fieldName: string, tableName: string){
+    //     let highlight:any = {
+    //         ID: ID,
+    //         fieldName: fieldName
+    //     }
+    //     this[tableName][indexValue]['Highlights'].push(highlight)
+    //     return
+    // }
 }

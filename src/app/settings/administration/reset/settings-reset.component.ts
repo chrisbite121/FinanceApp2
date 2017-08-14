@@ -15,30 +15,18 @@ export class SettingsResetComponent{
 resetAppWebLists(event){
     this.scriptService.resetLists(this.utilsService.appWeb)
         .subscribe(
-            data => {
-                this.logs.push(data)
-            },
-            err => {
-                this.logs.push(err)
-            },
-            () => {
-                this.logs.push('reset app web lists complete')
-            }
+            data => {console.log(data)},
+            err => {console.log(err)},
+            () => {console.log('reset app web lists complete')}
         )
 }
 
 resetHostWebLists(event){
     this.scriptService.resetLists(this.utilsService.hostWeb)
         .subscribe(
-            data => {
-                this.logs.push(data)
-            },
-            err => {
-                this.logs.push(err)
-            },
-            () => {
-                this.logs.push('reset host web lists complete')
-            }
+            data => {console.log(data)},
+            err => {console.log(err)},
+            () => {console.log('reset host web lists complete')}
         )
 }
 
