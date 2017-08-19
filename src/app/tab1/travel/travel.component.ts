@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -9,6 +9,7 @@ import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 import { UiStateService } from '../../service/ui-state.service'
+import { fadeInAnimation } from '../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
@@ -16,9 +17,13 @@ import { IYear } from '../../model/year.model'
 @Component({
     selector: 'travel',
     templateUrl: './travel.component.html',
-    styleUrls: ['./travel.component.css']
+    styleUrls: ['./travel.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation],   
 })
-export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public tableReady: boolean = false;
+    
     public title:string = 'Travel & Subsistence';
     public headerStyle = 'ag-header-cell';
 
@@ -40,8 +45,6 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
     public rtsTableWidth: number = 2000;
     public rtstTableWidth: number = 2100;
 
-    // public _backgroundColour: string = '#99e7ff';
-    
     public resourceStream: Subscription
     public resourceContextStream: Subscription
     public totalStream: Subscription
@@ -216,7 +219,8 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }
 
-    ngAfterViewInit () {
+    ngAfterContentChecked () {
+        this.tableReady = true;
         if (this.settingsService.settings.headerColour) {
             this.changeHeaderBGColor(this.settingsService.settings.headerColour)
         }

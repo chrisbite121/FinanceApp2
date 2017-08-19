@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -9,6 +9,7 @@ import { ScriptService } from '../../../service/scripts.service'
 import { SettingsService } from '../../../service/settings.service'
 import { UtilsService } from '../../../service/utils.service'
 import { LogService } from '../../../service/log.service'
+import { fadeInAnimation } from '../../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
@@ -16,10 +17,12 @@ import { Subscription } from 'rxjs/subscription'
 @Component({
     selector: 'cost-summary',
     templateUrl: './cost-summary.component.html',
-    styleUrls: ['./cost-summary.component.css']
+    styleUrls: ['./cost-summary.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation]    
 })
-export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
-
+export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public tableReady: boolean = false;
     public csGridOptions:GridOptions
 
     csTableHeight: number = 45;
@@ -107,8 +110,8 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.csSummaryContextStream.unsubscribe()
     }
 
-    ngAfterViewInit(){
-
+    ngAfterContentChecked(){
+        this.tableReady = true;
     }
 
     getSubscriber() {

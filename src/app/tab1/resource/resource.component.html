@@ -1,13 +1,4 @@
-<div *ngIf='!tableReady' class="ms-Grid">
-    <div class="ms-Grid-row">
-        <div class="ms-Grid-col ms-u-6"></div>
-        <div class="ms-Grid-col ms-u-6">
-            <of-spinner [label]='"Loading tables..."'></of-spinner>
-        </div>
-    </div>
-</div>
-
-<div *ngIf='tableReady'>
+<div *ngIf="tableReady" [@fadeInAnimation]> 
     <ag-grid-angular #agGrid1   [style.height.px]="wdTableHeight" 
                                 [style.width.px]="wdTableWidth" 
                                 class="ag-fresh" 
@@ -52,4 +43,5 @@
                             class="ag-fresh" 
                             [gridOptions]="prtGridOptions">
     </ag-grid-angular> 
+
 </div>

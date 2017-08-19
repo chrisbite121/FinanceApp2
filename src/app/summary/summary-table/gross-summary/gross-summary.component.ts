@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, AfterContentChecked, ElementRef } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -9,16 +9,19 @@ import { ScriptService } from '../../../service/scripts.service'
 import { SettingsService } from '../../../service/settings.service'
 import { UtilsService } from '../../../service/utils.service'
 import { LogService } from '../../../service/log.service'
+import { fadeInAnimation } from '../../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
 @Component({
     selector: 'gross-summary',
     templateUrl: './gross-summary.component.html',
-    styleUrls: ['./gross-summary.component.css']
+    styleUrls: ['./gross-summary.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation]
 })
-export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
-
+export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public tableReady: boolean = false;
     public gsGridOptions:GridOptions
 
     gsTableHeight: number = 45;
@@ -98,8 +101,8 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    ngAfterViewInit(){
-     
+    ngAfterContentChecked(){
+        this.tableReady = true;
     }
 
     ngOnDestroy(){

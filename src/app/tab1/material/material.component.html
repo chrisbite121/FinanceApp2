@@ -1,25 +1,27 @@
-<div class="ms-Grid">
-        <div class="ms-Grid-row" style="padding:10px 0px">
-            <div class="ms-Grid-col ms-u-sm1">
-                <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
-            </div>
-            <div class="ms-Grid-col ms-u-sm2">
-                <i class="ms-Icon ms-Icon--Add" style="margin-top:5px" (click)="addMaterialRow();"></i>
-                <i class="ms-Icon ms-Icon--Delete" style="margin-top:5px" (click)="deleteMaterialRow();"></i> 
-            </div>
-            <div class="ms-Grid-col ms-u-sm9">
-            </div>
-        </div>    
-    </div>
-<ag-grid-angular #agGrid10 style="overflow: hidden;" 
-                        [style.height.px]="cmTableHeight" 
-                        [style.width.px]="cmTableWidth"
-                        class="ag-fresh" 
-                [gridOptions]="cmGridOptions">
-</ag-grid-angular>
-<ag-grid-angular #agGrid11 style="overflow: hidden;" 
-                        [style.height.px]="mattTableHeight" 
-                        [style.width.px]="mattTableWidth"
-                        class="ag-fresh" 
-                [gridOptions]="mattGridOptions">
-</ag-grid-angular>
+<div *ngIf="tableReady" [@fadeInAnimation]>
+    <div class="ms-Grid">
+            <div class="ms-Grid-row" style="padding:10px 0px">
+                <div class="ms-Grid-col ms-u-sm1">
+                    <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
+                </div>
+                <div class="ms-Grid-col ms-u-sm2">
+                    <i class="ms-Icon ms-Icon--Add" style="margin-top:5px" (click)="addMaterialRow();"></i>
+                    <i class="ms-Icon ms-Icon--Delete" style="margin-top:5px" (click)="deleteMaterialRow();"></i> 
+                </div>
+                <div class="ms-Grid-col ms-u-sm9">
+                </div>
+            </div>    
+        </div>
+    <ag-grid-angular #agGrid10 style="overflow: hidden;" 
+                            [style.height.px]="cmTableHeight" 
+                            [style.width.px]="cmTableWidth"
+                            class="ag-fresh" 
+                    [gridOptions]="cmGridOptions">
+    </ag-grid-angular>
+    <ag-grid-angular #agGrid11 style="overflow: hidden;" 
+                            [style.height.px]="mattTableHeight" 
+                            [style.width.px]="mattTableWidth"
+                            class="ag-fresh" 
+                    [gridOptions]="mattGridOptions">
+    </ag-grid-angular>
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -9,15 +9,19 @@ import { ScriptService } from '../../../service/scripts.service'
 import { SettingsService } from '../../../service/settings.service'
 import { UtilsService } from '../../../service/utils.service'
 import { LogService } from '../../../service/log.service'
+import { fadeInAnimation } from '../../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
 @Component({
     selector: 'net-summary',
     templateUrl: './net-summary.component.html',
-    styleUrls: ['./net-summary.component.css']
+    styleUrls: ['./net-summary.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation]
 })
-export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
+export class NetSummaryComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public tableReady = false;
 
     public nsGridOptions:GridOptions
 
@@ -90,8 +94,8 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    ngAfterViewInit(){
-     
+    ngAfterContentChecked(){
+     this.tableReady = true
     }
 
     ngOnDestroy(){

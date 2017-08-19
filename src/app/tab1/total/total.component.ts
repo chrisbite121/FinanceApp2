@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef } from '@angular/core'
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -7,6 +7,7 @@ import { DataContextService } from '../../service/data-context.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
+import { fadeInAnimation } from '../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
@@ -14,9 +15,12 @@ import { IYear } from '../../model/year.model'
 @Component({
     selector: 'total',
     templateUrl: './total.component.html',
-    styleUrls: ['./total.component.css']
+    styleUrls: ['./total.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation]
 })
-export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public tableReady: boolean = false;
     //totals
     public tGridOptions: GridOptions    
     
@@ -92,7 +96,8 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }
 
-    ngAfterViewInit () {
+    ngAfterContentChecked () {
+        this.tableReady = true;
         if (this.settingsService.settings.headerColour) {
             this.changeHeaderBGColor(this.settingsService.settings.headerColour)
         }

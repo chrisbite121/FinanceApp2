@@ -1,12 +1,14 @@
-<div class="ms-Grid">
-    <div class="ms-Grid-row ms-font-l">
-        <h3>Cost Summary</h3>
+<div *ngIf="tableReady" [@fadeInAnimation]> 
+    <div class="ms-Grid">
+        <div class="ms-Grid-row ms-font-l">
+            <h3>Cost Summary</h3>
+        </div>
     </div>
-</div>
 
-<ag-grid-angular #agGrid14
-                        [style.height.px]="csTableHeight" 
-                        [style.width.px]="csTableWidth"
-                        class="ag-fresh"  
-            [gridOptions]="csGridOptions">
-</ag-grid-angular>
+    <ag-grid-angular #agGrid14
+                            [style.height.px]="csTableHeight" 
+                            [style.width.px]="csTableWidth"
+                            class="ag-fresh"  
+                [gridOptions]="csGridOptions">
+    </ag-grid-angular>
+</div>

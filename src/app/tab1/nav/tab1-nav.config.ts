@@ -23,16 +23,16 @@ export const pivotGrid:Array<Object> = [
     routerLink: ['/tab1', 'total' ],
     content: 'This is the total tab.',
   },
+  // {
+  //   dataContent: 'aggregate',
+  //   title: 'Aggregate',
+  //   routerLink: ['/tab1', 'aggregate' ],
+  //   content: 'This is the aggregate tab.',
+  // },
   {
     dataContent: 'aggregate',
     title: 'Aggregate',
     routerLink: ['/tab1', 'aggregate' ],
     content: 'This is the aggregate tab.',
-  },
-  {
-    dataContent: 'aggregate2',
-    title: 'Aggregate2',
-    routerLink: ['/tab1', 'aggregate2' ],
-    content: 'This is the aggregate2 tab.',
   }    
 ] 

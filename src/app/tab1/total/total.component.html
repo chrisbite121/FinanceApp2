@@ -1,16 +1,18 @@
-<div class="ms-Grid">
-        <div class="ms-Grid-row" style="padding:10px 0px">
-            <div class="ms-Grid-col ms-u-sm3">
-                <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
-            </div>
-            <div class="ms-Grid-col ms-u-sm9">
-            </div>
-        </div>    
-    </div>
+<div *ngIf="tableReady" [@fadeInAnimation]> 
+    <div class="ms-Grid">
+            <div class="ms-Grid-row" style="padding:10px 0px">
+                <div class="ms-Grid-col ms-u-sm3">
+                    <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
+                </div>
+                <div class="ms-Grid-col ms-u-sm9">
+                </div>
+            </div>    
+        </div>
 
-<ag-grid-angular #agGrid12 style="overflow: hidden;" 
-                        [style.height.px]="tTableHeight" 
-                        [style.width.px]="tTableWidth"
-                        class="ag-fresh"  
-            [gridOptions]="tGridOptions">
-</ag-grid-angular>
+    <ag-grid-angular #agGrid12 style="overflow: hidden;" 
+                            [style.height.px]="tTableHeight" 
+                            [style.width.px]="tTableWidth"
+                            class="ag-fresh"  
+                [gridOptions]="tGridOptions">
+    </ag-grid-angular>
+</div>

@@ -1,13 +1,11 @@
-import { Component, OnInit } from '@angular/core'
+import { Component } from '@angular/core'
 
 @Component({
     selector: 'summary',
-    templateUrl: './summary.component.html'
+    templateUrl: './summary.component.html',
 })
-export class SummaryComponent implements OnInit {
+export class SummaryComponent {
     cars: any[];
     options: any[];
     brands: any[];
-    ngOnInit() {
-    }
 }

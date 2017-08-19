@@ -13,7 +13,7 @@ import { Tab1Component } from './tab1.component'
 import { ResourceComponent } from './resource/resource.component'
 import { MaterialComponent } from './material/material.component'
 import { TravelComponent } from './travel/travel.component'
-import { AggregateComponent } from './aggregate/aggregate.component'
+// import { AggregateComponent } from './aggregate/aggregate.component'
 import { TotalComponent } from './total/total.component'
 
 import { Aggregate2Component } from './aggregate2/aggregate2.component'
@@ -38,7 +38,7 @@ import  { tab1Routes } from './tab1.routes'
         MaterialComponent,
         TravelComponent,
         Tab1NavComponent,
-        AggregateComponent,
+        // AggregateComponent,
         TotalComponent,
         Aggregate2Component,
         NumericEditorComponent

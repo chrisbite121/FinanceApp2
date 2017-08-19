@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -11,14 +11,19 @@ import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 
 import { Subscription } from 'rxjs/subscription'
+import { fadeInAnimation } from '../../animations/fade-in.animation'
 
 import { IYear } from '../../model/year.model'
 @Component({
     selector: 'material',
     templateUrl: './material.component.html',
-    styleUrls: ['./material.component.css']
+    styleUrls: ['./material.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation],    
 })
-export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public tableReady: boolean = false;
+    
     public title:string = 'Materials';
     public headerStyle = 'ag-header-cell';
 
@@ -154,7 +159,8 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }
 
-    ngAfterViewInit () {
+    ngAfterContentChecked () {
+        this.tableReady = true;
         if (this.settingsService.settings.headerColour) {
             this.changeHeaderBGColor(this.settingsService.settings.headerColour)
         }

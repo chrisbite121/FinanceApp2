@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core'
+import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -9,19 +9,20 @@ import { WorkdayService } from '../../service/workdays.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
+import { fadeInAnimation } from '../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
 import { IYear } from '../../model/year.model'
 
-import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
-
 @Component({
     selector: 'resource',
     templateUrl: './resource.component.html',
-    styleUrls: ['./resource.component.css']
+    styleUrls: ['./resource.component.css'],
+    // make fade in animation available to this component
+    animations: [fadeInAnimation],
 })
-export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked {
     public title:string = 'Resources';
     public headerStyle = 'ag-header-cell';
 
@@ -72,8 +73,6 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
                 private utilsService: UtilsService,
                 private el: ElementRef) {
     
-        this.tableReady = false;
-
         //initialise gridoptions objects
         this.puGridOptions = <GridOptions>{};
         this.wdGridOptions = <GridOptions>{};
@@ -205,10 +204,6 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
                 this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
                 this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
             }
-
-            if (this.tableReady == false) {
-                this.tableReady = true;
-            }
         })
         
         this.totalStream = this.dataContextService.getTotalDataStream().subscribe(data => {
@@ -263,12 +258,13 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
         this.refreshGrid()
     }
 
-    ngAfterViewInit () {
+    ngAfterContentChecked(){
+        this.tableReady = true;
         if (this.settingsService.settings.headerColour) {
             this.changeHeaderBGColor(this.settingsService.settings.headerColour)
         }
         if (this.settingsService.settings.headerColour) {
-            this.changeHeaderFontColour(this.settingsService.settings.headerFontColour)
+            this.changeHeaderFontColour(this.settingsService.settings.headerFontColour)  
         }
     }
 
