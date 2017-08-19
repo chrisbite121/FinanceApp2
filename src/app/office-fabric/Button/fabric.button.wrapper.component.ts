@@ -1,5 +1,5 @@
 
-import { Component, Input, Output, EventEmitter, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, AfterContentInit } from '@angular/core';
 
 // Import the default Fabric implementation of Button
 import { Button } from './Button';
@@ -8,7 +8,7 @@ import { Button } from './Button';
     selector: 'of-button',
     templateUrl: './fabric.button.wrapper.component.html',
 })
-export class FabricButtonWrapperComponent implements AfterViewInit {
+export class FabricButtonWrapperComponent implements AfterContentInit {
     
     public button: Button;
     public useIcon: boolean;
@@ -35,7 +35,7 @@ export class FabricButtonWrapperComponent implements AfterViewInit {
      }
 
     // After the textfield has fully rendered, create a Fabric TextField object for it.
-    ngAfterViewInit() {
+    ngAfterContentInit() {
         switch (this.type) {
                         case 'normal':
                             this.type = ''

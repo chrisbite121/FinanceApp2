@@ -1,0 +1,11 @@
+:host {
+    line-height: 20px;
+}
+
+.message {
+    text-align: right;
+    color: #0000FF;
+    text-decoration: underline;
+    cursor: pointer; 
+    cursor: hand;
+}

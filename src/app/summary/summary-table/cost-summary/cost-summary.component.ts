@@ -23,15 +23,10 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     public csGridOptions:GridOptions
 
     csTableHeight: number = 45;
-    csTableWidth: number = 1400;
-
-    public _focusCell:any
-    public _focusTable:string
-    
+    csTableWidth: number = 991;
 
     public summaryData: Subscription;
     public csSummaryContextStream: Subscription
-    // public focusCellStream: Subscription
 
     constructor(private tableService: TableService, 
                 private dataContextService: DataContextService,
@@ -49,10 +44,10 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             //Summary Table gridoptions
             this.csGridOptions.context = {}
             this.csGridOptions.onCellValueChanged = ($event: any) => {
-                this._focusTable = 'gsGridOptions'
-                this._focusCell = this.csGridOptions.api.getFocusedCell()
-                this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
-                // this.csGridOptions.api.clearFocusedCell()
+                let _rowIndex = $event.node.rowIndex
+                let _colId = $event.column.colId                
+                let _focusTable = 'gsGridOptions'
+                this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, _focusTable, _rowIndex, _colId)
                 this.scriptService.updateTable($event).subscribe(this.getSubscriber())
 
             }
@@ -62,7 +57,9 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
             this.csGridOptions.singleClickEdit = true;
             this.csGridOptions.enableColResize = true;
-            this.csGridOptions.rowHeight = 40                    
+            this.csGridOptions.rowHeight = 40
+            this.csGridOptions.suppressCellSelection=true;
+            this.csGridOptions.domLayout = 'forPrint'             
         }
 
     ngOnInit(){
@@ -71,19 +68,18 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         })
 
         this.summaryData = this.dataContextService.getSummaryDataStream().subscribe(data => {
-            console.error('DATA')
-
-            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }            
 
             if(!this.csGridOptions.rowData){
                 this.csGridOptions.rowData = data;
             } else if (this.csGridOptions.api) {
                 this.csGridOptions.api.setRowData(data)
+            }
+            
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
             }
         })
 
@@ -96,14 +92,6 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }
         })
-        
-        // this.focusCellStream = this.uiStateService.getFocusCellDataStream().subscribe(data => {
-        //     console.error('FOCUS')
-        //     if(this[data.gridOptions]){
-        //         this[data.gridOptions].api.setFocusedCell(data.rowIndex, data.columnId)
-        //         this[data.gridOptions].api.startEditingCell({colKey: data.columnId,rowIndex: data.rowIndex})
-        //     }
-        // })        
 
         if(this.settingsService.initAppComplete) {
             this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
@@ -117,7 +105,6 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     ngOnDestroy(){
         this.summaryData.unsubscribe()
         this.csSummaryContextStream.unsubscribe()
-        // this.focusCellStream.unsubscribe()
     }
 
     ngAfterViewInit(){
@@ -132,21 +119,4 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         }
      }
     
-    // setCellFocus(){
-    //     if (this._focusCell && 
-    //         this._focusCell.rowIndex >=0 &&
-    //         this._focusCell.column &&
-    //         this._focusCell.column.colId &&
-    //         this._focusTable &&
-    //         this[this._focusTable] &&
-    //         this[this._focusTable].api
-    //         ) {
-    //         try { //set focused column
-    //             this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-    //             this[this._focusTable].api.tabToNextCell()
-    //         } catch (e) {
-    //             this.logService.log(`error tyring to set cell focus on focusTable: ${this._focusTable}` )
-    //         }
-    //     }       
-    // }     
 }

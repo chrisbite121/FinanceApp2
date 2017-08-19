@@ -1,0 +1,19 @@
+<div class="ms-Grid-row">
+  <div class="ms-Grid-col ms-u-sm10 message">
+    <div class="message">
+      {{message}}
+    </div>
+  </div>
+
+  <div class="ms-Grid-col ms-u-sm2">
+    <div *ngIf='icon == "spinner"'>
+      <of-spinner></of-spinner>
+    </div>
+    <div *ngIf='icon== "success"'>
+      <img [src]='successImageUrl'>
+    </div>
+    <div *ngIf='icon== "error"'>
+      <img [src]='errorImageUrl'>
+    </div>
+  </div>
+</div>

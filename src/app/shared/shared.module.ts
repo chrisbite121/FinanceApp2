@@ -11,6 +11,7 @@ import { FabricTableWrapperComponent } from '../office-fabric/table/fabric.table
 import { FabricPivotWrapperComponent } from '../office-fabric/pivot/fabric.pivot.wrapper.component'
 import { FabricButtonWrapperComponent } from '../office-fabric/button/fabric.button.wrapper.component'
 import { FabricCommandButtonWrapperComponent } from '../office-fabric/commandbutton/fabric.commandButton.wrapper.component'
+import { FabricSpinnerWrapperComponent } from '../office-fabric/spinner/fabric.spinner.wrapper.component'
 
 @NgModule({
     imports: [
@@ -25,7 +26,8 @@ import { FabricCommandButtonWrapperComponent } from '../office-fabric/commandbut
         FabricTableWrapperComponent,
         FabricPivotWrapperComponent,
         FabricButtonWrapperComponent,
-        FabricCommandButtonWrapperComponent
+        FabricCommandButtonWrapperComponent,
+        FabricSpinnerWrapperComponent
     ],
     exports: [
         FabricTextFieldWrapperComponent,
@@ -36,8 +38,8 @@ import { FabricCommandButtonWrapperComponent } from '../office-fabric/commandbut
         FabricPivotWrapperComponent,
         FabricButtonWrapperComponent,
         FabricCommandButtonWrapperComponent,
+        FabricSpinnerWrapperComponent,
         CommonModule
-
     ]
 })
 export class SharedModule {

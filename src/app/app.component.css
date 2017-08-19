@@ -1,3 +1,23 @@
 .mainContainer {
     height: 600px;
 }
+
+.right {
+    position: absolute;
+    right: 0px;
+    width: 300px;
+    border: 3px solid #73AD21;
+    padding: 10px
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    line-height: 30px;
+}
+
+.submenu {
+    background-color: #e5e7ea;
+    /* position: relative;
+    width: 100% */
+}

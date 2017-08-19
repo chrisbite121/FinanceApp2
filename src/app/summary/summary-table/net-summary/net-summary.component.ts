@@ -24,10 +24,6 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     nsTableHeight: number = 45;
     nsTableWidth: number = 1380;
 
-    public _focusCell:any
-    public _focusTable:string
-
-
     public summaryData: Subscription;
     public nsSummaryContextStream: Subscription;
 
@@ -46,8 +42,9 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         //Summary Table gridoptions
         this.nsGridOptions.context = {}
         this.nsGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusTable = 'gsGridOptions'
-            this._focusCell = this.nsGridOptions.api.getFocusedCell()
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId 
+            let _focusTable = 'gsGridOptions'
             this.scriptService.updateTable($event).subscribe(this.getSubscriber())
         }
         this.nsGridOptions.onGridReady = () => {
@@ -56,6 +53,8 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.nsGridOptions.singleClickEdit = true;
         this.nsGridOptions.enableColResize = true;
+        this.nsGridOptions.suppressCellSelection=true;
+        this.nsGridOptions.domLayout = 'forPrint'          
         this.nsGridOptions.rowHeight = 40
     }
 
@@ -72,8 +71,6 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             } else if (this.nsGridOptions.api) {
                 this.nsGridOptions.api.setRowData(data)
             }
-
-            this.setCellFocus();  
         })
 
         this.nsSummaryContextStream = this.dataContextService.getResourceContextStream().subscribe(data => {
@@ -109,22 +106,4 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             complete(){ console.log('completed') }
         }
      }
-    
-    setCellFocus(){
-        if (this._focusCell && 
-            this._focusCell.rowIndex >=0 &&
-            this._focusCell.column &&
-            this._focusCell.column.colId &&
-            this._focusTable &&
-            this[this._focusTable] &&
-            this[this._focusTable].api
-            ) {
-            try { //set focused column
-                this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-                this[this._focusTable].api.tabToNextCell()
-            } catch (e) {
-                this.logService.log(`error tyring to set cell focus on focusTable: ${this._focusTable}` )
-            }
-        }       
-    }
 }

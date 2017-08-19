@@ -1,6 +1,7 @@
 import {NgModule} from "@angular/core";
 import {BrowserModule} from "@angular/platform-browser";
 import { RouterModule } from '@angular/router';
+// import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 
 //services
 import { LogService } from './service/log.service'
@@ -22,14 +23,15 @@ import { NotificationService } from './service/notification.service'
 import {AppComponent} from "./app.component";
 import {Error404Component} from './errors/404.component';
 import { NavBarComponent } from './nav/navbar.component';
-
+import { ToolbarComponent } from './toolbar/toolbar.component';
+import { MessagebarComponent } from './nav/messagebar/messagebar.component'
+import { SharedModule } from './shared/shared.module'
 import { FabricMainCommandBarWrapperComponent } from './office-fabric/commandbar/fabric.mainCommandbar.wrapper.component'
 
 //modules
 import { SummaryModule } from './summary/summary.module'
 import { Tab1Module } from './tab1/tab1.module'
 import { SettingsModule } from './settings/settings.module'
-
 //routes
 import { appRoutes } from './routes'
 
@@ -39,12 +41,16 @@ import { appRoutes } from './routes'
         RouterModule.forRoot(appRoutes,{ useHash:true}),
         Tab1Module,
         SummaryModule,
-        SettingsModule
+        SettingsModule,
+        // BrowserAnimationsModule,
+        SharedModule
     ],
     declarations: [
         AppComponent,
         Error404Component,
         NavBarComponent,
+        ToolbarComponent,
+        MessagebarComponent,
         FabricMainCommandBarWrapperComponent
     ],
   providers:    [ 

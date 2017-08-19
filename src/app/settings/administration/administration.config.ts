@@ -28,5 +28,11 @@ export const adminConfig = [
     title: 'Cached',
     routerLink: ['cached'],
     content: '',
+  },
+  {
+    dataContent: 'notification',
+    title: 'Notification',
+    routerLink: ['notification'],
+    content: '',
   }  
 ] 

@@ -21,6 +21,7 @@ import { SettingsProvisionerComponent } from './administration/provisioner/setti
 import { HealthReportComponent } from './administration/healthreport/healthreport.component'
 import { DataComponent } from './administration/data/data.component'
 import { CachedComponent } from './administration/cached/cached.component'
+import { NotificationComponent } from './administration/notification/notification.component'
 
 import { ApiLoggerComponent } from './shared/api-logger.component';
 
@@ -60,6 +61,7 @@ import { settingsRoutes } from './settings.routes';
         HealthReportComponent,
         CachedComponent,
         DataComponent,
+        NotificationComponent,
 
         ListManagerComponent,
         ListManagerApiComponent,

@@ -26,7 +26,7 @@ const userControlledsettings: ISettings = {
     ],
     //Sharepoint Mode needs to be removed from here
     //this value is set in application controlled settings
-    sharePointMode: false,
+    sharePointMode: true,
     autoSave: false,
     workingHoursInDay: 7.5,
     tsWeighting: 0.2,

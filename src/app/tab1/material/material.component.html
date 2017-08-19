@@ -1,22 +1,16 @@
 <div class="ms-Grid">
-    <div class="ms-Grid-row">
-        <div class="ms-Grid-col ms-u-sm6 ms-u-md8 ms-u-lg10">
-            <h3>{{title}}</h3>
-        </div>
-        <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
-            <i class="ms-Icon ms-Icon--Save" (click)="saveUpdates();"></i>
-            <i class="ms-Icon ms-Icon--Add" (click)="addMaterialRow();"></i>
-            <i class="ms-Icon ms-Icon--Cancel" (click)="deleteMaterialRow();"></i>
-            <i class="ms-Icon ms-Icon--Sync" (click)="refreshGrid();"></i>         
-            <!--<input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
-            <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
-            <input type="button" class="btn btn-xs" (click)="addMaterialRow();" value="Add"/>
-            <input type="button" class="btn btn-xs" (click)="deleteMaterialRow();" value="Remove"/>        
-            <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
-            <input type="button" *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();" value="Redo" />-->
-        </div>
+        <div class="ms-Grid-row" style="padding:10px 0px">
+            <div class="ms-Grid-col ms-u-sm1">
+                <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
+            </div>
+            <div class="ms-Grid-col ms-u-sm2">
+                <i class="ms-Icon ms-Icon--Add" style="margin-top:5px" (click)="addMaterialRow();"></i>
+                <i class="ms-Icon ms-Icon--Delete" style="margin-top:5px" (click)="deleteMaterialRow();"></i> 
+            </div>
+            <div class="ms-Grid-col ms-u-sm9">
+            </div>
+        </div>    
     </div>
-</div>
 <ag-grid-angular #agGrid10 style="overflow: hidden;" 
                         [style.height.px]="cmTableHeight" 
                         [style.width.px]="cmTableWidth"

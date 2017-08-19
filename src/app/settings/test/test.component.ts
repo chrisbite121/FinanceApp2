@@ -19,6 +19,8 @@ import { FabricMessageBarWrapperComponent } from '../../office-fabric/messagebar
 import { FabricTableWrapperComponent } from '../../office-fabric/table/fabric.table.wrapper.component'
 import { FabricButtonWrapperComponent } from '../../office-fabric/button/fabric.button.wrapper.component'
 import { FabricCommandButtonWrapperComponent } from '../../office-fabric/commandbutton/fabric.commandButton.wrapper.component'
+import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
+
 
 const label:ICommandButtonLabel = {
     label: 'additional',

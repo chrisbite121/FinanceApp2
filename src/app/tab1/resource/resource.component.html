@@ -1,28 +1,33 @@
-<div class="ms-Grid">
+<div *ngIf='!tableReady' class="ms-Grid">
     <div class="ms-Grid-row">
-        <i class="ms-Icon ms-Icon--Save" (click)="saveUpdates();"></i>
-        <i class="ms-Icon ms-Icon--Add" (click)="addResourceRow();"></i>
-        <i class="ms-Icon ms-Icon--Cancel" (click)="deleteResourceRow();"></i>
-        <i class="ms-Icon ms-Icon--Sync" (click)="refreshGrid();"></i>
-
-       <!-- <input type="button" class="btn btn-xs" (click)="addResourceRow();" value="Add"/>
-        <input type="button" class="btn btn-xs" (click)="deleteResourceRow();" value="Remove"/>
-        <input type="button" class="btn btn-xs" (click)="refreshGrid();" value="Refresh"/>
-        <input type="button" class="btn btn-xs" (click)="saveUpdates();" value="Save" />
-        <input type="button" *ngIf="uiState.undo" class="btn btn-xs" (click)="undo();" value="Undo"/>
-        <input type="button" *ngIf="uiState.redo" class="btn btn-xs" (click)="redo();" value="Redo" />-->
+        <div class="ms-Grid-col ms-u-6"></div>
+        <div class="ms-Grid-col ms-u-6">
+            <of-spinner [label]='"Loading tables..."'></of-spinner>
+        </div>
     </div>
 </div>
+
+<div *ngIf='tableReady'>
     <ag-grid-angular #agGrid1   [style.height.px]="wdTableHeight" 
                                 [style.width.px]="wdTableWidth" 
                                 class="ag-fresh" 
-                 [gridOptions]="wdGridOptions">
+                [gridOptions]="wdGridOptions">
     </ag-grid-angular>
-<div class="ms-Grid">
-    <div class="ms-Grid-row">
-        <h3>{{title}}</h3>
-    </div>    
-</div>
+
+    <div class="ms-Grid">
+        <div class="ms-Grid-row" style="padding:10px 0px">
+            <div class="ms-Grid-col ms-u-sm1">
+                <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
+            </div>
+            <div class="ms-Grid-col ms-u-sm2">
+                <i class="ms-Icon ms-Icon--Add" style="margin-top:5px" (click)="addResourceRow();"></i>
+                <i class="ms-Icon ms-Icon--Delete" style="margin-top:5px" (click)="deleteResourceRow();"></i> 
+            </div>
+            <div class="ms-Grid-col ms-u-sm9">
+            </div>
+        </div>    
+    </div>
+
     <ag-grid-angular #agGrid2 style="overflow: hidden;" 
                             [style.height.px]="puTableHeight" 
                             [style.width.px]="puTableWidth"
@@ -33,7 +38,7 @@
                             [style.height.px]="ahTableHeight" 
                             [style.width.px]="ahTableWidth"
                             class="ag-fresh"  
-                 [gridOptions]="ahGridOptions">
+                [gridOptions]="ahGridOptions">
     </ag-grid-angular>
     <ag-grid-angular #agGrid4 style="overflow: hidden;" 
                             [style.height.px]="prTableHeight" 
@@ -46,4 +51,5 @@
                             [style.width.px]="prtTableWidth"
                             class="ag-fresh" 
                             [gridOptions]="prtGridOptions">
-    </ag-grid-angular>    
+    </ag-grid-angular> 
+</div>

@@ -24,10 +24,6 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     gsTableHeight: number = 45;
     gsTableWidth: number = 1400;
 
-    public _focusCell:any
-    public _focusTable:string
-    // public focusCellStream: Subscription
-
     public summaryData: Subscription;
     public gsSummaryContextStream: Subscription
 
@@ -47,10 +43,10 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.gsGridOptions.context = {}
 
         this.gsGridOptions.onCellValueChanged = ($event: any) => {
-
-            this._focusCell = this.gsGridOptions.api.getFocusedCell()
-            this._focusTable = 'gsGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'gsGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber())
 
         }
@@ -60,6 +56,8 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.gsGridOptions.singleClickEdit = true;
         this.gsGridOptions.enableColResize = true;
+        this.gsGridOptions.suppressCellSelection=true;
+        this.gsGridOptions.domLayout = 'forPrint'         
         this.gsGridOptions.rowHeight = 40
     }
 
@@ -69,13 +67,6 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         })
 
         this.summaryData = this.dataContextService.getSummaryDataStream().subscribe(data => {
-            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }
-
             if(!this.gsGridOptions.rowData){
                 this.gsGridOptions.rowData = data;
             } else if (this.gsGridOptions.api) {
@@ -83,13 +74,11 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             }
 
             //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            // let focusedCellData = this.uiStateService.getFocusCellData()
-            // if(this[focusedCellData.gridOptions]) {
-            //     // console.error('setting editing cell')
-            //     // console.log(focusedCellData)
-            //     this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-            //     this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            // }
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            }            
         })
 
         this.gsSummaryContextStream = this.dataContextService.getResourceContextStream().subscribe(data => {
@@ -101,16 +90,6 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }
         })
-
-        // this.focusCellStream = this.uiStateService.getFocusCellDataStream().subscribe(data => {
-        //     if(this[data.gridOptions]){
-        //         console.log(data.rowIndex)
-        //         console.log(data.columnId)
-        //         console.log('setting gross summary focus cell')
-        //         this[data.gridOptions].api.setFocusedCell(data.rowIndex, data.columnId)
-        //         this[data.gridOptions].api.startEditingCell({colKey: data.columnId,rowIndex: data.rowIndex})
-        //     }
-        // })
 
         if(this.settingsService.initAppComplete) {
             this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
@@ -136,24 +115,4 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             complete(){ console.log('completed') }
         }
      }
-    
-    // setCellFocus(){
-    //     if (this._focusCell && 
-    //         this._focusCell.rowIndex >=0 &&
-    //         this._focusCell.column &&
-    //         this._focusCell.column.colId &&
-    //         this._focusTable &&
-    //         this[this._focusTable] &&
-    //         this[this._focusTable].api
-    //         ) {
-    //         try { //set focused column
-    //             this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-    //             this[this._focusTable].api.tabToNextCell()
-    //         } catch (e) {
-    //             this.logService.log(`error tyring to set cell focus on focusTable: ${this._focusTable}` )
-    //         }
-    //     }       
-    // }
-
-
 }

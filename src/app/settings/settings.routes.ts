@@ -16,7 +16,7 @@ import { SettingsResetComponent } from './administration/reset/settings-reset.co
 import { HealthReportComponent } from './administration/healthreport/healthreport.component'
 import { DataComponent } from './administration/data/data.component'
 import { CachedComponent } from './administration/cached/cached.component'
-
+import { NotificationComponent } from './administration/notification/notification.component'
 
 import { ListManagerComponent } from './list-manager/list-manager.component'
 import { ResourceListComponent } from './list-manager/resource-list/resource-list.component'
@@ -86,7 +86,11 @@ const settingsSubRoutes = [
             {
                 path: 'data',
                 component: DataComponent,
-            }                                  
+            },
+            {
+                path: 'notification',
+                component: NotificationComponent
+            }
         ]
     },
     {

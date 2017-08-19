@@ -31,14 +31,10 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
     public cmTableHeight: number = 100;
     public mattTableHeight: number = 30;
 
-    public cmTableWidth: number = 2000;
-    public mattTableWidth: number = 2100;
+    public cmTableWidth: number = 1901;
+    public mattTableWidth: number = 1901;
 
     // public _backgroundColour: string = '#99e7ff';
-    
-    //used to track cell focus
-    public _focusCell:any
-    public _focusTable:string
 
     public materialStream: Subscription
     public totalStream: Subscription
@@ -61,10 +57,10 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
         //Project cost material gridoptions
         this.cmGridOptions.context = {};
         this.cmGridOptions.onCellValueChanged = ($event: any) => {
-
-            this._focusCell = this.cmGridOptions.api.getFocusedCell()
-            this._focusTable = 'cmGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppMaterialData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'cmGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppMaterialData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
 
         };
@@ -72,6 +68,8 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cmGridOptions.singleClickEdit = true;
         this.cmGridOptions.enableColResize = true;
         this.cmGridOptions.rowSelection = 'single';
+        this.cmGridOptions.suppressCellSelection=true;
+        this.cmGridOptions.domLayout = 'forPrint'           
 
         //Project Materials Totals gridoptions
         this.mattGridOptions.context = {};
@@ -80,7 +78,9 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
              this.mattGridOptions.api.setHeaderHeight(0)
         }
         this.mattGridOptions.singleClickEdit = true;
-        this.mattGridOptions.enableColResize = true;                                             
+        this.mattGridOptions.enableColResize = true;
+        this.mattGridOptions.suppressCellSelection=true;
+        this.mattGridOptions.domLayout = 'forPrint'                                                        
     }
 
     ngOnInit() {
@@ -93,13 +93,6 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
         this.materialStream = this.dataContext.getMaterialDataStream().subscribe(data=>{
-            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }
-
             if (!this.cmGridOptions.rowData) {
                 this.cmGridOptions.rowData = data;
 
@@ -108,6 +101,13 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
              
             }
             this.resizeMaterialTable(data.length);
+
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            }            
         })
 
         this.totalStream = this.dataContext.getTotalDataStream().subscribe(data => {
@@ -220,79 +220,13 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe(this.getSubscriber())
     }
 
-    // applyCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-    //     this.cmGridOptions.api.setColumnDefs(this.cmGridOptions.columnDefs);
-
-    // }
-    // applyMaterialCellHighlights(tableData: any) {
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-
-    //     this.cmGridOptions.columnDefs.forEach((column: any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column, data, bkColour);
-    //     })
-
-    //     this.cmGridOptions.api.setColumnDefs(this.cmGridOptions.columnDefs);
-    // }
-
-    // applyTotalCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-
-    //     this.mattGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })                        
-    //     this.mattGridOptions.api.setColumnDefs(this.mattGridOptions.columnDefs);
-    // }
-
-    // applyCellStyle(column: any, data: any, bkColour: string){
-    //         column.cellStyle = function(params: any){
-    //             let fldName = params.colDef.field;
-    //             let rowId = params.data.ItemId;
-    //             let highlightCell = false;
-    //             if (data.length > 0) {
-                    
-    //                 data.forEach(function(dataCell: any){
-    //                      if(dataCell.fieldName == fldName &&
-    //                         dataCell.ItemId == rowId) {
-    //                             highlightCell = true;
-    //                         }
-    //                 });
-    //             }
-    //             return (highlightCell? 
-    //                     {backgroundColor: bkColour}:
-    //                     {backgroundColor: '#ffff'})
-
-    //         }
-    // }
-
-    // constructHighlightsObject(tableData:any){
-    //     let data:Array<any> = []
-    //     if (tableData.length > 0){
-    //         tableData.forEach((rowData:any)=> {
-    //             if (rowData.Highlights && 
-    //                 rowData.Highlights.length>0) {
-    //                      rowData.Highlights.forEach((highlight:any) => {
-    //                         data.push(highlight);
-    //                     })
-
-    //                 }
-    //         })   
-    //     }
-    //     return data
-    // }
-
     resizeTables(noRows: number) {
-        this.mattTableWidth = 2100;
+        this.mattTableWidth = 1901;
     }
 
     resizeMaterialTable(noRows: number) {
         this.cmTableHeight = (noRows * 25) + 40;
-        this.cmTableWidth = 2000;
+        this.cmTableWidth = 1901;
     }
 
     getSubscriber() {
@@ -305,7 +239,7 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
 
      changeHeaderBGColor(value) {
         if (value) {
-            var cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
+            var cols =     this.el.nativeElement.getElementsByClassName('ag-header-row');
             for(let i=0; i<cols.length; i++) {
                 cols[i]['style'].backgroundColor = value;
             }
@@ -316,37 +250,9 @@ export class MaterialComponent implements OnInit, AfterViewInit, OnDestroy {
         if (value) {
             var cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
             for(let i=0; i<cols.length; i++) {
-                cols[i]['style'].fontColor = value;
+                cols[i]['style'].color = value;
             }
         }
     }
 
-    // setCellFocus(){
-    //     if (this._focusCell && 
-    //         this._focusCell.rowIndex >=0 &&
-    //         this._focusCell.column &&
-    //         this._focusCell.column.colId &&
-    //         this._focusTable &&
-    //         this[this._focusTable] &&
-    //         this[this._focusTable].api
-    //         ) {
-    //         try { //set focused column
-    //             this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-    //             this[this._focusTable].api.tabToNextCell()
-    //         } catch (e) {
-    //             console.log(e);
-    //         }
-    //     }       
-    // }
-
-    // updateContext() {
-    //     let _materialDataName = 'materialData'
-    //     let _totalsDataName = 'totalsData'
-
-    //     this.cmGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_materialDataName]))
-    //     this.cmGridOptions.context.arrayName = _materialDataName
-
-    //     this.mattGridOptions.context.totalsData = JSON.parse(JSON.stringify(this.dataContext[_totalsDataName]))
-    //     this.mattGridOptions.context.arrayName = _totalsDataName
-    // }
 }

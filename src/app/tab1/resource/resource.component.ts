@@ -13,6 +13,9 @@ import { UtilsService } from '../../service/utils.service'
 import { Subscription } from 'rxjs/subscription'
 
 import { IYear } from '../../model/year.model'
+
+import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
+
 @Component({
     selector: 'resource',
     templateUrl: './resource.component.html',
@@ -50,20 +53,15 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
 
     //totals
     public prtTableWidth: number = 2100;
-
-    // public _backgroundColour: string = '#99e7ff';
     
-    //used to track cell focus
-    public _focusCell:any
-    public _focusTable:string
-
-
     //continuous streams that need to be destroyed on exit
     public resouceStream: Subscription
     public totalStream: Subscription
     public workdayStream: Subscription
     public resourceContextStream: Subscription
     public totalContextStream: Subscription
+
+    public tableReady: boolean;
 
     constructor(private tableService: TableService, 
                 private dataContextService: DataContextService,
@@ -73,7 +71,9 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
                 private el: ElementRef) {
-        
+    
+        this.tableReady = false;
+
         //initialise gridoptions objects
         this.puGridOptions = <GridOptions>{};
         this.wdGridOptions = <GridOptions>{};
@@ -90,14 +90,21 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
         this.wdGridOptions.onGridReady = () => {
             this.wdGridOptions.api.setHeaderHeight(0)
         }
+        this.wdGridOptions.suppressCellSelection=true;
+        this.wdGridOptions.domLayout = 'forPrint'         
 
         //percentage utilised gridoptions
         this.puGridOptions.singleClickEdit = true;
         this.puGridOptions.enableCellExpressions = true;
+        this.puGridOptions.suppressCellSelection=true;
+        this.puGridOptions.domLayout = 'forPrint'
+       
+
         this.puGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusCell = this.puGridOptions.api.getFocusedCell()
-            this._focusTable = 'puGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'puGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber()); 
         };
         this.puGridOptions.context = {};
@@ -107,27 +114,32 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
         //actual hours gridoptions
         this.ahGridOptions.context = {};
         this.ahGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusCell = this.ahGridOptions.api.getFocusedCell()
-            this._focusTable = 'ahGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'ahGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         // this.ahGridOptions.rowSelection = 'single';
         this.ahGridOptions.singleClickEdit = true;
-        this.ahGridOptions.enableColResize = true; 
+        this.ahGridOptions.enableColResize = true;
+        this.ahGridOptions.suppressCellSelection=true;
+        this.ahGridOptions.domLayout = 'forPrint'        
 
         //project resource gridoptions
         this.prGridOptions.context = {};
         this.prGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusCell = this.prGridOptions.api.getFocusedCell()
-            this._focusTable = 'prGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'prGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         // this.prGridOptions.rowSelection = 'single';
         this.prGridOptions.singleClickEdit = true;
         this.prGridOptions.enableColResize = true; 
-
+        this.prGridOptions.suppressCellSelection=true;
+        this.prGridOptions.domLayout = 'forPrint'
 
         //Project Resource Totals gridoptions
         this.prtGridOptions.context = {};
@@ -138,6 +150,8 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
         
         this.prtGridOptions.singleClickEdit = true;
         this.prtGridOptions.enableColResize = true;
+        this.prtGridOptions.suppressCellSelection=true;
+        this.prtGridOptions.domLayout = 'forPrint'        
 
                                           
     }
@@ -163,12 +177,7 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.resouceStream = this.dataContextService.getResourceDataStream().subscribe(data => {
            console.error('RESOURCE DATA RECEIVED')
-            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }
+
 
             if (!this.puGridOptions.rowData) {
                 this.puGridOptions.rowData = data;
@@ -189,6 +198,17 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
             }
 
             this.resizeTables(data.length);
+
+            // redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            }
+
+            if (this.tableReady == false) {
+                this.tableReady = true;
+            }
         })
         
         this.totalStream = this.dataContextService.getTotalDataStream().subscribe(data => {
@@ -309,88 +329,16 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe(this.getSubscriber())
     }
 
-    // applyCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-    //     this.puGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.ahGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.prGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-
-    //     this.puGridOptions.api.setColumnDefs(this.puGridOptions.columnDefs);
-    //     this.ahGridOptions.api.setColumnDefs(this.ahGridOptions.columnDefs);
-    //     this.prGridOptions.api.setColumnDefs(this.prGridOptions.columnDefs);
-    // }
-
-    // applyTotalCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-    //     console.log(data);
-    //     console.log(this.prtGridOptions.columnDefs)
-    //     this.prtGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.prtGridOptions.api.setColumnDefs(this.prtGridOptions.columnDefs);
-
-    // }
-
-    // applyCellStyle(column: any, data: any, bkColour: string){
-    //         column.cellStyle = function(params: any){
-    //             let fldName = params.colDef.field;
-    //             let rowID = params.data.ID;
-    //             console.log(rowID)
-    //             let highlightCell = false;
-    //             if (data.length > 0) {
-                    
-    //                 data.forEach(function(dataCell: any){
-    //                      if(dataCell.fieldName == fldName &&
-    //                         dataCell.ID == rowID) {
-    //                             highlightCell = true;
-    //                         }
-    //                 });
-    //             }
-    //             return (highlightCell? 
-    //                     {backgroundColor: bkColour}:
-    //                     {backgroundColor: '#ffff'})
-
-    //         }
-    // }
-
-    // constructHighlightsObject(tableData:any){
-    //     let data:Array<any> = []
-    //     if (tableData.length > 0){
-    //         tableData.forEach((rowData:any)=> {
-    //             if (rowData.Highlights && 
-    //                 rowData.Highlights.length>0) {
-    //                      rowData.Highlights.forEach((highlight:any) => {
-    //                         data.push(highlight);
-    //                     })
-
-    //                 }
-    //         })   
-    //     }
-    //     return data
-    // }
-
     resizeTables(noRows: number) {
-        this.wdTableWidth = 1520
+        this.wdTableWidth = 1501
 
         this.puTableHeight = (noRows * 25) + 30;
         this.ahTableHeight = (noRows * 25) + 30;
         this.prTableHeight = (noRows * 25) + 30;
 
-        this.puTableWidth = 1620;
-        this.ahTableWidth = 1720;
-        this.prTableWidth = 1920;
+        this.puTableWidth = 1601;
+        this.ahTableWidth = 1701;
+        this.prTableWidth = 1901;
 
         //Totals
 
@@ -409,7 +357,7 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
 
      changeHeaderBGColor(value) {
         if (value) {
-            var cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
+            var cols =     this.el.nativeElement.getElementsByClassName('ag-header-row');
             for(let i=0; i<cols.length; i++) {
                 cols[i]['style'].backgroundColor = value;
             }
@@ -420,44 +368,8 @@ export class ResourceComponent implements OnInit, AfterViewInit, OnDestroy {
         if (value) {
             var cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
             for(let i=0; i<cols.length; i++) {
-                cols[i]['style'].fontColor = value;
+                cols[i]['style'].color = value;
             }
         }
     }
-
-    setCellFocus(){
-        if (this._focusCell && 
-            this._focusCell.rowIndex >=0 &&
-            this._focusCell.column &&
-            this._focusCell.column.colId &&
-            this._focusTable &&
-            this[this._focusTable] &&
-            this[this._focusTable].api
-            ) {
-            try { //set focused column
-                this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-                this[this._focusTable].api.tabToNextCell()
-            } catch (e) {
-                console.log(e);
-            }
-        }       
-    }
-
-    // updateContext() {
-    //     let _resourceDataName = 'resourceData'
-    //     let _totalsDataName = 'totalsData'
-
-    //     console.log(JSON.parse(JSON.stringify(this.dataContext[_resourceDataName])))
-    //     this.puGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
-    //     this.puGridOptions.context.arrayName = _resourceDataName
-
-    //     this.prGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
-    //     this.prGridOptions.context.arrayName = _resourceDataName
-
-    //     this.ahGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
-    //     this.ahGridOptions.context.arrayName = _resourceDataName
-        
-    //     this.prtGridOptions.context.totalsData = JSON.parse(JSON.stringify(this.dataContext[_totalsDataName]))
-    //     this.prtGridOptions.context.arrayName = _totalsDataName
-    // }
 }

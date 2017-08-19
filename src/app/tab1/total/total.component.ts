@@ -24,16 +24,13 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
     public tTableHeight: number = 30;
 
     //totals
-    public tTableWidth: number = 2100;
+    public tTableWidth: number = 1901;
 
     public uiState: any;
 
+    public title: string;
     // public _backgroundColour: string = '#99e7ff';
     
-    //used to track cell focus
-    public _focusCell:any
-    public _focusTable:string
-
     public totalStream: Subscription
     public totalContextStream: Subscription
 
@@ -44,16 +41,18 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
                 private utilsService: UtilsService,
                 private el: ElementRef) {
         
+        this.title = 'Total'
+
         //initialise gridoptions objects
         this.tGridOptions = <GridOptions>{};
 
         //Total cost gridoptions
         this.tGridOptions.context = {};
-        this.tGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusTable = 'tGridOptions'
-            this._focusCell = this.tGridOptions.api.getFocusedCell()
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber());
-        };
+        // this.tGridOptions.onCellValueChanged = ($event: any) => {
+        //     this._focusTable = 'tGridOptions'
+        //     this._focusCell = this.tGridOptions.api.getFocusedCell()
+        //     this.scriptService.updateTable($event).subscribe(this.getSubscriber());
+        // };
         this.tGridOptions.onGridReady = () => {
             //Remove Header
             this.tGridOptions.api.setHeaderHeight(0)
@@ -61,6 +60,8 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.tGridOptions.singleClickEdit = true;
         this.tGridOptions.enableColResize = true;
+        this.tGridOptions.suppressCellSelection=true;
+        this.tGridOptions.domLayout = 'forPrint' 
     }
 
     ngOnInit() {
@@ -70,18 +71,11 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.totalStream = this.dataContext.getTotalDataStream().subscribe(data => {
             console.error('TOTAL DATA RECEIVED')
-            console.log(data)
-
-
             if (!this.tGridOptions.rowData) {
                 this.tGridOptions.rowData = data;
             } else if (this.tGridOptions.api) {
                 this.tGridOptions.api.setRowData(data);
             }
-
-            // if(this.tGridOptions.api){
-            //     this.applyTotalCellHighlights(data);
-            // }
         })
 
         this.totalContextStream = this.dataContext.getTotalContextStream().subscribe(data => {
@@ -94,14 +88,8 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
             }
         })
 
-        // this.uiStateService.uiState().subscribe(data => {
-        //     this.uiState = data;
-            
-        // })
             this.refreshGrid()
-        
-        //get inital ui state values
-        // this.uiStateService.updateState();
+
     }
 
     ngAfterViewInit () {
@@ -118,56 +106,6 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
         this.totalStream.unsubscribe()
         this.totalContextStream.unsubscribe()
     }
-
-
-    // applyTotalCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-
-    //     this.tGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.tGridOptions.api.setColumnDefs(this.tGridOptions.columnDefs);
-
-    // }
-
-    // applyCellStyle(column: any, data: any, bkColour: string){
-    //         column.cellStyle = function(params: any){
-    //             let fldName = params.colDef.field;
-    //             let rowId = params.data.ItemId;
-    //             let highlightCell = false;
-    //             if (data.length > 0) {
-                    
-    //                 data.forEach(function(dataCell: any){
-    //                      if(dataCell.fieldName == fldName &&
-    //                         dataCell.ItemId == rowId) {
-    //                             highlightCell = true;
-    //                         }
-    //                 });
-    //             }
-    //             return (highlightCell? 
-    //                     {backgroundColor: bkColour}:
-    //                     {backgroundColor: '#ffff'})
-
-    //         }
-    // }
-
-    // constructHighlightsObject(tableData:any){
-    //     let data:Array<any> = []
-    //     if (tableData.length > 0){
-    //         tableData.forEach((rowData:any)=> {
-    //             if (rowData.Highlights && 
-    //                 rowData.Highlights.length>0) {
-    //                      rowData.Highlights.forEach((highlight:any) => {
-    //                         data.push(highlight);
-    //                     })
-
-    //                 }
-    //         })   
-    //     }
-    //     return data
-    // }
 
     refreshGrid(){
         if(this.settingsService.initAppComplete){
@@ -192,7 +130,7 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
 
      changeHeaderBGColor(value) {
         if (value) {
-            let cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
+            let cols =     this.el.nativeElement.getElementsByClassName('ag-header-row');
             for(let i=0; i<cols.length; i++) {
                 cols[i]['style'].backgroundColor = value;
             }
@@ -203,7 +141,7 @@ export class TotalComponent implements OnInit, AfterViewInit, OnDestroy {
         if (value) {
             let cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
             for(let i=0; i<cols.length; i++) {
-                cols[i]['style'].fontColor = value;
+                cols[i]['style'].color = value;
             }
         }
     }

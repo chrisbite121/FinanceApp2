@@ -42,10 +42,6 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // public _backgroundColour: string = '#99e7ff';
     
-    //used to track cell focus
-    public _focusCell:any
-    public _focusTable:string
-
     public resourceStream: Subscription
     public resourceContextStream: Subscription
     public totalStream: Subscription
@@ -69,39 +65,48 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
         //travel subsidence gridoptions
         this.tsGridOptions.context = {};
         this.tsGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusCell = this.tsGridOptions.api.getFocusedCell()
-            this._focusTable = 'tsGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'tsGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         // this.tsGridOptions.rowSelection = 'single';
         this.tsGridOptions.singleClickEdit = true;
-        this.tsGridOptions.enableColResize = true;   
+        this.tsGridOptions.enableColResize = true;
+        this.tsGridOptions.suppressCellSelection=true;
+        this.tsGridOptions.domLayout = 'forPrint'  
 
         //actual travel subsidence gridoptions
         this.atsGridOptions.context = {};
         this.atsGridOptions.onCellValueChanged = ($event: any) => {
 
-            this._focusCell = this.atsGridOptions.api.getFocusedCell()
-            this._focusTable = 'atsGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'atsGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         // this.atsGridOptions.rowSelection = 'single';
         this.atsGridOptions.singleClickEdit = true;
         this.atsGridOptions.enableColResize = true;
+        this.atsGridOptions.suppressCellSelection=true;
+        this.atsGridOptions.domLayout = 'forPrint'  
 
         //Project resource travel subsistence gridoptions
         this.rtsGridOptions.context = {};
         this.rtsGridOptions.onCellValueChanged = ($event: any) => {
-            this._focusCell = this.rtsGridOptions.api.getFocusedCell()
-            this._focusTable = 'rtsGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, this._focusTable, this._focusCell.rowIndex, this._focusCell.column.colId)
+            let _rowIndex = $event.node.rowIndex
+            let _colId = $event.column.colId
+            let _focusTable = 'rtsGridOptions'
+            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         };
         this.rtsGridOptions.rowSelection = 'single';
         this.rtsGridOptions.singleClickEdit = true;
         this.rtsGridOptions.enableColResize = true;
+        this.rtsGridOptions.suppressCellSelection=true;
+        this.rtsGridOptions.domLayout = 'forPrint'  
 
         //Resource Travel Subsistence Totals gridoptions
         this.rtstGridOptions.context = {};
@@ -112,6 +117,8 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.rtstGridOptions.singleClickEdit = true;
         this.rtstGridOptions.enableColResize = true;
+        this.rtstGridOptions.suppressCellSelection=true;
+        this.rtstGridOptions.domLayout = 'forPrint'  
                          
     }
 
@@ -151,14 +158,15 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.rtsGridOptions.api.setRowData(data);
             }
 
-            // if(this.tsGridOptions.api &&
-            //     this.atsGridOptions.api &&
-            //     this.rtsGridOptions.api
-            //     ) {
-            //         this.applyCellHighlights(data);  
-            //     }
             this.resizeTables(data.length);
-            // this.setCellFocus();
+
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            let focusedCellData = this.uiStateService.getFocusCellData()
+            if(this[focusedCellData.gridOptions]) {
+                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+            }            
+
         })
 
         this.totalStream = this.dataContext.getTotalDataStream().subscribe(data => {
@@ -169,26 +177,9 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.rtstGridOptions.api.setRowData(data);
             }
 
-                         
-
-            // if(this.rtstGridOptions.api) {
-            //         this.applyTotalCellHighlights(data);  
-            //     }            
         })
 
-        // this.uiStateService.uiState().subscribe(data => {
-        //     this.uiState = data;
-            
-        // })
-
         this.resourceContextStream = this.dataContext.getResourceContextStream().subscribe(data => {
-            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }
-
             let _resourceDataName = 'resourceData'
             if(typeof(data) == 'object') {
                 if(this.tsGridOptions){
@@ -242,36 +233,36 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
 
-    addResourceRow(){
-        this.scriptService.addDataRow(this.utilsService.financeAppResourceData, this.settingsService.year, this.settingsService.autoSave)
-            .subscribe(this.getSubscriber());
-        return
-    }
+    // addResourceRow(){
+    //     this.scriptService.addDataRow(this.utilsService.financeAppResourceData, this.settingsService.year, this.settingsService.autoSave)
+    //         .subscribe(this.getSubscriber());
+    //     return
+    // }
 
-    deleteResourceRow(){
-        let selectedNode:any = this.tsGridOptions.api.getSelectedNodes();
-        console.log(selectedNode)
+    // deleteResourceRow(){
+    //     let selectedNode:any = this.tsGridOptions.api.getSelectedNodes();
+    //     console.log(selectedNode)
         
-        if (!Array.isArray(selectedNode)) {
-            alert('no row selected');
-            return
-        }
+    //     if (!Array.isArray(selectedNode)) {
+    //         alert('no row selected');
+    //         return
+    //     }
 
-        if (selectedNode.length !== 1) {
-            alert('only 1 row must be selected to perform the delete operation')
-            return
-        }
+    //     if (selectedNode.length !== 1) {
+    //         alert('only 1 row must be selected to perform the delete operation')
+    //         return
+    //     }
 
-        if (selectedNode[0].hasOwnProperty('data') && 
-            selectedNode[0].data.hasOwnProperty('ID')) {
-                this.scriptService.deleteDataRow(this.utilsService.financeAppResourceData,
-                selectedNode[0].data.ID)
-                    .subscribe(this.getSubscriber());
-                    } else {
-                        alert('something has gone wrong, required data values are not available to delete row')
-                    }
-        return
-    }    
+    //     if (selectedNode[0].hasOwnProperty('data') && 
+    //         selectedNode[0].data.hasOwnProperty('ID')) {
+    //             this.scriptService.deleteDataRow(this.utilsService.financeAppResourceData,
+    //             selectedNode[0].data.ID)
+    //                 .subscribe(this.getSubscriber());
+    //                 } else {
+    //                     alert('something has gone wrong, required data values are not available to delete row')
+    //                 }
+    //     return
+    // }    
 
     refreshGrid(){
         if(this.settingsService.initAppComplete) {
@@ -287,86 +278,16 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe(this.getSubscriber());
     }
 
-    // applyCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-    //     this.tsGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.atsGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-
-    //     this.rtsGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.tsGridOptions.api.setColumnDefs(this.tsGridOptions.columnDefs);
-    //     this.atsGridOptions.api.setColumnDefs(this.atsGridOptions.columnDefs);
-    //     this.rtsGridOptions.api.setColumnDefs(this.rtsGridOptions.columnDefs);
-
-    // }
-
-    // applyTotalCellHighlights(tableData: any){
-    //     let bkColour = this._backgroundColour;
-    //     let data:Array<any> = this.constructHighlightsObject(tableData);
-
-    //     this.rtstGridOptions.columnDefs.forEach((column:any) => {
-    //         //highlight updated cells
-    //         return this.applyCellStyle(column,data, bkColour);
-    //     })
-    //     this.rtstGridOptions.api.setColumnDefs(this.rtstGridOptions.columnDefs);
-    // }
-
-    // applyCellStyle(column: any, data: any, bkColour: string){
-    //         column.cellStyle = function(params: any){
-    //             let fldName = params.colDef.field;
-    //             let rowId = params.data.ItemId;
-    //             let highlightCell = false;
-    //             if (data.length > 0) {
-                    
-    //                 data.forEach(function(dataCell: any){
-    //                      if(dataCell.fieldName == fldName &&
-    //                         dataCell.ItemId == rowId) {
-    //                             highlightCell = true;
-    //                         }
-    //                 });
-    //             }
-    //             return (highlightCell? 
-    //                     {backgroundColor: bkColour}:
-    //                     {backgroundColor: '#ffff'})
-
-    //         }
-    // }
-
-    // constructHighlightsObject(tableData:any){
-    //     let data:Array<any> = []
-    //     if (tableData.length > 0){
-    //         tableData.forEach((rowData:any)=> {
-    //             if (rowData.Highlights && 
-    //                 rowData.Highlights.length>0) {
-    //                      rowData.Highlights.forEach((highlight:any) => {
-    //                         data.push(highlight);
-    //                     })
-
-    //                 }
-    //         })   
-    //     }
-    //     return data
-    // }
-
     resizeTables(noRows: number) {
         this.tsTableHeight = (noRows * 25) + 40;
         this.atsTableHeight = (noRows * 25) + 40;
         this.rtsTableHeight = (noRows * 25) + 40;
 
-        this.tsTableWidth = 1800;
-        this.atsTableWidth = 1800;
-        this.rtsTableWidth = 2000;
+        this.tsTableWidth = 1601;
+        this.atsTableWidth = 1601;
+        this.rtsTableWidth = 1901;
         //Totals
-        this.rtstTableWidth = 2100;
+        this.rtstTableWidth = 1901;
     }
 
     getSubscriber() {
@@ -379,7 +300,7 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
 
      changeHeaderBGColor(value) {
         if (value) {
-            var cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
+            var cols =     this.el.nativeElement.getElementsByClassName('ag-header-row');
             for(let i=0; i<cols.length; i++) {
                 cols[i]['style'].backgroundColor = value;
             }
@@ -390,43 +311,10 @@ export class TravelComponent implements OnInit, AfterViewInit, OnDestroy {
         if (value) {
             var cols =     this.el.nativeElement.getElementsByClassName('ag-header-container');
             for(let i=0; i<cols.length; i++) {
-                cols[i]['style'].fontColor = value;
+                cols[i]['style'].color = value;
             }
         }
     }
 
-    // setCellFocus(){
-    //     if (this._focusCell && 
-    //         this._focusCell.rowIndex >=0 &&
-    //         this._focusCell.column &&
-    //         this._focusCell.column.colId &&
-    //         this._focusTable &&
-    //         this[this._focusTable] &&
-    //         this[this._focusTable].api
-    //         ) {
-    //         try { //set focused column
-    //             this[this._focusTable].api.setFocusedCell(this._focusCell.rowIndex, this._focusCell.column.colId)
-    //             this[this._focusTable].api.tabToNextCell()
-    //         } catch (e) {
-    //             console.log(e);
-    //         }
-    //     }       
-    // }
-
-    // updateContext() {
-    //     let _resourceDataName = 'resourceData'
-    //     let _totalsDataName = 'totalsData'
-
-    //     this.tsGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
-    //     this.tsGridOptions.context.arrayName = _resourceDataName
-
-    //     this.atsGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
-    //     this.atsGridOptions.context.arrayName = _resourceDataName
-
-    //     this.rtsGridOptions.context.resourceData = JSON.parse(JSON.stringify(this.dataContext[_resourceDataName]))
-    //     this.rtsGridOptions.context.arrayName = _resourceDataName
-        
-    //     this.rtstGridOptions.context.totalsData = JSON.parse(JSON.stringify(this.dataContext[_totalsDataName]))
-    //     this.rtstGridOptions.context.arrayName = _totalsDataName
-    // }    
+ 
 }

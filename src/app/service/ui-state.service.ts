@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 
-// import { Observable } from 'rxjs/Rx';
-// import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Rx';
+import { Subject } from 'rxjs/Subject';
 
 // import { HistoryService } from './history.service'
 //import { IUiState } from '../model/ui-state.model'
@@ -89,7 +89,7 @@ const materialFocusedCells:IFocusColumn[] = [
 @Injectable()
 export class UiStateService {
     private _uiState;
-    // private _stateStream: Subject<any> = new Subject();
+    private _messageStream: Subject<any> = new Subject();
     // add settings 
     // auto save, highlight colour picker, debug mode
     // public _focusCellStream: Subject<any> = new Subject();
@@ -121,6 +121,10 @@ export class UiStateService {
             focusedRowIndex: '',
             focusedList: '',
             focusedGridOptions: '',
+            messageData: {
+                icon: 'spinner',
+                message: 'loading'
+            }
 
         }
         // this.getHistoryStream();
@@ -153,10 +157,9 @@ export class UiStateService {
             }
     }
 
-    // getFocusCellDataStream(): Observable<any> {
-    //     let dataStream = this._focusCellStream.asObservable()
-    //     return dataStream
-    // }
+    getMessageDataStream(): Observable<any> {
+        return this._messageStream.asObservable()
+    }
 
     getFocusCellData(){
         return {
@@ -223,6 +226,19 @@ export class UiStateService {
         }
 
         return tableName
+    }
+
+    emitMessageData(){
+        this._messageStream.next(this._uiState.messageData)
+    }
+
+    updateMessage(message:string, icon:string):Observable<any>{
+        let updateMsg$ = new Observable((observer:any) => {
+            this._uiState.messageData.message = message;
+            this._uiState.messageData.icon = icon;
+            this.emitMessageData()
+        })
+        return updateMsg$
     }
 
     // uiState():Observable<any> {

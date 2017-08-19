@@ -1,0 +1,21 @@
+<div class="ms-Grid-row">
+     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+        <of-button (buttonClicked)='updateNotification($event)' 
+                    [label]="'Update Notification'" 
+                    [type]="'small'" 
+                    [id]="'updatenotification'" 
+                    [description]="'Update Notification'"></of-button>
+     </div>
+    <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4">
+        <of-textfield [innerlabel]="'Field Name'" [id]="'notificationMessage'" (textEntered)='notificationMessageSet($event)' [defaultValue]="message"></of-textfield>
+     </div>
+
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md3 ms-u-lg2">
+      <of-dropdown [innerlabel]="" 
+                  [id]="'setIconType'" 
+                  [disable]='false' 
+                  [options]= "iconTypeOptions" 
+                  [defaultValue]='icon'
+                  (choiceSelectedEvent)='iconTypeSet($event)'></of-dropdown>
+    </div>
+</div>

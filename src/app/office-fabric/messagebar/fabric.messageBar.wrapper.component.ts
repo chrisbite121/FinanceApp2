@@ -1,10 +1,10 @@
-import { Component, Input, AfterViewInit } from '@angular/core'
+import { Component, Input, AfterContentInit } from '@angular/core'
 
 @Component({
     selector: 'of-messagebar',
     templateUrl: './fabric.messageBar.wrapper.component.html'
 })
-export class FabricMessageBarWrapperComponent implements AfterViewInit {
+export class FabricMessageBarWrapperComponent implements AfterContentInit {
     public icontype: string = '';
     public messagebartype: string = '';
 
@@ -15,15 +15,16 @@ export class FabricMessageBarWrapperComponent implements AfterViewInit {
 
 
     constructor(){
-
+       
     }
 
-    ngAfterViewInit(){
-        console.log(this.type)
+    ngAfterContentInit(){
+        if (!this.urllink) {
+            this.urllink = '/'
+        }
         if (this.type) {
             this.type = this.type.toLowerCase()
         }
-        console.log(this.type);
         switch (this.type) {
             case 'info':
                 this.messagebartype = ''
@@ -55,8 +56,5 @@ export class FabricMessageBarWrapperComponent implements AfterViewInit {
             break;
         }
 
-        if (!this.urllink) {
-            this.urllink = '/'
-        }
     }
 }
