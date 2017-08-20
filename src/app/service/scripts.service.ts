@@ -1529,7 +1529,20 @@ loadAppDataLists(listArray:Array<string>, year:number):Array<Observable<any>>{
 getAppData(listArray:Array<string>, year:number): Observable<any>{
     let get$ = 
         this.dataContextService.checkForCachedData(listArray, year)
-            .mergeMap(data =>
+        .mergeMap(data =>
+        (typeof(data) == 'object' &&
+        data.hasOwnProperty('functionCall') &&
+        data.hasOwnProperty('listName') &&
+        data.hasOwnProperty('result') &&
+        data.hasOwnProperty('dataExists') &&
+        data.functionCall == 'checkForCachedData' &&
+        data.result == true &&
+        data.dataExists == true)
+        ? this.dataContextService.emitValues([data.listName])
+        : Observable.of(data)
+        )
+        .mergeMap(data =>
+        (
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('listName') &&
@@ -1537,29 +1550,16 @@ getAppData(listArray:Array<string>, year:number): Observable<any>{
             data.hasOwnProperty('dataExists') &&
             data.functionCall == 'checkForCachedData' &&
             data.result == true &&
-            data.dataExists == true)
-            ? this.dataContextService.emitValues([data.listName])
+            data.dataExists == false
+        )
+        &&
+        (
+            this.settingsService.sharePointMode
+        )
+        )
+            ? this.loadAppData([data.listName],year)
             : Observable.of(data)
-            )
-            .mergeMap(data =>
-            (
-                (typeof(data) == 'object' &&
-                data.hasOwnProperty('functionCall') &&
-                data.hasOwnProperty('listName') &&
-                data.hasOwnProperty('result') &&
-                data.hasOwnProperty('dataExists') &&
-                data.functionCall == 'checkForCachedData' &&
-                data.result == true &&
-                data.dataExists == false
-            )
-            &&
-            (
-                this.settingsService.sharePointMode
-            )
-            )
-                ? this.loadAppData([data.listName],year)
-                : Observable.of(data)
-            )        
+        )        
 
         return get$
 }
@@ -1578,10 +1578,19 @@ updateTable(event: any): Observable<any> {
         * 9. reset statechange flag
         */
         let updateTable$ =
-            this.dataContextService.emitContextValues([this.utilsService.financeAppResourceData,
+            this.uiStateService.updateMessage('updating data', 'spinner')
+            .mergeMap(data => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'updateMessage' &&
+            data.result == true)
+            ? this.dataContextService.emitContextValues([this.utilsService.financeAppResourceData,
                                                         this.utilsService.financeAppMaterialData,
                                                         this.utilsService.financeAppTotalsData,
                                                         this.utilsService.financeAppSummaryData])
+            : Observable.of(data)
+            )
             .mergeMap(data =>
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
@@ -1680,6 +1689,7 @@ saveAppData(){
 
 
     let submitData$ = Observable
+
         .merge(...this.prepDataForApi([
                 {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
                 {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},

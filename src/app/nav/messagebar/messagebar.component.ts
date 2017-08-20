@@ -16,10 +16,10 @@ export class MessagebarComponent implements OnChanges {
     public messageStream: Subscription
 
     constructor(private uiStateService: UiStateService){
-        this.icon = 'spinner'
+        this.icon = 'none'
         this.successImageUrl = require('../../assets/tick.png')
         this.errorImageUrl = require('../../assets/error.png')
-        this.message = 'loading...'
+        this.message = ''
 
         this.messageStream = this.uiStateService.getMessageDataStream().subscribe(data => {
             console.log(data)

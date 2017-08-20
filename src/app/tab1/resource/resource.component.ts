@@ -104,7 +104,14 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             let _colId = $event.column.colId
             let _focusTable = 'puGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber()); 
+            this.scriptService.updateTable($event)
+                    .subscribe(
+                        data => console.log(data),
+                        err => console.log(err),
+                        () => { 
+                            console.error('COMPLETED');                            
+                            this.uiStateService.updateMessage('update completed', 'success').subscribe(this.getSubscriber())
+                    });
         };
         this.puGridOptions.context = {};
         this.puGridOptions.rowSelection = 'single';
@@ -132,7 +139,7 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             let _colId = $event.column.colId
             let _focusTable = 'prGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber());
+            this.scriptService.updateTable($event).subscribe(this.getSubscriber())
         };
         // this.prGridOptions.rowSelection = 'single';
         this.prGridOptions.singleClickEdit = true;

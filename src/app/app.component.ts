@@ -11,7 +11,7 @@ import { CommonApiService } from './service/api-common.service'
 import { SettingsService } from './service/settings.service'
 import { NotificationService } from './service/notification.service'
 
-
+import { FabricSpinnerWrapperComponent } from './office-fabric/spinner/fabric.spinner.wrapper.component'
 
 @Component({
   selector: 'my-app',
@@ -164,4 +164,5 @@ export class AppComponent  {
         );
 
     }
+
 }

@@ -122,8 +122,8 @@ export class UiStateService {
             focusedList: '',
             focusedGridOptions: '',
             messageData: {
-                icon: 'spinner',
-                message: 'loading'
+                icon: 'none',
+                message: ''
             }
 
         }
@@ -237,6 +237,12 @@ export class UiStateService {
             this._uiState.messageData.message = message;
             this._uiState.messageData.icon = icon;
             this.emitMessageData()
+
+            observer.next({
+                functionCall: 'updateMessage',
+                result: true
+            })
+            observer.complete()
         })
         return updateMsg$
     }

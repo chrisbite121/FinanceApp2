@@ -500,6 +500,7 @@ addDataItemToTable(listName:string, item):Observable<any> {
         let check$ = new Observable((observer:any) => {
             if(typeof(year) !== 'number') {
                 this.logService.log(`error with year value in functionCall: checkForCachedData; year value captured as: ${year}`, this.utilsService.errorStatus, false)
+                observer.complete()
             }
 
             if(listArray.length > 0) {
@@ -548,6 +549,8 @@ addDataItemToTable(listName:string, item):Observable<any> {
                     }
                 })
             }
+
+            observer.complete()
         })
         return check$
     }

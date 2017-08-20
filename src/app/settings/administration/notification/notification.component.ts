@@ -14,7 +14,7 @@ export class NotificationComponent{
     constructor(private uiStateService: UiStateService){
         this.message = 'loading',
         this.icon = 'spinner'
-        this.iconTypeOptions = ['spinner', 'success', 'error']
+        this.iconTypeOptions = ['spinner', 'success', 'error', 'none']
     }
 
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core'
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, AfterContentChecked} from '@angular/core'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 import { ScriptService } from '../../service/scripts.service'
@@ -26,7 +26,7 @@ export class SettingsMainComponent implements OnInit, AfterViewInit {
     public workingHoursInDayValue: number;
     public tsWeightingValue: number;
     public listAutoCheckValue: boolean;
-    public tswInput: HTMLElement
+    public tswInput: HTMLElement;
 
     constructor(private settingsService: SettingsService,
                 private utilsService: UtilsService,
@@ -61,7 +61,7 @@ export class SettingsMainComponent implements OnInit, AfterViewInit {
             .debounceTime(1000)
             .subscribe((data:Event) => {
                 this.updateSetting('TsWeighting',data.target['value'])
-            });
+            });      
     }
 
     yearSelect(year){
