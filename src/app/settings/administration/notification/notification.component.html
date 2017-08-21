@@ -1,21 +1,60 @@
-<div class="ms-Grid-row">
-     <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
-        <of-button (buttonClicked)='updateNotification($event)' 
-                    [label]="'Update Notification'" 
-                    [type]="'small'" 
-                    [id]="'updatenotification'" 
-                    [description]="'Update Notification'"></of-button>
-     </div>
-    <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg4">
-        <of-textfield [innerlabel]="'Field Name'" [id]="'notificationMessage'" (textEntered)='notificationMessageSet($event)' [defaultValue]="message"></of-textfield>
-     </div>
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg2">
+            <of-button (buttonClicked)='updateNotification($event)' 
+                        [label]="'Update Notification Status'" 
+                        [type]="'small'" 
+                        [id]="'updatenotification'" 
+                        [description]="'Update Notification Status'"></of-button>
+        </div>
+        <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg2">
+            <of-textfield [innerlabel]="'Field Name'" [id]="'notificationMessage'" (textEntered)='notificationMessageSet($event)' [defaultValue]="message"></of-textfield>
+        </div>
 
-    <div class="ms-Grid-col ms-u-sm4 ms-u-md3 ms-u-lg2">
-      <of-dropdown [innerlabel]="" 
-                  [id]="'setIconType'" 
-                  [disable]='false' 
-                  [options]= "iconTypeOptions" 
-                  [defaultValue]='icon'
-                  (choiceSelectedEvent)='iconTypeSet($event)'></of-dropdown>
+        <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg2">
+        <of-dropdown [innerlabel]="" 
+                    [id]="'setIconType'" 
+                    [disable]='false' 
+                    [options]= "iconTypeOptions" 
+                    [defaultValue]='icon'
+                    (choiceSelectedEvent)='iconTypeSet($event)'></of-dropdown>
+        </div>
+        <div class="ms-Grid-col ms-u-sm3 ms-u-md3 ms-u-lg2">
+                <of-dropdown [innerlabel]="" 
+                            [id]="'setErrorStatus'" 
+                            [disable]='false' 
+                            [options]= "errorStatusOptions" 
+                            [defaultValue]='"false"'
+                            (choiceSelectedEvent)='errorStatusSet($event)'></of-dropdown>
+                </div>        
     </div>
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+            <of-button (buttonClicked)='generateId($event)' 
+                        [label]="'Generate test ID'" 
+                        [type]="'small'" 
+                        [id]="'generateid'" 
+                        [description]="'Generate ID'"></of-button>
+         </div>
+    </div>
+    <br/>
+    <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+                    <of-button (buttonClicked)='getNotifications($event)' 
+                                [label]="'Get Notifications'" 
+                                [type]="'small'" 
+                                [id]="'getnotifications'" 
+                                [description]="'Get Notifications'"></of-button>
+            </div>
+    </div>
+    <br/>
+    <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm3 ms-u-md2 ms-u-lg2">
+                    <of-button (buttonClicked)='addNotification($event)' 
+                                [label]="'Add Notification'" 
+                                [type]="'small'" 
+                                [id]="'addnotification'" 
+                                [description]="'Add Notification'"></of-button>
+            </div>
+    </div>    
 </div>

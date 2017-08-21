@@ -27,6 +27,7 @@ import { ToolbarComponent } from './toolbar/toolbar.component';
 import { MessagebarComponent } from './nav/messagebar/messagebar.component'
 import { SharedModule } from './shared/shared.module'
 import { FabricMainCommandBarWrapperComponent } from './office-fabric/commandbar/fabric.mainCommandbar.wrapper.component'
+import { DialogComponent } from './nav/dialog/dialog.component'
 
 //modules
 import { SummaryModule } from './summary/summary.module'
@@ -51,7 +52,8 @@ import { appRoutes } from './routes'
         NavBarComponent,
         ToolbarComponent,
         MessagebarComponent,
-        FabricMainCommandBarWrapperComponent
+        FabricMainCommandBarWrapperComponent,
+        DialogComponent
     ],
   providers:    [ 
         LogService,

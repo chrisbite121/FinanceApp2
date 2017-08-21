@@ -110,7 +110,7 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
                         err => console.log(err),
                         () => { 
                             console.error('COMPLETED');                            
-                            this.uiStateService.updateMessage('update completed', 'success').subscribe(this.getSubscriber())
+                            this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
                     });
         };
         this.puGridOptions.context = {};

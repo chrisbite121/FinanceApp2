@@ -9,6 +9,7 @@ import { HealthReportService } from './health-report.service'
 import { SettingsService } from './settings.service'
 import { DataContextService } from './data-context.service'
 import { WorkdayService } from './workdays.service'
+import { NotificationService } from './notification.service'
 
 import { Observable } from 'rxjs/Rx';
 import { Observer } from 'rxjs/Observer';
@@ -18,6 +19,7 @@ import 'rxjs/operator/map'
 import 'rxjs/operator/mergeMap'
 import 'rxjs/operator/merge'
 
+import { UUID } from 'angular2-uuid';
 
 //Models
 import { IItemPropertyModel } from '../model/data-validation.model'
@@ -60,7 +62,8 @@ export class ScriptService {
                 private healthReportService: HealthReportService,
                 private settingsService: SettingsService,
                 private dataContextService: DataContextService,
-                private workdaysService: WorkdayService){
+                private workdaysService: WorkdayService,
+                private notificationService: NotificationService){
         this.init()
     }
 
@@ -1577,28 +1580,30 @@ updateTable(event: any): Observable<any> {
         * 8. history service
         * 9. reset statechange flag
         */
+        let _transactionId = UUID.UUID();
+
         let updateTable$ =
-            this.uiStateService.updateMessage('updating data', 'spinner')
-            .mergeMap(data => 
-            (typeof(data) == 'object' &&
-            data.hasOwnProperty('functionCall') &&
-            data.hasOwnProperty('result') &&
-            data.functionCall == 'updateMessage' &&
-            data.result == true)
-            ? this.dataContextService.emitContextValues([this.utilsService.financeAppResourceData,
-                                                        this.utilsService.financeAppMaterialData,
-                                                        this.utilsService.financeAppTotalsData,
-                                                        this.utilsService.financeAppSummaryData])
-            : Observable.of(data)
+            this.uiStateService.updateMessage('updating data', this.utilsService.loadingStatus)
+            .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+                ? this.dataContextService.emitContextValues([this.utilsService.financeAppResourceData,
+                                                            this.utilsService.financeAppMaterialData,
+                                                            this.utilsService.financeAppTotalsData,
+                                                            this.utilsService.financeAppSummaryData])
+                : Observable.of(data)
             )
             .mergeMap(data =>
-            (typeof(data) == 'object' &&
-            data.hasOwnProperty('functionCall') &&
-            data.hasOwnProperty('listArray') &&
-            data.hasOwnProperty('result') &&
-            data.result ==  true)
-            ? this.dataContextService.extractProperties(event)
-            : Observable.of(data) 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('listArray') &&
+                data.hasOwnProperty('result') &&
+                data.result ==  true)
+                ? this.dataContextService.extractProperties(event)
+                : Observable.of(data) 
             )
             .mergeMap(data =>
                 (typeof(data) == 'object' &&
@@ -1665,6 +1670,14 @@ updateTable(event: any): Observable<any> {
                 )
                 ? this.dataContextService.emitValues([data.data.listName, this.utilsService.financeAppTotalsData])
                 : Observable.of(data)
+            )
+            //collect notifications passed down the observable chain and add them to the notifcaiton table
+            .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('reportHeading') &&
+                data.hasOwnProperty('reportResult'))
+                ? this.notificationService.addNotification(data, _transactionId)
+                :Observable.of(data)
             )
             .mergeMap(data =>
                 (

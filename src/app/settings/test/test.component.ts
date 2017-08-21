@@ -20,6 +20,7 @@ import { FabricTableWrapperComponent } from '../../office-fabric/table/fabric.ta
 import { FabricButtonWrapperComponent } from '../../office-fabric/button/fabric.button.wrapper.component'
 import { FabricCommandButtonWrapperComponent } from '../../office-fabric/commandbutton/fabric.commandButton.wrapper.component'
 import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
+import { FabricDialogWrapperComponent } from '../../office-fabric/dialog/fabric.dialog.wrapper.component'
 
 
 const label:ICommandButtonLabel = {

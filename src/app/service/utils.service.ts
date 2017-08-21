@@ -325,5 +325,13 @@ private _Parser;
     
     get summaryDataSetName(){
         return  '_SummaryData'
-    }    
+    }
+
+    get loadingStatus(){
+        return 'loading'
+    }
+
+    get completeStatus(){
+        return 'complete'
+    }
 }

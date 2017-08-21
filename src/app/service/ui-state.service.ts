@@ -123,7 +123,8 @@ export class UiStateService {
             focusedGridOptions: '',
             messageData: {
                 icon: 'none',
-                message: ''
+                message: '',
+                errorStatus: false
             }
 
         }
@@ -245,6 +246,12 @@ export class UiStateService {
             observer.complete()
         })
         return updateMsg$
+    }
+
+    updateErrorStatus(value: boolean): void{
+        this._uiState.messageData.errorStatus = value;
+        this.emitMessageData()
+        return
     }
 
     // uiState():Observable<any> {

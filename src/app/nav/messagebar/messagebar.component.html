@@ -1,22 +1,29 @@
 <div class="ms-Grid-row">
-  <div class="ms-Grid-col ms-u-sm10 message">
-    <div class="message">
-      {{message}}
+  <div class="ms-Grid-col ms-u-sm10">
+    <div class="messageContainer">
+      <span *ngIf='errorStatus' class='message' (click)="showDialog($event)">
+          errors detected
+        </span>
+      <span *ngIf='errorStatus'>
+          &nbsp;<img [src]='errorImageUrl' (click)="showDialog($event)" class="handHover">
+      </span>
+      &nbsp;&nbsp;&nbsp;
+      <span class='message' (click)="showDialog($event)">
+        {{message}}
+      </span>
     </div>
   </div>
-
   <div class="ms-Grid-col ms-u-sm2">
-    <div *ngIf='icon == "spinner"'>
+    <div *ngIf='icon == "loading"'>
       <of-spinner></of-spinner>
     </div>
-    <div *ngIf='icon== "success"'>
-      <img [src]='successImageUrl'>
+    <div *ngIf='icon== "complete"'>
+      <img [src]='successImageUrl' (click)="showDialog($event)" class="handHover">
     </div>
-    <div *ngIf='icon== "error"'>
-      <img [src]='errorImageUrl'>
-    </div>
-    <div *ngIf='icon== "none"'>
+    <div *ngIf='icon=="none"'>
         
-      </div>    
-  </div>
+    </div>    
 </div>
+
+
+<notification-dialog></notification-dialog>

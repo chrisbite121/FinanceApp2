@@ -2,10 +2,18 @@
     line-height: 20px;
 }
 
-.message {
+.messageContainer {
     text-align: right;
+}
+
+.message {
     color: #0000FF;
     text-decoration: underline;
+    cursor: pointer; 
+    cursor: hand;
+}
+
+.handHover {
     cursor: pointer; 
     cursor: hand;
 }

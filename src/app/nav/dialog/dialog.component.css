@@ -1,0 +1,10 @@
+.dialog-container {
+    width: 500px; 
+    max-width:500px
+}
+
+
+.dialog-body {
+    max-height: 300px; 
+    overflow-y: scroll;
+}
