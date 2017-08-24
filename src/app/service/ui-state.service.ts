@@ -243,6 +243,12 @@ export class UiStateService {
                 functionCall: 'updateMessage',
                 result: true
             })
+
+            //used for testing error message
+            // observer.next({
+            //     reportHeading: 'updateMessage',
+            //     reportResult: this.utilsService.errorStatus
+            // })            
             observer.complete()
         })
         return updateMsg$

@@ -1,0 +1,22 @@
+.agGridTable {
+    overflow: hidden;
+}
+
+.info-icon {
+    padding: 5px;
+}
+
+.info-icon:hover {
+    filter: opacity(.7);
+    -webkit-filter: opacity(.7);
+}
+
+.title{
+    cursor: pointer; 
+    cursor: hand;
+}
+
+.title:hover{
+    filter: opacity(.7);
+    -webkit-filter: opacity(.7);
+}

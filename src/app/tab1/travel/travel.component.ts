@@ -9,7 +9,10 @@ import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 import { UiStateService } from '../../service/ui-state.service'
+
 import { fadeInAnimation } from '../../animations/fade-in.animation'
+import { slideInOutAnimation } from '../../animations/slide-in-out.animation'
+import { FabricIconPanelWrapperComponent } from '../../office-fabric/panel/fabric.panel.wrapper.component'
 
 import { Subscription } from 'rxjs/subscription'
 
@@ -19,11 +22,11 @@ import { IYear } from '../../model/year.model'
     templateUrl: './travel.component.html',
     styleUrls: ['./travel.component.css'],
     // make fade in animation available to this component
-    animations: [fadeInAnimation],   
+    animations: [fadeInAnimation, slideInOutAnimation],   
 })
 export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
     public tableReady: boolean = false;
-    
+    public collapsed: boolean = false;    
     public title:string = 'Travel & Subsistence';
     public headerStyle = 'ag-header-cell';
 
@@ -72,7 +75,14 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
             let _colId = $event.column.colId
             let _focusTable = 'tsGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber());
+            this.scriptService.updateTable($event)
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
         };
         // this.tsGridOptions.rowSelection = 'single';
         this.tsGridOptions.singleClickEdit = true;
@@ -88,7 +98,14 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
             let _colId = $event.column.colId
             let _focusTable = 'atsGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber());
+            this.scriptService.updateTable($event)
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
         };
         // this.atsGridOptions.rowSelection = 'single';
         this.atsGridOptions.singleClickEdit = true;
@@ -319,6 +336,12 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
             }
         }
     }
-
+    public isCollapsed(): boolean {
+        return this.collapsed;
+    }
+    
+    public toggleMenu(): void {
+        this.collapsed = !this.collapsed;
+    }
  
 }

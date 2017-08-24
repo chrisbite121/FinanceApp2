@@ -13,6 +13,7 @@ import { fadeInAnimation } from '../../../animations/fade-in.animation'
 
 import { Subscription } from 'rxjs/subscription'
 
+import { FabricIconPanelWrapperComponent } from '../../../office-fabric/panel/fabric.panel.wrapper.component'
 
 @Component({
     selector: 'cost-summary',
@@ -22,11 +23,12 @@ import { Subscription } from 'rxjs/subscription'
     animations: [fadeInAnimation]    
 })
 export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public title: string = 'Cost Summary';
     public tableReady: boolean = false;
     public csGridOptions:GridOptions
 
-    csTableHeight: number = 45;
-    csTableWidth: number = 991;
+    csTableHeight: number = 43;
+    csTableWidth: number = 1361;
 
     public summaryData: Subscription;
     public csSummaryContextStream: Subscription
@@ -44,6 +46,12 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
             //initialise gridoptions objects
             this.csGridOptions = <GridOptions>{};
 
+            this.csGridOptions.singleClickEdit = true;
+            this.csGridOptions.enableColResize = true;
+            this.csGridOptions.rowHeight = 40
+            this.csGridOptions.suppressCellSelection=true;
+            this.csGridOptions.domLayout = 'forPrint'      
+
             //Summary Table gridoptions
             this.csGridOptions.context = {}
             this.csGridOptions.onCellValueChanged = ($event: any) => {
@@ -51,18 +59,21 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
                 let _colId = $event.column.colId                
                 let _focusTable = 'gsGridOptions'
                 this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, _focusTable, _rowIndex, _colId)
-                this.scriptService.updateTable($event).subscribe(this.getSubscriber())
+                this.scriptService.updateTable($event)
+                    .subscribe(
+                        data => console.log(data),
+                        err => console.log(err),
+                        () => { 
+                            console.error('COMPLETED');                            
+                            this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                    });
 
             }
             this.csGridOptions.onGridReady = () => {
                 this.csGridOptions.api.setHeaderHeight(0)
             }
 
-            this.csGridOptions.singleClickEdit = true;
-            this.csGridOptions.enableColResize = true;
-            this.csGridOptions.rowHeight = 40
-            this.csGridOptions.suppressCellSelection=true;
-            this.csGridOptions.domLayout = 'forPrint'             
+       
         }
 
     ngOnInit(){

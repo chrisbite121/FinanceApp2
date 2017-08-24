@@ -656,7 +656,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                         this.logService.log(e, this._error, false);
                         this.utilsService.errorStatus
 
-                        let result: IReportResult = {
+                        let result = {
                             reportHeading: this.utilsService.apiCallListExists,
                             reportResult: this.utilsService.errorStatus,
                             listName: listName,
@@ -669,11 +669,11 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     }
                 }
                 
-                let reportData: IReportResult = {
+                let reportData  = {
                     reportHeading: this.utilsService.apiCallListExists,
                     listName: listName,
-                    fieldName: this.utilsService.NaStatus,
-                    reportResult: reportResult
+                    reportResult: reportResult,
+                    description: `successfully determined if list ${listName} exists - list exists: ${listFlag}`,
                 }
 
                 observer.next(reportData);
@@ -1322,12 +1322,11 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             }
             
             try {
+                this.logService.log(`adding field to list ${listName} with values...`, this._info, true)
                 itemValues.forEach(element => {
                     if (element.fieldName == 'ItemId') {
                         itemId = element.fieldValue
-                        console.error(itemId)
                     }
-                    this.logService.log(`adding field to list ${listName} with values...`, this._info, true)
                     this.logService.log(String(element.fieldName) + ': ' + String(element.fieldValue), this._info, true);
                     listItem.set_item(element.fieldName, element.fieldValue);
 
@@ -1354,7 +1353,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
 
             function success() {
                 let ID = listItem.get_id();
-                let resultMsg = `Item successfully created in List: ${listName}`
+                let resultMsg = `Item successfully created in List: ${listName} with ID ${ID}`
                 
                 let result:IAddItemResult = {
                     apiCall: this.utilsService.apiCallAddItem,
@@ -1521,7 +1520,11 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
 
     updateItem(listName: string, contextType: string, ID: string, itemValues: Array<IItemPropertyModel>): Observable<any>{
         this.logService.log('Update Item funtion called', this._info, true);
-        this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, ID parameter: ${ID}, itemValues parameter: ${itemValues}`)
+        this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, ID parameter: ${ID}`)
+        this.logService.log(`updaing field to list ${listName} with values...`, this._info, true)
+        itemValues.forEach(element => {
+            this.logService.log(String(element.fieldName) + ': ' + String(element.fieldValue), this._info, true);
+        })
 
         let updateItem$ = new Observable((observer:Observer<any>) => {
 
@@ -1577,9 +1580,9 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             clientContext.executeQueryAsync(success.bind(this), failure.bind(this));
 
             function success() {
-                let ID = listItem.get_id();
+                // let currentID = listItem.get_id();
 
-                let resultMsg = 'updated list item successfully';
+                let resultMsg =`updated item successfully on list ${listName} with ID ${ID}`;
                 let result:IUpdateItemResult = {
                     apiCall: this.utilsService.apiCallUpdateItem,
                     listName: listName,
@@ -1588,9 +1591,10 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 }
                 observer.next(result);
 
-                let reportResult:IReportItemResult = {
+                let reportResult = {
                     reportHeading: this.utilsService.apiCallUpdateItem,
                     reportResult: this.utilsService.successStatus,
+                    description: resultMsg,
                     listName: listName,
                     itemValues: itemValues
                 }
@@ -1607,7 +1611,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 let apiResult = 'Failed to UPDATE ITEM: ' + args.get_message() + '  ' + args.get_stackTrace();
                 this.logService.log(apiResult, this._error, false);
 
-                let resultMsg = `Request failed to updateItem to list ${listName}`
+                let resultMsg = `Request failed to updateItem to list ${listName} with ID ${ID}`
                 this.logService.log(resultMsg, this._error, false);
 
                 let result:IUpdateItemResult = {
@@ -1618,9 +1622,10 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 }
                 observer.next(result);
                 
-                let reportResult:IReportItemResult = {
+                let reportResult = {
                     reportHeading: this.utilsService.apiCallUpdateItem,
                     reportResult: this.utilsService.failStatus,
+                    description: resultMsg,
                     listName: listName,
                     itemValues: itemValues
                 }
@@ -1731,9 +1736,10 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     }
                 }
 
-                let reportResult: IReportResult = {
+                let reportResult = {
                     reportHeading: this.utilsService.apiCallGetItem,
                     reportResult: this.utilsService.successStatus,
+                    descrption: 'item retrieved successfully',
                     listName: listName,
                     fieldName: this.utilsService.NaStatus
                 }

@@ -13,6 +13,10 @@ import { FabricButtonWrapperComponent } from '../office-fabric/button/fabric.but
 import { FabricCommandButtonWrapperComponent } from '../office-fabric/commandbutton/fabric.commandButton.wrapper.component'
 import { FabricSpinnerWrapperComponent } from '../office-fabric/spinner/fabric.spinner.wrapper.component'
 import { FabricDialogWrapperComponent } from '../office-fabric/dialog/fabric.dialog.wrapper.component'
+import { FabricIconPanelWrapperComponent } from '../office-fabric/panel/fabric.panel.wrapper.component'
+
+//pipes
+import { ArrayReversePipe } from '../pipe/reverse.pipe'
 
 @NgModule({
     imports: [
@@ -29,7 +33,9 @@ import { FabricDialogWrapperComponent } from '../office-fabric/dialog/fabric.dia
         FabricButtonWrapperComponent,
         FabricCommandButtonWrapperComponent,
         FabricSpinnerWrapperComponent,
-        FabricDialogWrapperComponent
+        FabricIconPanelWrapperComponent,
+        FabricDialogWrapperComponent,
+        ArrayReversePipe
     ],
     exports: [
         FabricTextFieldWrapperComponent,
@@ -42,7 +48,9 @@ import { FabricDialogWrapperComponent } from '../office-fabric/dialog/fabric.dia
         FabricCommandButtonWrapperComponent,
         FabricSpinnerWrapperComponent,
         FabricDialogWrapperComponent,
-        CommonModule
+        FabricIconPanelWrapperComponent,
+        CommonModule,
+        ArrayReversePipe
     ]
 })
 export class SharedModule {

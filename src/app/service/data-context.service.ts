@@ -220,7 +220,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
             observer.next({
                 functionCall: 'processListData',
                 listName: listName,
-                message: _msg
+                desc: _msg
             })            
             
             observer.next({
@@ -335,7 +335,7 @@ emitContextValues(listArray:Array<string>):Observable<any>{
                             reportHeading: 'emitContextValues',
                             reportResult: this.utilsService.failStatus,
                             listName: listName,
-                            message: _msg
+                            description: _msg
                         })
                         observer.complete()
                     break;
@@ -347,7 +347,7 @@ emitContextValues(listArray:Array<string>):Observable<any>{
                     reportHeading: 'emitContextValues',
                     reportResult: this.utilsService.failStatus,
                     listName: listName,
-                    message: _msg,
+                    description: _msg,
                     error: e
                 })
                 observer.complete()
@@ -364,13 +364,14 @@ emitContextValues(listArray:Array<string>):Observable<any>{
         observer.next({
             reportHeading: 'emitContextValues',
             reportResult: this.utilsService.successStatus,
+            description: `successfully emitted context Values`,
             listArray: listArray,
         })
     } else {
         observer.next({
             reportheading: 'emitContextValues',
             reportResult: this.utilsService.errorStatus,
-            message: 'error status: listArray is not of type Array'
+            description: 'error status: listArray is not of type Array'
         })
     }
     observer.complete()
@@ -438,13 +439,14 @@ addDataItemToTable(listName:string, item):Observable<any> {
                 reportHeading: 'addDataItemToTable',
                 reportResult: this.utilsService.successStatus,
                 listName: listName,
+                description: `row added to table ${listName}`,
                 item: item
             })
         } catch (e) {
             observer.next({
                 reportHeading: 'addDataItemToTable',
                 reportResult: this.utilsService.errorStatus,
-                message: `error trying to call function addDataToTable from within function addDataItemToTable with listName: ${listName}`,
+                description: `error trying to call function addDataToTable from within function addDataItemToTable with listName: ${listName}`,
                 error: e
             })
         }
@@ -534,7 +536,7 @@ addDataItemToTable(listName:string, item):Observable<any> {
                                 tableName: _tableName,
                                 result: false,
                                 dataExists: false,
-                                message: `failed to find data for ${listName} in functionCall: checkForCachedData`
+                                description: `failed to find data for ${listName} in functionCall: checkForCachedData`
                             })                            
                         }
                     } else {
@@ -544,7 +546,7 @@ addDataItemToTable(listName:string, item):Observable<any> {
                             listName: listName,
                             result: false,
                             dataExists: false,
-                            message: `failed to find listName ${listName} in functionCall: checkForCachedData`
+                            description: `failed to find listName ${listName} in functionCall: checkForCachedData`
                         })
                     }
                 })
@@ -718,6 +720,7 @@ extractProperties(event): Observable<any>{
                 observer.next({
                     reportHeading: 'extractProperties',
                     reportResult: this.utilsService.successStatus,
+                    description: `successfully extracted properties from grid associated with list: ${listName}`,
                     listName: listName
                 })
         } else {
@@ -727,7 +730,7 @@ extractProperties(event): Observable<any>{
             observer.next({
                 reportHeading: 'extractProperties',
                 reportResult: this.utilsService.failStatus,
-                message: _msg
+                description: _msg
             })
         }
 
@@ -748,7 +751,7 @@ preProcessData(data): Observable<any>{
             observer.next({
                 reportHeading: 'preProcessData',
                 reportResult: this.utilsService.failStatus,
-                message: _msg
+                description: _msg
             })
         } else {
             data.newValue = +data.newValue
@@ -760,7 +763,7 @@ preProcessData(data): Observable<any>{
             observer.next({
                 reportHeading: 'preProcessData',
                 reportResult: this.utilsService.failStatus,
-                message: _msg
+                description: _msg
             })
         } else {
             observer.next({
@@ -772,6 +775,7 @@ preProcessData(data): Observable<any>{
             observer.next({
                 reportHeading: 'preProcesData',
                 reportResult: this.utilsService.successStatus,
+                description: `successfully completed preprocessing of data on list ${data.listName}`,
                 listName: data.listName,
                 data: data
             })
@@ -848,7 +852,7 @@ getIndexValue(listName:string, ID:number, data:any): Observable<any>{
                 observer.next({
                     reportHeading: 'getIndexValue',
                     reportResult: this.utilsService.failStatus,
-                    message: _msg,
+                    description: _msg,
                     error: e
                 })
                 observer.complete()
@@ -865,7 +869,7 @@ getIndexValue(listName:string, ID:number, data:any): Observable<any>{
                 observer.next({
                     reportHeading: 'getIndexValue',
                     reportResult: this.utilsService.failStatus,
-                    message: _msg,
+                    description: _msg,
                     error: e
                 })
                 observer.complete()
@@ -968,12 +972,12 @@ getIndexValue(listName:string, ID:number, data:any): Observable<any>{
         //     break;
         // }
         if (!data.hasOwnProperty('indexValue') || data.indexValue < 0) {
-            let _msg = `updateTable Error: can't find indexValue`
+            let _msg = `updateTable Error: can't find indexValue: ${data.indexValue} - dataRow ID ${ID} - tableName: ${tableName}`
             this.logService.log(_msg, this.utilsService.errorStatus, false);
             observer.next({
                 reportHeading: 'getIndexValue',
                 reportResult: this.utilsService.errorStatus,
-                message: _msg
+                description: _msg
             }) 
         } else {
             observer.next({
@@ -988,6 +992,7 @@ getIndexValue(listName:string, ID:number, data:any): Observable<any>{
             observer.next({
                 reportHeading: 'getIndexValue',
                 reportResult: this.utilsService.successStatus,
+                description: `successful lookup of indexValue for item on list ${listName}, indexValue ${data.indexValue}`,
                 listName: listName,
                 data: data
             })
@@ -1019,6 +1024,7 @@ UTUpdateData(data):Observable<any>{
                     observer.next({
                         reportHeading: 'UTUpdateData',
                         reportResult: this.utilsService.successStatus,
+                        description: `successfully updated data on list ${data.listName}`,
                         listName: data.listName
                     })
                 } catch (e) {
@@ -1026,7 +1032,7 @@ UTUpdateData(data):Observable<any>{
                     observer.next({
                         reportHeading: 'UTUpdateData',
                         reportResult: this.utilsService.failStatus,
-                        message: `failed to update table with tableName: ${data.tableName}, 
+                        description: `failed to update table with tableName: ${data.tableName}, 
                                                                 indexValue: ${data.indexValue}, 
                                                                 columnName: ${data.columnName}`
                     })
@@ -1039,9 +1045,84 @@ UTUpdateData(data):Observable<any>{
     
 }
 
+determineStateValue(indexValue:number, suggestedStateValue: string, tableName: string, data: any):Observable<any>{
+    let det$ = new Observable((observer:Observer<any>) => {
+        let currentStateValue, revisedStateValue
+        
+        if(this[tableName] &&
+            Array.isArray(this[tableName]) &&
+            this[tableName][indexValue] &&
+            this[tableName][indexValue]['State']) {
+                
+            currentStateValue = this[tableName][indexValue]['State']
+
+            //when suggested state is update
+            if(suggestedStateValue == this.utilsService.updateState) {
+                switch(currentStateValue) {
+                    case this.utilsService.createState:
+                        revisedStateValue = this.utilsService.createState
+                    break;
+                    case this.utilsService.updateState:
+                        revisedStateValue = this.utilsService.updateState
+                    break;
+                    case this.utilsService.deleteState:
+                        revisedStateValue = this.utilsService.deleteState
+                    break;
+                    case this.utilsService.inertState:
+                        revisedStateValue = this.utilsService.updateState
+                    break;
+                    default:
+                        observer.next({
+                            reportHeading: 'determineStateValue',
+                            reportResult:   this.utilsService.failStatus,
+                            description: `failed to identify matching state`
+                        })
+                    break;
+                }
+            } else if (suggestedStateValue == this.utilsService.deleteState){
+                //need to think carefully about this - how do we know if the delete operation has been actioned
+                // this will determine whether we need to recreate the item or just flag it as 'inert'
+                revisedStateValue = currentStateValue
+                
+            } else if (suggestedStateValue == this.utilsService.createState) {
+                // there should never be the need to run this function when suggested state is create
+                // as that operation is only called when created a new item
+                revisedStateValue = currentStateValue
+
+            } else if (suggestedStateValue == this.utilsService.inertState) {
+                revisedStateValue = suggestedStateValue
+            }
+    
+        } else {
+            observer.next({
+                reportHeading: 'determineStateValue',
+                reportResult: this.utilsService.failStatus,
+                description: `unable to find table`
+            })
+            observer.complete()
+        }
+
+        observer.next({
+            reportHeading: 'determineStatevalue',
+            reportResult: this.utilsService.successStatus,
+            descrpiton: `successfully determined stateValue: ${revisedStateValue}`
+        })
+
+
+        observer.next({
+            functionCall: 'determineStateValue',
+            result: true,
+            revisedStateValue: revisedStateValue,
+            data: data
+        })
+        observer.complete()
+
+    })
+    return det$
+    
+}
+
 updateStateValue(indexValue:number, stateValue:string, tableName:string, data:any):Observable<any>{
-    console.log('updateStateValue function called')
-    console.log(indexValue, stateValue, tableName, data)
     let state$ = new Observable((observer:Observer<any>) => {
         try {
             //SHOULD BE IN SEPERATE FUNCITON
@@ -1061,6 +1142,7 @@ updateStateValue(indexValue:number, stateValue:string, tableName:string, data:an
                     observer.next({
                         reportHeading: 'updateStateValue',
                         reportResult: this.utilsService.successStatus,
+                        description: `successfully updated row in list ${data.listName} with indexValue: ${indexValue}, to State value ${stateValue}`,
                         listName: data.listName,
                         itemIndex: indexValue
                     })
@@ -1068,7 +1150,7 @@ updateStateValue(indexValue:number, stateValue:string, tableName:string, data:an
                     observer.next({
                         reportHeading: 'updateStateValue',
                         reportResult: this.utilsService.failStatus,
-                        message: `failed to located item and state property to update`,
+                        description: `failed to located item and state property to update, indexValue: ${indexValue}, state Value: ${stateValue}, tableName ${tableName}`,
                         indexValue: indexValue,
                         stateValue: stateValue,
                         tableName: tableName,
@@ -1082,7 +1164,7 @@ updateStateValue(indexValue:number, stateValue:string, tableName:string, data:an
             observer.next({
                 reportHeading: 'updateStateValue',
                 reportResult: this.utilsService.errorStatus,
-                message: _msg,
+                description: _msg,
                 error: e
             })
         }   
@@ -1120,7 +1202,7 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
                         reportHeading: 'processCalculatedFields',
                         reportResult: this.utilsService.failStatus,
                         listName: listName,
-                        message: `failed to run process calculcated fields`
+                        description: `failed to run calculcated fields on listName: ${listName}`
                     })                    
                     observer.complete()
                 break;
@@ -1136,6 +1218,7 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
                 reportHeading: 'processCalculatedFields',
                 reportResult: this.utilsService.successStatus,
                 listName: listName,
+                description: `successfully ran function calculcated fields on listName: ${listName}`,
                 data: data? data: null
             })
 
@@ -1146,7 +1229,7 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
                 reportResult: this.utilsService.failStatus,
                 listName: listName,
                 error: e,
-                message: `failed to run process calculcated fields`
+                description: `failed to run process calculcated fields on listName: ${listName}`
             })
         }
 
@@ -1183,7 +1266,7 @@ emitValues(listArray:Array<string>): Observable<any>{
                             reportHeading: 'emitValues',
                             reportResult: this.utilsService.failStatus,
                             listName: listName,
-                            message: _msg
+                            description: _msg
                         })
                         observer.complete()
                     break;
@@ -1195,11 +1278,12 @@ emitValues(listArray:Array<string>): Observable<any>{
                     reportHeading: 'emitValues',
                     reportResult: this.utilsService.failStatus,
                     listName: listName,
-                    message: _msg,
+                    description: _msg,
                     error: e
                 })
-                observer.complete()
+                observer.complete()    
             }
+
         })
         
 
@@ -1212,13 +1296,14 @@ emitValues(listArray:Array<string>): Observable<any>{
         observer.next({
             reportHeading: 'emitValues',
             reportResult: this.utilsService.successStatus,
+            description: 'successfully emitted values',
             listArray: listArray,
         })
     } else {
         observer.next({
             reportheading: 'emitValues',
             reportResult: this.utilsService.errorStatus,
-            message: 'error status: listArray is not of type Array'
+            description: 'error status: listArray is not of type Array'
         })
     }
     observer.complete()
@@ -1240,7 +1325,7 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
                     observer.next({
                         reportHeading: 'updateItemIdAfterAdd',
                         reportResult: this.utilsService.errorStatus,
-                        message: `failed to find index: ${_index} for item with itemId: ${itemId} on table: ${tableName} and list: ${listName}`
+                        description: `failed to find index: ${_index} for item with itemId: ${itemId} on table: ${tableName} and list: ${listName}`
                     })
                     observer.complete()
                 }
@@ -1251,7 +1336,7 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
                     observer.next({
                         reportHeading: 'updateItemIdAfterAdd',
                         reportResult: this.utilsService.errorStatus,
-                        message: `failed to find item with index: ${_index} for item with itemId: ${itemId} on table: ${tableName} and list: ${listName}`
+                        description: `failed to find item with index: ${_index} for item with itemId: ${itemId} on table: ${tableName} and list: ${listName}`
                     })
                     observer.complete()
                 }
@@ -1259,7 +1344,7 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
             observer.next({
                 reportHeading: 'updateItemIdAfterAdd',
                 reportResult: this.utilsService.errorStatus,
-                message: `failed to find table with table: ${tableName} and list: ${listName} for item with itemId ${itemId} and ID ${ID}`
+                description: `failed to find table with table: ${tableName} and list: ${listName} for item with itemId ${itemId} and ID ${ID}`
             })
             observer.complete()            
         }
@@ -1277,6 +1362,7 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
         observer.next({
             reportHeading: 'updateItemIdAfterAdd',
             reportResult: this.utilsService.successStatus,
+            description: `successfully updated ID of item to ${ID} - itemID ${itemId} - listName ${listName}`,
             listName: listName,
             ID: ID
         })
@@ -1303,7 +1389,8 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
 
                 observer.next({
                     reportHeading: 'addDataRow',
-                    result: this.utilsService.successStatus,
+                    reportResult: this.utilsService.successStatus,
+                    description: `row added successfully to list ${listName}`,
                     listName: listName,
                     item:_item
                 })
@@ -1315,10 +1402,11 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
                 observer.next({
                     reportHeading: 'addDataRow',
                     reportResult: this.utilsService.failStatus,
-                    message: _msg
+                    description: _msg
                 })
-                observer.complete()
+                
             }
+            observer.complete()
             // switch(tableName) {
             //     case this._ResourceDataName:
             //         this.addResourceRow()

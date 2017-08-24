@@ -21,11 +21,12 @@ import { Subscription } from 'rxjs/subscription'
     animations: [fadeInAnimation]
 })
 export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChecked {
+    public title: string = 'Gross Summary'
     public tableReady: boolean = false;
     public gsGridOptions:GridOptions
 
-    gsTableHeight: number = 45;
-    gsTableWidth: number = 1400;
+    public gsTableHeight: number = 43;
+    public gsTableWidth: number = 1361;
 
     public summaryData: Subscription;
     public gsSummaryContextStream: Subscription
@@ -44,24 +45,33 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
 
         //Summary Table gridoptions
         this.gsGridOptions.context = {}
+        this.gsGridOptions.singleClickEdit = true;
+        this.gsGridOptions.enableColResize = true;
+        this.gsGridOptions.suppressCellSelection=true;
+        this.gsGridOptions.domLayout = 'forPrint';         
+        this.gsGridOptions.rowHeight = 40
 
         this.gsGridOptions.onCellValueChanged = ($event: any) => {
             let _rowIndex = $event.node.rowIndex
             let _colId = $event.column.colId
             let _focusTable = 'gsGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber())
+            this.scriptService.updateTable($event)
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
 
         }
+
+
+
         this.gsGridOptions.onGridReady = () => {
             this.gsGridOptions.api.setHeaderHeight(0)
         }
-
-        this.gsGridOptions.singleClickEdit = true;
-        this.gsGridOptions.enableColResize = true;
-        this.gsGridOptions.suppressCellSelection=true;
-        this.gsGridOptions.domLayout = 'forPrint'         
-        this.gsGridOptions.rowHeight = 40
     }
 
     ngOnInit(){
@@ -81,7 +91,7 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
             if(this[focusedCellData.gridOptions]) {
                 this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
                 this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }            
+            }
         })
 
         this.gsSummaryContextStream = this.dataContextService.getResourceContextStream().subscribe(data => {
@@ -99,6 +109,8 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
                                         this.settingsService.year)
                                             .subscribe(this.getSubscriber())
         }
+
+        
     }
 
     ngAfterContentChecked(){
@@ -118,4 +130,5 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
             complete(){ console.log('completed') }
         }
      }
+
 }

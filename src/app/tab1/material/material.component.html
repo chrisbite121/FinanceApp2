@@ -1,5 +1,5 @@
 <div *ngIf="tableReady" [@fadeInAnimation]>
-    <div class="ms-Grid">
+    <!-- <div class="ms-Grid">
             <div class="ms-Grid-row" style="padding:10px 0px">
                 <div class="ms-Grid-col ms-u-sm1">
                     <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
@@ -11,17 +11,38 @@
                 <div class="ms-Grid-col ms-u-sm9">
                 </div>
             </div>    
-        </div>
-    <ag-grid-angular #agGrid10 style="overflow: hidden;" 
+        </div> -->
+        <div class="ms-Grid"  class="header-row">
+                <div class="ms-Grid-row">
+                    <div class="ms-Grid-col ms-u-sm1 ">
+                        <div class="ms-Grid-row">
+                            <of-icon-panel [contentName]="'Material'" class="info-icon"></of-icon-panel>
+                            <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
+                                {{title}}    
+                            </span>
+                            
+                        </div>
+                    </div>
+                    <div class="ms-Grid-col ms-u-sm2">
+                        <i class="ms-Icon ms-Icon--Add action-icon" (click)="addResourceRow();"></i>
+                        <i class="ms-Icon ms-Icon--Delete action-icon" (click)="deleteResourceRow();"></i> 
+                    </div>
+                    <div class="ms-Grid-col ms-u-sm9">
+                    </div>
+                </div>    
+            </div>        
+    <ag-grid-angular #agGrid10
                             [style.height.px]="cmTableHeight" 
                             [style.width.px]="cmTableWidth"
-                            class="ag-fresh" 
-                    [gridOptions]="cmGridOptions">
+                            class="ag-fresh agGridTable" 
+                            [gridOptions]="cmGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid11 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid11
                             [style.height.px]="mattTableHeight" 
                             [style.width.px]="mattTableWidth"
-                            class="ag-fresh" 
-                    [gridOptions]="mattGridOptions">
+                            class="ag-fresh agGridTable" 
+                            [gridOptions]="mattGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
 </div>

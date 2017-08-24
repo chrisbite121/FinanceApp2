@@ -9,7 +9,7 @@ import { UtilsService } from './utils.service'
 
 @Injectable()
 export class NotificationService {
-    public NotificationTable: Array<any>
+    public NotificationTable: object
     constructor(private logService: LogService,
                 private uiStateService: UiStateService,
                 private utilsService: UtilsService){
@@ -29,16 +29,18 @@ export class NotificationService {
             }
 
             try {
-                // if(!(transactionId in this.NotificationTable)) {
-                //     this.NotificationTable[transactionId] = {
-                //         id: transactionId,
-                //         timestamp: new Date(),
-                //         transactions: []
-                //     }
-                // }
+                if(!(transactionId in this.NotificationTable)) {
+                    this.logService.log(`error: cannot find location to add transaction - creating new transaction object to store transaction with id - ${transactionId}`, this.utilsService.errorStatus, false)
+                    this.NotificationTable[transactionId] = {
+                        id: transactionId,
+                        timestamp: new Date(),
+                        title: 'unkown',
+                        transactions: []
+                    }
+                }
                 transaction['id'] = transactionId;
                 transaction['timestamp'] = new Date().toLocaleString();
-                this.NotificationTable.push(transaction)
+                this.NotificationTable[transactionId].transactions.push(transaction)
             } catch (e) {
                 this.logService.log('error adding notifcation to Notifcation Table', this.utilsService.errorStatus, false)
                 this.logService.log(e)
@@ -48,37 +50,45 @@ export class NotificationService {
         return add$
     }
 
-    // initTransaction(transactionId):Observable<any>{
-    //     let init$ = new Observable((observer:any) => {
-    //         if(transactionId in this.NotificationTable) {
-    //             observer.next({
-    //                 reportHeading: 'initTransaction',
-    //                 reportResult: this.utilsService.errorStatus,
-    //                 message: `Transaction: ${transactionId} already exists, skipping initTransaction`
-    //             })
-    //         } else {
-    //             this.NotificationTable[transactionId] = {
-    //                 id: transactionId,
-    //                 timestamp: new Date(),
-    //                 transactions: []
-    //             }
+    initTransaction(transactionId:string, transactionTitle:string):Observable<any>{
+        let init$ = new Observable((observer:any) => {
+            if(transactionId in this.NotificationTable) {
+                observer.next({
+                    reportHeading: 'initTransaction',
+                    reportResult: this.utilsService.errorStatus,
+                    message: `Transaction: ${transactionId} already exists, skipping initTransaction`
+                })
+            } else {
+                try {
+                    this.NotificationTable[transactionId] = {
+                        id: transactionId,
+                        timestamp: new Date(),
+                        title: transactionTitle,
+                        transactions: []
+                    }
 
-    //             observer.next({
-    //                 functionCall: 'initTransaction',
-    //                 result: true,
-    //             })
+                    observer.next({
+                        functionCall: 'initTransaction',
+                        result: true,
+                    })
+    
+                    observer.next({
+                        reportHeading: 'initTransaction',
+                        reportResult: this.utilsService.successStatus,
+                        description: `Transaction: ${transactionId} added to Transaction Table`
+                    })                    
+                } catch (e) {
+                    this.logService.log(`error running initTransaction function with transaction ID - ${transactionId}`, this.utilsService.errorStatus, false)
+                }
+                
 
-    //             observer.next({
-    //                 reportHeading: 'initTransaction',
-    //                 reportResult: this.utilsService.successStatus,
-    //                 message: `Transaction: ${transactionId} added to Transaction Table`
-    //             })
-    //         }
-    //         observer.complete()
-    //     })
+                
+            }
+            observer.complete()
+        })
 
-    //     return init$
-    // }
+        return init$
+    }
 
     getNotifications(){
         return this.NotificationTable

@@ -3,6 +3,7 @@ import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 import { ScriptService } from '../../service/scripts.service'
 import { DataContextService } from '../../service/data-context.service'
+import { UiStateService } from '../../service/ui-state.service'
 
 import { ISettings, ISettingsOptions } from '../../model/settings.model'
 
@@ -31,7 +32,8 @@ export class SettingsMainComponent implements OnInit, AfterViewInit {
     constructor(private settingsService: SettingsService,
                 private utilsService: UtilsService,
                 private scriptService: ScriptService,
-                private dataContextService: DataContextService ) {
+                private dataContextService: DataContextService,
+                private uiStateService: UiStateService ) {
     }
 
     @ViewChild('tsweighting') private tswDiv: ElementRef
@@ -130,9 +132,9 @@ export class SettingsMainComponent implements OnInit, AfterViewInit {
                                 ? this.scriptService.loadAppData(data.listName, fieldValue)
                                 : Observable.of(data)
                             )
-                            
                         }
-                        console.log('completed')
+                        this.uiStateService.updateMessage('update settings complete', this.utilsService.completeStatus).subscribe()
+                        console.log('completed updating setting')
                     }
                 )
     }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { ScriptService } from '../../service/scripts.service'
 import { UtilsService } from '../../service/utils.service'
 import { SettingsService } from '../../service/settings.service'
+import { UiStateService } from '../../service/ui-state.service'
 
 @Component({
     selector: 'look-feel',
@@ -16,7 +17,8 @@ export class LookFeelComponent implements OnInit {
     
     constructor(private scriptService: ScriptService,
                 private utilsService: UtilsService,
-                private settingsService: SettingsService){
+                private settingsService: SettingsService,
+                private uiStateService: UiStateService){
 
     }
 
@@ -66,6 +68,7 @@ export class LookFeelComponent implements OnInit {
                     () => {
                         console.log('completed')
                         this.settingsService.getSettings()
+                        this.uiStateService.updateMessage('update settings complete', this.utilsService.completeStatus).subscribe()
                     }
                 )
     }

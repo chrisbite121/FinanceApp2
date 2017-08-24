@@ -61,7 +61,17 @@ module.exports = {
             },
             {
                 test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
-                loader: 'file-loader?name=[path]/[name].[ext]'
+                //loader: 'file-loader?name=../Images/[name].[ext]'
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            useRelativePath: false,
+                            name: '[name].[ext]',
+                            publicPath: '/Images/'
+                        }
+                    }
+                ] 
             },
             {
                 // site wide css (excluding all css under the app dir)

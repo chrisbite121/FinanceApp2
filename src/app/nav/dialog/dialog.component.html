@@ -10,7 +10,29 @@
                     <span class="ms-Label">Option1</span> 
                     </label>
                 </div> -->
-                <table class="ms-font-s ms-fontWeight-semibold">
+                    <div *ngFor="let _id of transactionArray" class="container">
+                        <div class="card">
+                            <div class="ms-font-l table-header">
+                                {{notifications[_id]['title']}} - {{notifications[_id]['timestamp'] | date:'HH:mm:ss'}}
+                            </div>
+                        <table class="ms-font-s table">
+                            <tr>
+                                <th>Transaction Heading</th>
+                                <th>Description</th>
+                                <th>Transaction Result</th>
+                                <th>Time</th>
+                            </tr>
+                            <tr *ngFor="let transaction of notifications[_id]['transactions'] | reverse" class="ms-fontWeight-semilight	ms-font-s">
+                                <td>{{transaction['reportHeading']}}</td>
+                                <td>{{transaction['description']}}</td>
+                                <td [ngClass]="{green: transaction['reportResult']=='success', redError: transaction['reportResult']=='error', redFail: transaction['reportResult']=='fail'}">{{transaction['reportResult']}}</td>
+                                <td>{{transaction['timestamp'] | date:'HH:mm:ss'}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- <table >
                     <tr>
                         <th>Transaction ID</th>
                         <th>Time</th>
@@ -23,7 +45,7 @@
                         <td>{{noti.reportHeading}}</td>
                         <td>{{noti.reportResult}}</td>
                     </tr>
-                </table>
+                </table> -->
                 <div class="ms-Dialog-actions">
                 <button class="ms-Button ms-Dialog-action ms-Button--primary">
                     <span class="ms-Button-label" >Close</span> 

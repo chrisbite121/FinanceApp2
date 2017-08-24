@@ -1085,10 +1085,32 @@ saveLogsBatch(){
 // using settings list?
 initApp():Observable<any>{
 this.logService.log('initialising app', this.utilsService.infoStatus, true);
+let _transactionId = UUID.UUID();
+
 let init$ = 
-    //NEED TO GET USER PERMISSIONS FIRST
-    // this property is set in code and is only intended to be used for development/debugging
-    this.checkUseSettingsList()
+    this.uiStateService.updateMessage('updating data', this.utilsService.loadingStatus)
+    .mergeMap(data =>
+        (typeof(data) == 'object' &&
+        data.hasOwnProperty('functionCall') &&
+        data.hasOwnProperty('result') &&
+        data.functionCall == 'updateMessage' &&
+        data.result == true)
+        ? this.notificationService.initTransaction(_transactionId, 'Update Table')
+        : Observable.of(data)
+    )
+    // create new entry in transaction table
+    .mergeMap((data:any) => 
+        (typeof(data) == 'object' &&
+        data.hasOwnProperty('functionCall') &&
+        data.hasOwnProperty('result') &&
+        data.functionCall == 'initTransaction' &&
+        data.result == true)
+        
+        //NEED TO GET USER PERMISSIONS FIRST
+        // this property is set in code and is only intended to be used for development/debugging
+        ? this.checkUseSettingsList()
+        : Observable.of(data)
+    )
     .mergeMap( data =>
         // are we using settings list?
         (typeof(data) === 'object' &&
@@ -1254,7 +1276,14 @@ let init$ =
         ? this.workdaysService.processItems(data['data'])
         : Observable.of(data)        
     )
-         
+    //collect notifications passed down the observable chain and add them to the notifcaiton table
+    .mergeMap((data:any) => 
+        (typeof(data) == 'object' &&
+        data.hasOwnProperty('reportHeading') &&
+        data.hasOwnProperty('reportResult'))
+        ? this.notificationService.addNotification(data, _transactionId)
+        : Observable.of(data)
+    )
 
 return init$
 }
@@ -1411,7 +1440,8 @@ processSettingsData(data){
                     reportHeading: 'processSettingsData',
                     reportValue: this.utilsService.successStatus,
                     settingsValue: 'year',
-                    value: this.settingsService.year
+                    value: this.settingsService.year,
+                    descripton: `successfully processed settings data`
                 })
                 console.error(this.settingsService.year)
             } catch(e) {
@@ -1584,11 +1614,21 @@ updateTable(event: any): Observable<any> {
 
         let updateTable$ =
             this.uiStateService.updateMessage('updating data', this.utilsService.loadingStatus)
-            .mergeMap((data:any) => 
+            .mergeMap(data =>
                 (typeof(data) == 'object' &&
                 data.hasOwnProperty('functionCall') &&
                 data.hasOwnProperty('result') &&
                 data.functionCall == 'updateMessage' &&
+                data.result == true)
+                ? this.notificationService.initTransaction(_transactionId, 'Update Table')
+                : Observable.of(data)
+            )
+            // create new entry in transaction table
+            .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
                 data.result == true)
                 ? this.dataContextService.emitContextValues([this.utilsService.financeAppResourceData,
                                                             this.utilsService.financeAppMaterialData,
@@ -1638,7 +1678,7 @@ updateTable(event: any): Observable<any> {
                 ? this.dataContextService.UTUpdateData(data.data)
                 : Observable.of(data)
             )
-            .mergeMap(data => 
+            .mergeMap(data =>
                 (typeof(data) == 'object' && 
                 data.hasOwnProperty('functionCall') &&
                 data.hasOwnProperty('result') &&
@@ -1646,7 +1686,19 @@ updateTable(event: any): Observable<any> {
                 data.functionCall == 'UTUpdateData' &&
                 data.result == true
                 )
-                ? this.dataContextService.updateStateValue(data.data.indexValue, this.utilsService.updateState, data.data.tableName, data.data)
+                ? this.dataContextService.determineStateValue(data.data.indexValue, this.utilsService.updateState, data.data.tableName, data.data)
+                :Observable.of(data)
+            )
+            .mergeMap(data => 
+                (typeof(data) == 'object' && 
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.hasOwnProperty('data') &&
+                data.hasOwnProperty('revisedStateValue') &&
+                data.functionCall == 'determineStateValue' &&
+                data.result == true
+                )
+                ? this.dataContextService.updateStateValue(data.data.indexValue, data.revisedStateValue, data.data.tableName, data.data)
                 : Observable.of(data)
             )
             .mergeMap(data => 
@@ -1700,14 +1752,35 @@ updateTable(event: any): Observable<any> {
 saveAppData(){
     this.logService.log('submit data to api function called', this.utilsService.infoStatus, false);
 
+    let _transactionId = UUID.UUID();
 
-    let submitData$ = Observable
+    let submitData$ = 
+        this.uiStateService.updateMessage('saving data', this.utilsService.loadingStatus)
+        .mergeMap(data =>
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'updateMessage' &&
+            data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Saving Data')
+            : Observable.of(data)
+        )
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'initTransaction' &&
+            data.result == true)
 
-        .merge(...this.prepDataForApi([
-                {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
-                {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
-                {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData},
-                {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData}])
+        ? Observable.from(this.prepDataForApi([
+                    {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
+                    {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
+                    {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData},
+                    {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData}
+                ])
+            ).mergeAll()
+        : Observable.of(data)
         )
         .mergeMap((data:any) => 
         // When adding an item to a list we need to update the ID with the newly createed ID value
@@ -1767,12 +1840,41 @@ saveAppData(){
             ? this.dataContextService.updateStateValue(data.indexValue, this.utilsService.inertState, data.tableName, data.data)
             : this.placeholderObservable(data)
         )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('reportHeading') &&
+            data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            :Observable.of(data)
+        )
     return submitData$
 }
 
 addDataRow(listName:string, year: number, saveData: boolean){
-    let addRow$ = 
-        this.dataContextService.createDataItem(listName)
+    let _transactionId = UUID.UUID();
+
+    let addRow$ =
+        this.uiStateService.updateMessage(`Adding data row`, this.utilsService.loadingStatus)
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Add Row')
+            : Observable.of(data)
+        )
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+            ? this.dataContextService.createDataItem(listName)
+            : Observable.of(data)
+        )
         .mergeMap((data:any) => 
             ((typeof(data) === 'object' &&
             data.hasOwnProperty('functionCall') &&
@@ -1845,6 +1947,14 @@ addDataRow(listName:string, year: number, saveData: boolean){
             ? this.dataContextService.emitValues([data.listName])
             : Observable.of(data)
         )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('reportHeading') &&
+                data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            : Observable.of(data)
+        )
 
     return addRow$
 }
@@ -1858,63 +1968,91 @@ deleteDataRow(listName:string, ID: number){
 *   5. calculdate values
 *   6. emit values
 */
-let data = {
+let rowData = {
     listName: listName,
     ID: ID
 }
 
+let _transactionId = UUID.UUID();
+
 console.error('delete Row Called')
-console.error(data)
+console.error(rowData)
 
 let delete$ =
-    this.dataContextService.getIndexValue(data.listName, data.ID, data)
-    .mergeMap(data =>
-        (typeof(data) == 'object' &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('data') &&
-        data.result == true &&
-        data.functionCall == 'getIndexValue'
+    this.uiStateService.updateMessage(`deleting data row`, this.utilsService.loadingStatus)
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Delete Row')
+            : Observable.of(data)
         )
-        ? this.dataContextService.updateStateValue(data.data.indexValue, this.utilsService.deleteState, data.data.tableName, data.data)
-        : Observable.of(data)
-    )
-    .mergeMap(data => 
-        (typeof(data) == 'object' &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('data') &&
-        data.result == true &&
-        data.functionCall == 'updateStateValue'
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+            ? this.dataContextService.getIndexValue(rowData.listName, rowData.ID, rowData)
+            : Observable.of(data)
         )
-        ? this.dataContextService.processCalculatedFields(data.data.listName, data.data)
-        : Observable.of(data)
-    )
-    .mergeMap(data => 
-        (typeof(data) == 'object'  &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('data') &&
-        data.result == true &&
-        data.functionCall == 'processCalculatedFields')
-        ? this.dataContextService.emitValues([data.data.listName])
-        : Observable.of(data)
-    )
-    .mergeMap(data =>
-        (
-            (typeof(data) == 'object' &&
-            data.hasOwnProperty('functionCall') &&
-            data.hasOwnProperty('result') &&
-            data.result == true &&
-            data.functionCall == 'emitValues')
-            && this.settingsService.autoSave
-            && this.settingsService.sharePointMode
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.hasOwnProperty('data') &&
+                data.result == true &&
+                data.functionCall == 'getIndexValue'
+                )
+            ? this.dataContextService.updateStateValue(data.data.indexValue, this.utilsService.deleteState, data.data.tableName, data.data)
+            : Observable.of(data)
         )
-        ? this.saveAppData()
-        : Observable.of(data)
-    )
-return delete$
-
+        .mergeMap(data => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.hasOwnProperty('data') &&
+                data.result == true &&
+                data.functionCall == 'updateStateValue'
+                )
+            ? this.dataContextService.processCalculatedFields(data.data.listName, data.data)
+            : Observable.of(data)
+        )
+        .mergeMap(data => 
+                (typeof(data) == 'object'  &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.hasOwnProperty('data') &&
+                data.result == true &&
+                data.functionCall == 'processCalculatedFields')
+            ? this.dataContextService.emitValues([data.data.listName])
+            : Observable.of(data)
+        )
+        .mergeMap(data =>
+            (
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.result == true &&
+                data.functionCall == 'emitValues')
+                && this.settingsService.autoSave
+                && this.settingsService.sharePointMode
+            )
+            ? this.saveAppData()
+            : Observable.of(data)
+        )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('reportHeading') &&
+                data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            :Observable.of(data)
+        )        
+    return delete$
 }
 
 
@@ -2031,12 +2169,68 @@ getWorkdays():Observable<any>{
 }
 
 
-updateSetting(data):Observable<any>{
+updateSetting(settingData):Observable<any>{
+    let _transactionId = UUID.UUID();
+
     let updateSetting$ = 
-       this.commonApiService
-            .updateItem(this.utilsService.financeAppSettingsData,
-                                this.utilsService.appWeb, "1", data
+        this.uiStateService.updateMessage(`updating setting: ${settingData[0]['fieldName']}`, this.utilsService.loadingStatus)
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Update Setting')
+            : Observable.of(data)
         )
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+            ? this.settingsService.getSetting('sharePointMode')
+            : Observable.of(data)
+        )
+        //if in sharepoint mode then update the settings list in the sharepoint app
+        .mergeMap(data =>
+        (
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('value') &&
+            data.hasOwnProperty('setting') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'getSetting' &&
+            data.setting == 'sharePointMode' &&
+            data.result == true &&
+            data.value == true)
+
+            ||
+
+            //or value to be updated is sharepoint mode itself
+            (
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('value') &&
+            data.hasOwnProperty('setting') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'getSetting' &&
+            data.setting == 'sharePointMode' &&
+            data.result == true &&
+            data.value == false) 
+            &&
+            settingData[0]['fieldName'] == 'SharePointMode'
+            )
+        )
+            ? this.commonApiService
+                .updateItem(this.utilsService.financeAppSettingsData,
+                                    this.utilsService.appWeb, "1", settingData)
+            : Observable.of(data)
+        )
+        //get the settings and update the cached settings data
         .mergeMap(data =>
                 (typeof(data) == 'object' &&
                 data.hasOwnProperty('apiCall') &&
@@ -2048,18 +2242,67 @@ updateSetting(data):Observable<any>{
             ? this.getSettings()
             : this.placeholderObservable(data)
         )
+        //if not in sharepoint mode then just add value to cache settings data
+        .mergeMap(data =>
+        (
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('value') &&
+            data.hasOwnProperty('setting') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'getSetting' &&
+            data.setting == 'sharePointMode' &&
+            data.result == true &&
+            data.value == false)
+            &&
+            //make sure that the value that we are updating is not sharepoint mode
+            settingData[0]['fieldName'] !== 'SharePointMode'
+        )
+            ? this.settingsService.setSetting(settingData[0]['fieldName'], settingData[0]['fieldValue'])
+            : Observable.of(data)
+        )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('reportHeading') &&
+                data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            :Observable.of(data)
+    )        
 
     return updateSetting$ 
 
 }
 
 getSettings(): Observable<any> {
-    let getSetting$ = 
-        this.commonApiService.getItem(this.utilsService.financeAppSettingsData, 
-                                            this.utilsService.generateXmlGetItemById(1),
-                                            this.utilsService.appWeb,
-                                            this.utilsService.includeFields(
-                                                    this.listService.getArrayFieldNames(this.utilsService.financeAppSettingsData)))
+    let _transactionId = UUID.UUID();    
+    let getSetting$ =
+    
+        this.uiStateService.updateMessage('updating setting', this.utilsService.loadingStatus)
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Get Settings')
+            : Observable.of(data)
+        )
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+            ? this.commonApiService.getItem(this.utilsService.financeAppSettingsData, 
+                                                this.utilsService.generateXmlGetItemById(1),
+                                                this.utilsService.appWeb,
+                                                this.utilsService.includeFields(
+                                                        this.listService.getArrayFieldNames(this.utilsService.financeAppSettingsData)))
+            : Observable.of(data)
+        )
         .mergeMap( data => 
             (typeof(data) == 'object' && 
             data.hasOwnProperty('listName') &&
@@ -2071,7 +2314,15 @@ getSettings(): Observable<any> {
             //need to process settings data, add results to settings service
             ? this.processSettingsData(data)
             : this.placeholderObservable(data)
-    )                                                    
+        )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('reportHeading') &&
+                data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            : Observable.of(data)            
+        )                                                    
 
     return getSetting$
 }

@@ -1,35 +1,46 @@
 <div *ngIf="tableReady" [@fadeInAnimation]>
-    <div class="ms-Grid">
-        <div class="ms-Grid-row" style="padding:10px 0px">
-            <div class="ms-Grid-col ms-u-sm3">
-                <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
+        <div class="ms-Grid"  class="header-row">
+                <div class="ms-Grid-row">
+                    <div class="ms-Grid-col ms-u-sm3 ">
+                        <div class="ms-Grid-row">
+                            <of-icon-panel [contentName]="'Travel'" class="info-icon"></of-icon-panel>
+                            <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
+                                {{title}}    
+                            </span>
+                            
+                        </div>
+                    </div>
+                    <div class="ms-Grid-col ms-u-sm9">
+                    </div>
+                </div>    
             </div>
-            <div class="ms-Grid-col ms-u-9"></div>
-        </div>
-    </div>
 
-    <ag-grid-angular #agGrid6 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid6 
                             [style.height.px]="tsTableHeight" 
                             [style.width.px]="tsTableWidth"
-                            class="ag-fresh"  
-                [gridOptions]="tsGridOptions">
+                            class="ag-fresh agGridTable"  
+                            [gridOptions]="tsGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid7 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid7
                             [style.height.px]="atsTableHeight" 
                             [style.width.px]="atsTableWidth"
-                            class="ag-fresh"  
-                [gridOptions]="atsGridOptions">
+                            class="ag-fresh agGridTable"  
+                            [gridOptions]="atsGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid8 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid8
                             [style.height.px]="rtsTableHeight" 
                             [style.width.px]="rtsTableWidth"
-                            class="ag-fresh"  
-                [gridOptions]="rtsGridOptions">
+                            class="ag-fresh agGridTable"  
+                            [gridOptions]="rtsGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid9 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid9
                             [style.height.px]="rtstTableHeight" 
                             [style.width.px]="rtstTableWidth"
-                            class="ag-fresh" 
-                [gridOptions]="rtstGridOptions">
+                            class="ag-fresh agGridTable" 
+                            [gridOptions]="rtstGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
 </div>

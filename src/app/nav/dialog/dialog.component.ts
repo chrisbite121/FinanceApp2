@@ -14,7 +14,8 @@ import { NotificationService } from '../../service/notification.service'
 export class DialogComponent implements AfterContentInit {
     
     public dialog: Dialog;
-    public notifications: Array<any>
+    public notifications: object;
+    public transactionArray:Array<string>;
     constructor(private element: ElementRef,
                 private notificationService: NotificationService){ 
                     this.notifications = [];
@@ -28,6 +29,7 @@ export class DialogComponent implements AfterContentInit {
 
     openDialog($event): void {
         this.notifications = this.notificationService.getNotifications()
+        this.transactionArray = Object.keys(this.notifications).slice().reverse()
         this.dialog.open()
     }
 

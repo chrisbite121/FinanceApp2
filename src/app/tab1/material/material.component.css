@@ -3,5 +3,43 @@ i {
     cursor: hand;
     padding-left: 7px;
     padding-right: 5px;
-    margin-top: 30px;
+    margin-top: 40px;
+}
+
+.header-row {
+    padding-top:10px;
+    padding-bottom:5px;
+    padding-left:20px;
+}
+
+.info-icon {
+    padding: 5px;
+}
+
+.info-icon:hover {
+    filter: opacity(.7);
+    -webkit-filter: opacity(.7);
+}
+
+.title{
+    cursor: pointer; 
+    cursor: hand;
+}
+
+.title:hover{
+    filter: opacity(.7);
+    -webkit-filter: opacity(.7);
+}
+
+.action-icon {
+    margin-top:5px
+}
+
+.action-icon:hover{
+    filter: opacity(.7);
+    -webkit-filter: opacity(.7);    
+}
+
+.agGridTable {
+    overflow: hidden;
 }

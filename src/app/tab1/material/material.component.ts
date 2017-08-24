@@ -12,6 +12,8 @@ import { UtilsService } from '../../service/utils.service'
 
 import { Subscription } from 'rxjs/subscription'
 import { fadeInAnimation } from '../../animations/fade-in.animation'
+import { slideInOutAnimation } from '../../animations/slide-in-out.animation'
+import { FabricIconPanelWrapperComponent } from '../../office-fabric/panel/fabric.panel.wrapper.component'
 
 import { IYear } from '../../model/year.model'
 @Component({
@@ -19,13 +21,14 @@ import { IYear } from '../../model/year.model'
     templateUrl: './material.component.html',
     styleUrls: ['./material.component.css'],
     // make fade in animation available to this component
-    animations: [fadeInAnimation],    
+    animations: [fadeInAnimation, slideInOutAnimation],    
 })
 export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked {
     public tableReady: boolean = false;
     
     public title:string = 'Materials';
     public headerStyle = 'ag-header-cell';
+    public collapsed: boolean = false;
 
     public cmGridOptions: GridOptions
     //totals
@@ -66,7 +69,14 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
             let _colId = $event.column.colId
             let _focusTable = 'cmGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppMaterialData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber());
+            this.scriptService.updateTable($event)
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
 
         };
 
@@ -259,6 +269,14 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
                 cols[i]['style'].color = value;
             }
         }
+    }
+
+    public isCollapsed(): boolean {
+        return this.collapsed;
+    }
+    
+    public toggleMenu(): void {
+        this.collapsed = !this.collapsed;
     }
 
 }

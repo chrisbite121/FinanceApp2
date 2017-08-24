@@ -1,14 +1,18 @@
 <div *ngIf="tableReady" [@fadeInAnimation]> 
     <div class="ms-Grid">
-        <div class="ms-Grid-row ms-font-l">
-            <h3>Cost Summary</h3>
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm6">
+                <of-icon-panel [contentName]="'CostSummary'" class="info-icon"></of-icon-panel>
+                <span class="ms-font-xl ms-fontWeight-regular title">{{title}}</span>
+            </div>
+            <div class="ms-Grid-col ms-u-sm6"></div>
         </div>
     </div>
 
     <ag-grid-angular #agGrid14
                             [style.height.px]="csTableHeight" 
                             [style.width.px]="csTableWidth"
-                            class="ag-fresh"  
+                            class="ag-fresh agGridTable"  
                 [gridOptions]="csGridOptions">
     </ag-grid-angular>
 </div>

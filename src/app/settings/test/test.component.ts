@@ -21,6 +21,7 @@ import { FabricButtonWrapperComponent } from '../../office-fabric/button/fabric.
 import { FabricCommandButtonWrapperComponent } from '../../office-fabric/commandbutton/fabric.commandButton.wrapper.component'
 import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
 import { FabricDialogWrapperComponent } from '../../office-fabric/dialog/fabric.dialog.wrapper.component'
+import { FabricIconPanelWrapperComponent } from '../../office-fabric/panel/fabric.panel.wrapper.component'
 
 
 const label:ICommandButtonLabel = {
@@ -69,5 +70,9 @@ export class TestComponent {
 
     buttonclicked($event){
         console.log($event);
+    }
+
+    createPanel($event){
+
     }
 }

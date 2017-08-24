@@ -1,18 +1,25 @@
 <div *ngIf="tableReady" [@fadeInAnimation]> 
-    <div class="ms-Grid">
-            <div class="ms-Grid-row" style="padding:10px 0px">
-                <div class="ms-Grid-col ms-u-sm3">
-                    <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
-                </div>
-                <div class="ms-Grid-col ms-u-sm9">
-                </div>
-            </div>    
-        </div>
+        <div class="ms-Grid"  class="header-row">
+                <div class="ms-Grid-row">
+                    <div class="ms-Grid-col ms-u-sm3 ">
+                        <div class="ms-Grid-row">
+                            <of-icon-panel [contentName]="'Total'" class="info-icon"></of-icon-panel>
+                            <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
+                                {{title}}    
+                            </span>
+                            
+                        </div>
+                    </div>
+                    <div class="ms-Grid-col ms-u-sm9">
+                    </div>
+                </div>    
+            </div>
 
-    <ag-grid-angular #agGrid12 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid12
                             [style.height.px]="tTableHeight" 
                             [style.width.px]="tTableWidth"
-                            class="ag-fresh"  
-                [gridOptions]="tGridOptions">
+                            class="ag-fresh agGridTable"  
+                            [gridOptions]="tGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
 </div>

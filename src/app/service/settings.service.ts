@@ -26,7 +26,7 @@ const userControlledsettings: ISettings = {
     ],
     //Sharepoint Mode needs to be removed from here
     //this value is set in application controlled settings
-    sharePointMode: false,
+    sharePointMode: true,
     autoSave: false,
     workingHoursInDay: 7.5,
     tsWeighting: 0.2,
@@ -290,18 +290,60 @@ export class SettingsService {
         this._settingsStream.next(this._settings);
     }
 
-    setSetting(attr: string, value: any): any {
-        if(this._settings[attr] !== undefined) {
-            console.log('updating value')
-            this._settings[attr] = value
-            this.getSettings();
-        }
+    setSetting(attr: string, value: any): Observable<any> {
+        let update$ = new Observable((observer:Observer<any>) => {
+            let _attribute = attr.charAt(0).toLowerCase() + attr.slice(1)
+            if(this._settings.hasOwnProperty(_attribute)) {
+
+                this._settings[_attribute] = value
+                
+                observer.next({
+                    functionCall: 'setSetting',
+                    result: true,
+                })
+
+                observer.next({
+                    reportHeading: 'setSetting',
+                    reportResult: 'success',
+                    description: `${_attribute}: Setting updated to ${value}`
+                })
+            } else {
+                observer.next({
+                    reportHeading: 'setSetting',
+                    reportResult: 'fail',
+                    description: `unable to update setting in functionCall: setSetting - could not find attribue ${attr}`
+                })
+            }
+
+            observer.complete()
+        })
+
+        return update$
+
     }
 
     getSetting(attr: any): Observable<any> {
         let obs = Observable.create((observer: Observer<any>) => {
             if(this._settings.hasOwnProperty(attr)){
-                observer.next(this._settings[attr]);
+                observer.next({
+                    functionCall: 'getSetting',
+                    result: true,
+                    setting: attr,
+                    value: this._settings[attr]
+                });
+                observer.next({
+                    reportHeading: 'getSetting',
+                    reportResult: 'success',
+                    description: 'successfully retrieved setting ' + attr
+                })
+            } else {
+                observer.next({
+                    reportHeading: 'getSetting',
+                    reportResult: 'fail',
+                    description: `could not find attribute: ${attr}`
+                })
+
+                console.error(`cannot find attribute ${attr} in settings list`)
             }
              observer.complete();
         });

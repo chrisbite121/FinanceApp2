@@ -10,6 +10,9 @@ import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
 import { fadeInAnimation } from '../../animations/fade-in.animation'
+import { slideInOutAnimation } from '../../animations/slide-in-out.animation'
+
+import { FabricIconPanelWrapperComponent } from '../../office-fabric/panel/fabric.panel.wrapper.component'
 
 import { Subscription } from 'rxjs/subscription'
 
@@ -20,11 +23,13 @@ import { IYear } from '../../model/year.model'
     templateUrl: './resource.component.html',
     styleUrls: ['./resource.component.css'],
     // make fade in animation available to this component
-    animations: [fadeInAnimation],
+    animations: [fadeInAnimation, slideInOutAnimation],
 })
 export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked {
     public title:string = 'Resources';
     public headerStyle = 'ag-header-cell';
+    public collapsed: boolean = false;
+    public tableReady: boolean = false;    
 
     public puGridOptions: GridOptions
     public wdGridOptions: GridOptions
@@ -62,7 +67,7 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     public resourceContextStream: Subscription
     public totalContextStream: Subscription
 
-    public tableReady: boolean;
+
 
     constructor(private tableService: TableService, 
                 private dataContextService: DataContextService,
@@ -105,13 +110,13 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             let _focusTable = 'puGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
             this.scriptService.updateTable($event)
-                    .subscribe(
-                        data => console.log(data),
-                        err => console.log(err),
-                        () => { 
-                            console.error('COMPLETED');                            
-                            this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
-                    });
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
         };
         this.puGridOptions.context = {};
         this.puGridOptions.rowSelection = 'single';
@@ -124,7 +129,14 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             let _colId = $event.column.colId
             let _focusTable = 'ahGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber());
+            this.scriptService.updateTable($event)
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
         };
         // this.ahGridOptions.rowSelection = 'single';
         this.ahGridOptions.singleClickEdit = true;
@@ -139,7 +151,14 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             let _colId = $event.column.colId
             let _focusTable = 'prGridOptions'
             this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event).subscribe(this.getSubscriber())
+            this.scriptService.updateTable($event)
+                .subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () => { 
+                        console.error('COMPLETED');                            
+                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                });
         };
         // this.prGridOptions.rowSelection = 'single';
         this.prGridOptions.singleClickEdit = true;
@@ -285,7 +304,15 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
 
     addResourceRow(){
         this.scriptService.addDataRow(this.utilsService.financeAppResourceData, this.settingsService.year, this.settingsService.autoSave)
-            .subscribe(this.getSubscriber());
+            .subscribe(
+                data => console.log(data),
+                err => console.log(err),
+                () => {
+                    this.uiStateService.updateMessage(`row created`, this.utilsService.completeStatus).subscribe()
+                    console.log(`add resource row completed`);
+                    
+                }
+            );
         return
     }
 
@@ -308,7 +335,14 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             selectedNode[0].data.hasOwnProperty('ID')) {
                 this.scriptService.deleteDataRow(this.utilsService.financeAppResourceData,
                 selectedNode[0].data.ID)
-                    .subscribe(this.getSubscriber());
+                    .subscribe(
+                        data => console.log(data),
+                        err => console.log(err),
+                        () => {
+                            console.log(`delete row completed`);
+                            this.uiStateService.updateMessage(`row deleted`, this.utilsService.completeStatus).subscribe()
+                        }
+                    );
                     } else {
                         alert('something has gone wrong, required data values are not available to delete row')
                     }
@@ -374,5 +408,13 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
                 cols[i]['style'].color = value;
             }
         }
+    }
+
+    public isCollapsed(): boolean {
+        return this.collapsed;
+    }
+    
+    public toggleMenu(): void {
+        this.collapsed = !this.collapsed;
     }
 }

@@ -5,43 +5,53 @@
                 [gridOptions]="wdGridOptions">
     </ag-grid-angular>
 
-    <div class="ms-Grid">
-        <div class="ms-Grid-row" style="padding:10px 0px">
-            <div class="ms-Grid-col ms-u-sm1">
-                <span class="ms-font-xl ms-fontWeight-semibold">{{title}}</span>
+    <div class="ms-Grid"  class="header-row">
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm1 ">
+                <div class="ms-Grid-row">
+                    <of-icon-panel [contentName]="'Resource'" class="info-icon"></of-icon-panel>
+                    <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
+                        {{title}}    
+                    </span>
+                    
+                </div>
             </div>
             <div class="ms-Grid-col ms-u-sm2">
-                <i class="ms-Icon ms-Icon--Add" style="margin-top:5px" (click)="addResourceRow();"></i>
-                <i class="ms-Icon ms-Icon--Delete" style="margin-top:5px" (click)="deleteResourceRow();"></i> 
+                <i class="ms-Icon ms-Icon--Add action-icon" (click)="addResourceRow();"></i>
+                <i class="ms-Icon ms-Icon--Delete action-icon" (click)="deleteResourceRow();"></i> 
             </div>
             <div class="ms-Grid-col ms-u-sm9">
             </div>
         </div>    
     </div>
 
-    <ag-grid-angular #agGrid2 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid2  
                             [style.height.px]="puTableHeight" 
                             [style.width.px]="puTableWidth"
-                            class="ag-fresh" 
-                            [gridOptions]="puGridOptions">
+                            class="ag-fresh agGridTable" 
+                            [gridOptions]="puGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid3 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid3
                             [style.height.px]="ahTableHeight" 
                             [style.width.px]="ahTableWidth"
-                            class="ag-fresh"  
-                [gridOptions]="ahGridOptions">
+                            class="ag-fresh agGridTable"  
+                            [gridOptions]="ahGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid4 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid4
                             [style.height.px]="prTableHeight" 
                             [style.width.px]="prTableWidth"
-                            class="ag-fresh"  
-                            [gridOptions]="prGridOptions">
+                            class="ag-fresh agGridTable"  
+                            [gridOptions]="prGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular>
-    <ag-grid-angular #agGrid5 style="overflow: hidden;" 
+    <ag-grid-angular #agGrid5 
                             [style.height.px]="prtTableHeight" 
                             [style.width.px]="prtTableWidth"
-                            class="ag-fresh" 
-                            [gridOptions]="prtGridOptions">
+                            class="ag-fresh agGridTable" 
+                            [gridOptions]="prtGridOptions"
+                            [@slideInOut]="isCollapsed()">
     </ag-grid-angular> 
 
 </div>

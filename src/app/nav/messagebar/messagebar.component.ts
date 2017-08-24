@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ViewChild } from '@angular/core'
+import { Component, Input, ViewChild } from '@angular/core'
 import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
 import { DialogComponent } from '../dialog/dialog.component'
 
@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs/subscription'
     templateUrl: './messagebar.component.html',
     styleUrls: ['./messagebar.component.css']
 })
-export class MessagebarComponent implements OnChanges {
+export class MessagebarComponent {
     @ViewChild(DialogComponent) dialogComponent:DialogComponent
 
     public successImageUrl: string;
@@ -27,7 +27,6 @@ export class MessagebarComponent implements OnChanges {
         this.errorImageUrl = require('../../assets/error.png')
         this.message = ''
         this.messageStream = this.uiStateService.getMessageDataStream().subscribe(data => {
-            console.log(data)
             if(data.hasOwnProperty('message')){
                 this.message = data.message
             }
@@ -39,10 +38,6 @@ export class MessagebarComponent implements OnChanges {
                 this.errorStatus = data.errorStatus
             }
         });
-    }
-
-    ngOnChanges(change){
-        console.log(change)
     }
 
     showDialog(event){

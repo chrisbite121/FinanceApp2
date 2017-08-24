@@ -1,14 +1,17 @@
 <div *ngIf="tableReady" [@fadeInAnimation]> 
-    <div class="ms-Grid">
-        <div class="ms-Grid-row ms-font-l">
-            <h3>Net Summary</h3>
-        </div>
-    </div>
-
+        <div class="ms-Grid">
+                <div class="ms-Grid-row">
+                    <div class="ms-Grid-col ms-u-sm6">
+                        <of-icon-panel [contentName]="'NetSummary'" class="info-icon"></of-icon-panel>
+                        <span class="ms-font-xl ms-fontWeight-regular title">{{title}}</span>
+                    </div>
+                    <div class="ms-Grid-col ms-u-sm6"></div>
+                </div>
+            </div>
     <ag-grid-angular #agGrid15
                             [style.height.px]="nsTableHeight" 
                             [style.width.px]="nsTableWidth"
-                            class="ag-fresh"  
+                            class="ag-fresh agGridTable"  
                 [gridOptions]="nsGridOptions">
     </ag-grid-angular>
 </div>

@@ -7,7 +7,10 @@ import { DataContextService } from '../../service/data-context.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
+
 import { fadeInAnimation } from '../../animations/fade-in.animation'
+import { slideInOutAnimation } from '../../animations/slide-in-out.animation'
+import { FabricIconPanelWrapperComponent } from '../../office-fabric/panel/fabric.panel.wrapper.component'
 
 import { Subscription } from 'rxjs/subscription'
 
@@ -17,10 +20,12 @@ import { IYear } from '../../model/year.model'
     templateUrl: './total.component.html',
     styleUrls: ['./total.component.css'],
     // make fade in animation available to this component
-    animations: [fadeInAnimation]
+    animations: [fadeInAnimation, slideInOutAnimation]
 })
 export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
     public tableReady: boolean = false;
+    public collapsed: boolean = false;
+    public title: string = 'Total';  
     //totals
     public tGridOptions: GridOptions    
     
@@ -32,7 +37,7 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
 
     public uiState: any;
 
-    public title: string;
+
     // public _backgroundColour: string = '#99e7ff';
     
     public totalStream: Subscription
@@ -44,10 +49,8 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
                 private el: ElementRef) {
-        
-        this.title = 'Total'
 
-        //initialise gridoptions objects
+                    //initialise gridoptions objects
         this.tGridOptions = <GridOptions>{};
 
         //Total cost gridoptions
@@ -151,5 +154,11 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
         }
     }
 
-
+    public isCollapsed(): boolean {
+        return this.collapsed;
+    }
+    
+    public toggleMenu(): void {
+        this.collapsed = !this.collapsed;
+    }
 }

@@ -1,14 +1,19 @@
 <div *ngIf="tableReady" [@fadeInAnimation]> 
-    <div class="ms-Grid">
-        <div class="ms-Grid-row ms-font-l">
-            <h3>Gross Summary</h3>
-        </div>
-    </div>
-
+        <div class="ms-Grid">
+                <div class="ms-Grid-row">
+                    <div class="ms-Grid-col ms-u-sm6">
+                        <of-icon-panel [contentName]="'GrossSummary'" class="info-icon"></of-icon-panel>
+                        <span class="ms-font-xl ms-fontWeight-regular title">{{title}}</span>
+                    </div>
+                    <div class="ms-Grid-col ms-u-sm6"></div>
+                </div>
+            </div>
+<!--Note the style overflow is needed -->
     <ag-grid-angular #agGrid13
-                            [style.height.px]="gsTableHeight" 
-                            [style.width.px]="gsTableWidth"
-                            class="ag-fresh"  
-                [gridOptions]="gsGridOptions">
+                    [style.height.px]="gsTableHeight" 
+                    [style.width.px]="gsTableWidth"
+                    class="ag-fresh agGridTable"  
+                    [gridOptions]="gsGridOptions">
     </ag-grid-angular>
 </div>
+
