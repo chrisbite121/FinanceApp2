@@ -7,6 +7,7 @@ import { DataContextService } from '../../service/data-context.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
+import { UiStateService } from '../../service/ui-state.service'
 
 import { fadeInAnimation } from '../../animations/fade-in.animation'
 import { slideInOutAnimation } from '../../animations/slide-in-out.animation'
@@ -48,7 +49,8 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
                 private scriptService: ScriptService,
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
-                private el: ElementRef) {
+                private el: ElementRef,
+                private uiStateService: UiStateService) {
 
                     //initialise gridoptions objects
         this.tGridOptions = <GridOptions>{};
@@ -80,7 +82,9 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
             console.error('TOTAL DATA RECEIVED')
             if (!this.tGridOptions.rowData) {
                 this.tGridOptions.rowData = data;
-            } else if (this.tGridOptions.api) {
+            } 
+            
+            if (this.tGridOptions.api) {
                 this.tGridOptions.api.setRowData(data);
             }
         })
@@ -119,7 +123,9 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
         if(this.settingsService.initAppComplete){
             this.scriptService.getAppData([this.utilsService.financeAppTotalsData],
                                         this.settingsService.year)
-                                            .subscribe(this.getSubscriber());
+                        .subscribe(data => console.log(data),
+                                    err => console.log(err),
+                                    ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         }
     }
 

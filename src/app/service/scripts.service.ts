@@ -10,6 +10,7 @@ import { SettingsService } from './settings.service'
 import { DataContextService } from './data-context.service'
 import { WorkdayService } from './workdays.service'
 import { NotificationService } from './notification.service'
+import { StateService } from './state.service'
 
 import { Observable } from 'rxjs/Rx';
 import { Observer } from 'rxjs/Observer';
@@ -63,7 +64,8 @@ export class ScriptService {
                 private settingsService: SettingsService,
                 private dataContextService: DataContextService,
                 private workdaysService: WorkdayService,
-                private notificationService: NotificationService){
+                private notificationService: NotificationService,
+                private stateService: StateService){
         this.init()
     }
 
@@ -133,8 +135,10 @@ healthReport(listArray: Array<string>) {
                         data.hasOwnProperty('listName') &&
                         data.hasOwnProperty('apiCall') &&
                         data.hasOwnProperty('result') &&
+                        data.hasOwnProperty('listExists') &&
                         data['apiCall'] == this.utilsService.apiCallListExists && 
-                        data['result'] == true)
+                        data['result'] == true &&
+                        data['listExists'] == true)
                         
                         ? this.commonApiService.getListXml(data['listName'], this.listService.getListContext(data['listName'])) 
                         : Observable.of(data)
@@ -490,7 +494,7 @@ defineApiCallsActionHealthReport(listArray): Observable<any>{
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // PROVISIONER
-public provisioner() {
+public provisioner(_listArry:Array<string>) {
     //check permissions
     //If list exists IGNORE else CREATe LISTS
     // this._provisionerReport = {
@@ -504,13 +508,6 @@ public provisioner() {
     //     deleteList: [],
     //     errors: []
     // };
-    let _listArry = [this.utilsService.financeAppResourceData, 
-                    this.utilsService.financeAppMaterialData,
-                    this.utilsService.financeAppTotalsData,
-                    this.utilsService.financeAppLogsData,
-                    this.utilsService.financeAppSettingsData,
-                    this.utilsService.financeAppWorkingDaysData,
-                    this.utilsService.financeAppSummaryData]
     let provisioner$ = 
             this.checkPermissions(this.utilsService.manageList, _listArry)
             .mergeMap((data: any) =>
@@ -531,7 +528,9 @@ public provisioner() {
                     data.hasOwnProperty('listName') && 
                     data.hasOwnProperty('apiCall') && 
                     data.hasOwnProperty('result') &&
-                    data.result == false && 
+                    data.hasOwnProperty('listExists') &&
+                    data.result == true &&
+                    data.listExists == false && 
                     data.apiCall == this.utilsService.apiCallListExists)
                 ? this.commonApiService.createList(data['listName'], this.listService.getListContext(data['listName'])) 
                 : this.placeholderObservable(data)
@@ -597,7 +596,9 @@ public resetLists(type? :string) {
                 data.hasOwnProperty('listName') && 
                 data.hasOwnProperty('apiCall') && 
                 data.hasOwnProperty('result') &&
+                data.hasOwnProperty('listExists') &&
                 data['result'] == true && 
+                data['listExists'] == true &&
                 data['apiCall'] == this.utilsService.apiCallListExists)
             ? this.commonApiService.deleteList(data['listName'], this.listService.getListContext(data['listName']))
             : this.placeholderObservable(data)
@@ -607,7 +608,9 @@ public resetLists(type? :string) {
                 data.hasOwnProperty('listName') && 
                 data.hasOwnProperty('apiCall') && 
                 data.hasOwnProperty('result') &&
-                data.result == false && 
+                data.hasOwnProperty('listExists') &&
+                data.result == true &&
+                data.listExists == false && 
                 data.apiCall == this.utilsService.apiCallListExists)
             ? this.commonApiService.createList(data['listName'], this.listService.getListContext(data['listName'])) 
             : this.placeholderObservable(data)
@@ -951,53 +954,49 @@ constructFieldsToCreateApiArray(fieldsToCreate){
 
 }
 
-constructFieldsToUpdatedArray(fieldsSetRequired, fieldsWrongType){
-    let _updateFieldApiArray:Array<any> = []
+// constructFieldsToUpdatedArray(fieldsSetRequired, fieldsWrongType){
+//     let _updateFieldApiArray:Array<any> = []
     
-    if (fieldsSetRequired && fieldsSetRequired.length > 0) {
-        fieldsSetRequired.forEach((element:IFieldUpdateReportResult) => {
-            console.log('set Required', element)
-            console.log('context type', this.listService.getListContext(element.listName))
-            _updateFieldApiArray.push(this.commonApiService.updateField(element.fieldName, element.listName, this.utilsService.hostWeb, element.oldSchema, element.newSchema))
-        })
-    }
+//     if (fieldsSetRequired && fieldsSetRequired.length > 0) {
+//         fieldsSetRequired.forEach((element:IFieldUpdateReportResult) => {
+//             console.log('set Required', element)
+//             console.log('context type', this.listService.getListContext(element.listName))
+//             _updateFieldApiArray.push(this.commonApiService.updateField(element.fieldName, element.listName, this.utilsService.hostWeb, element.oldSchema, element.newSchema))
+//         })
+//     }
 
-    if (fieldsWrongType && fieldsWrongType.length > 0) {
-        fieldsWrongType.forEach((element:IFieldUpdateReportResult) => {
-            console.log('wrong type', element)
-            console.log('context type', this.listService.getListContext(element.listName))
-            _updateFieldApiArray.push(this.commonApiService.updateField(element.fieldName, element.listName, this.utilsService.hostWeb, element.oldSchema, element.newSchema))
-        })
-    }
+//     if (fieldsWrongType && fieldsWrongType.length > 0) {
+//         fieldsWrongType.forEach((element:IFieldUpdateReportResult) => {
+//             console.log('wrong type', element)
+//             console.log('context type', this.listService.getListContext(element.listName))
+//             _updateFieldApiArray.push(this.commonApiService.updateField(element.fieldName, element.listName, this.utilsService.hostWeb, element.oldSchema, element.newSchema))
+//         })
+//     }
 
-    return _updateFieldApiArray
-}
+//     return _updateFieldApiArray
+// }
 
-constructGetDataArray(){
-    let _listArry = []
-    let _listApiArry = [];
+// constructGetDataArray(){
+//     let _listArry = []
+//     let _listApiArry = [];
 
-    try {
-        _listArry = [this.utilsService.financeAppResourceData, 
-                    this.utilsService.financeAppMaterialData,
-                    this.utilsService.financeAppTotalsData]
-        _listArry.forEach(listName => {
-            _listApiArry.push(this.commonApiService.getItems(listName, this.utilsService.hostWeb))
-        })
-    } catch (e) {
-        this.logService.log(e, this.utilsService.errorStatus, false)
-    }
+//     try {
+//         _listArry = [this.utilsService.financeAppResourceData, 
+//                     this.utilsService.financeAppMaterialData,
+//                     this.utilsService.financeAppTotalsData]
+//         _listArry.forEach(listName => {
+//             _listApiArry.push(this.commonApiService.getItems(listName, this.utilsService.hostWeb))
+//         })
+//     } catch (e) {
+//         this.logService.log(e, this.utilsService.errorStatus, false)
+//     }
 
-    return _listApiArry    
-}
+//     return _listApiArry    
+// }
 
 getLogs():Observable<any>{
-    if (this.settingsService.useLoggingList 
-        //TO BE ADDED
-        //&& this.settingsService.loggingListReady
-        && (this.settingsService.persist)) {
-                
-        return this.commonApiService.getItems(this.utilsService.financeAppLogsData, this.utilsService.appWeb, 
+       let getLog$ =       
+             this.commonApiService.getItems(this.utilsService.financeAppLogsData, this.utilsService.appWeb, 
                                 this.utilsService.includeFields(
                                     this.listService.getArrayFieldNames(this.utilsService.financeAppLogsData)),
                                     //this caml query will be replaced eventually with a skip take query
@@ -1014,10 +1013,7 @@ getLogs():Observable<any>{
                     :this.placeholderObservable(data)
                 )
 
-    } else {
-        this.logService.log('persist logs set to false, returning cached logs', this.utilsService.infoStatus, true)
-        return this.placeholderObservable(this.logService.logs)
-    }
+        return getLog$
 }
 
 saveLogsBatch(){
@@ -1088,38 +1084,37 @@ this.logService.log('initialising app', this.utilsService.infoStatus, true);
 let _transactionId = UUID.UUID();
 
 let init$ = 
-    this.uiStateService.updateMessage('updating data', this.utilsService.loadingStatus)
+    this.uiStateService.updateMessage('Initialising App', this.utilsService.loadingStatus)
+    // create new entry in transaction table
     .mergeMap(data =>
         (typeof(data) == 'object' &&
         data.hasOwnProperty('functionCall') &&
         data.hasOwnProperty('result') &&
         data.functionCall == 'updateMessage' &&
         data.result == true)
-        ? this.notificationService.initTransaction(_transactionId, 'Update Table')
+        ? this.notificationService.initTransaction(_transactionId, 'Init App')
         : Observable.of(data)
     )
-    // create new entry in transaction table
-    .mergeMap((data:any) => 
+    .mergeMap((data:any) =>
+        (
         (typeof(data) == 'object' &&
         data.hasOwnProperty('functionCall') &&
         data.hasOwnProperty('result') &&
         data.functionCall == 'initTransaction' &&
-        data.result == true)
-        
-        //NEED TO GET USER PERMISSIONS FIRST
-        // this property is set in code and is only intended to be used for development/debugging
-        ? this.checkUseSettingsList()
-        : Observable.of(data)
-    )
-    .mergeMap( data =>
-        // are we using settings list?
-        (typeof(data) === 'object' &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('value') &&
-        data['functionCall'] === 'checkUseSettingsList' &&
-        data['value'] === true)
-        ? this.commonApiService.listExists(this.utilsService.financeAppSettingsData, this.utilsService.appWeb)
-        // if no, then use app default values, let data pass though
+        data.result == true) &&
+        //make sure app is in sharepoint mode
+        this.settingsService.sharePointMode
+        )
+        ? Observable.from([
+            this.commonApiService.listExists(this.utilsService.financeAppSettingsData, this.listService.getListContext(this.utilsService.financeAppSettingsData)),
+            this.commonApiService.listExists(this.utilsService.financeAppLogsData, this.listService.getListContext(this.utilsService.financeAppLogsData)),
+            this.commonApiService.listExists(this.utilsService.financeAppWorkingDaysData, this.listService.getListContext(this.utilsService.financeAppWorkingDaysData)),
+            this.commonApiService.listExists(this.utilsService.financeAppSummaryData, this.listService.getListContext(this.utilsService.financeAppSummaryData)),
+            this.commonApiService.listExists(this.utilsService.financeAppResourceData, this.listService.getListContext(this.utilsService.financeAppResourceData)),
+            this.commonApiService.listExists(this.utilsService.financeAppMaterialData, this.listService.getListContext(this.utilsService.financeAppMaterialData)),
+            this.commonApiService.listExists(this.utilsService.financeAppTotalsData, this.listService.getListContext(this.utilsService.financeAppTotalsData)),
+        ])
+        .mergeAll()
         : Observable.of(data)
     )
     .mergeMap( data => 
@@ -1127,21 +1122,39 @@ let init$ =
         data.hasOwnProperty('listName') &&
         data.hasOwnProperty('apiCall') &&
         data.hasOwnProperty('result') &&
-        data['apiCall'] == this.utilsService.apiCallListExists && 
-        data['listName'] == this.utilsService.financeAppSettingsData && 
-        data['result'] == false)
-        //if settings doesn't exists create
-        ? this.commonApiService.createList(this.utilsService.financeAppSettingsData, this.utilsService.appWeb)
+        data.hasOwnProperty('listExists') &&
+        data['apiCall'] == this.utilsService.apiCallListExists &&
+        data['result'] == true &&
+        data['listExists'] == false)
+        //if any list doesn't exists create list
+        ? this.commonApiService.createList(data['listName'], 
+                                            this.listService.getListContext(data['listName']))
         : Observable.of(data)
     )
+        
+    // .mergeMap( data => 
+    //     (typeof(data) == 'object' && 
+    //     data.hasOwnProperty('listName') &&
+    //     data.hasOwnProperty('apiCall') &&
+    //     data.hasOwnProperty('result') &&
+    //     data.hasOwnProperty('listExists') &&
+    //     data['apiCall'] == this.utilsService.apiCallListExists && 
+    //     data['listName'] == this.utilsService.financeAppSettingsData && 
+    //     data['listExists'] == false &&
+    //     data['result'] == true)
+    //     //if settings doesn't exists create
+    //     ? this.commonApiService.createList(this.utilsService.financeAppSettingsData, this.utilsService.appWeb)
+    //     : Observable.of(data)
+    // )
     .mergeMap( data => 
         (typeof(data) == 'object' && 
         data.hasOwnProperty('listName') &&
         data.hasOwnProperty('apiCall') &&
         data.hasOwnProperty('result') &&
         data['apiCall'] == this.utilsService.apiCallCreateList && 
+        data['listName'] == this.utilsService.financeAppSettingsData &&
         data['result'] == true)
-        //if settings doesn't exists create
+        //if settings has just been created then need to add placeholder item for settings data
         ? this.commonApiService.addItem(this.utilsService.financeAppSettingsData, this.utilsService.appWeb, this.settingsService.settingsValuesArray())
         : Observable.of(data)
     )    
@@ -1151,9 +1164,11 @@ let init$ =
         data.hasOwnProperty('listName') &&
         data.hasOwnProperty('apiCall') &&
         data.hasOwnProperty('result') &&
+        data.hasOwnProperty('listExists') &&
         data['apiCall'] == this.utilsService.apiCallListExists &&
         data['listName'] == this.utilsService.financeAppSettingsData &&        
-        data['result'] == true)
+        data['result'] == true &&
+        data['listExists'] == true)
 
         ||
 
@@ -1161,12 +1176,13 @@ let init$ =
         data.hasOwnProperty('listName') &&
         data.hasOwnProperty('apiCall') &&
         data.hasOwnProperty('result') &&
+        data['listName'] == this.utilsService.financeAppSettingsData &&
         data['apiCall'] == this.utilsService.apiCallAddItem && 
         data['result'] == true)
 
         )
 
-        //if settings exists get data
+        //if settings exists or succesfully created new item get data
         ? this.commonApiService.getItem(this.utilsService.financeAppSettingsData, 
                                             this.utilsService.generateXmlGetItemById(1),
                                             this.utilsService.appWeb,
@@ -1186,54 +1202,19 @@ let init$ =
         ? this.processSettingsData(data)
         : Observable.of(data)
     )
-    .mergeMap( data => 
-        //if settings list and using logging?
-        (  
-        (typeof(data) === 'object' &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('result') &&
-        data['functionCall'] == 'processSettingsData' &&
-        data['result'] == true)
-        &&
-        // this property is set in code and is only intended to be used for development/debugging
-        this.settingsService.useLoggingList
-        )
-        //if yes check if logs list exist?
-        ? Observable.from([
-            this.commonApiService.listExists(this.utilsService.financeAppLogsData, this.utilsService.appWeb),
-            this.commonApiService.listExists(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb)
-        ])
-        .mergeAll()
-        // if no, then use app default values, let data pass though
-        : Observable.of(data)
-    )
-    .mergeMap( data => 
-        (typeof(data) == 'object' && 
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('apiCall') &&
-        data.hasOwnProperty('result') &&
-        data['apiCall'] == this.utilsService.apiCallListExists &&
-        (data['listName'] == this.utilsService.financeAppLogsData ||
-        data['listName'] == this.utilsService.financeAppWorkingDaysData) && 
-        data['result'] == false)
-        //if logging or workdays data doesn't exists create list
-        ? this.commonApiService.createList(data['listName'], 
-                                            this.listService.getListContext(data['listName']))
-        : Observable.of(data)
-    )
-    .mergeMap(data => 
-        this.isLogListReady(data)
-        ? this.settingsService.logListReady(true)
-        : Observable.of(data)
-    
-    )
-    .mergeMap(data =>
-        //log list exists or create log list succeeds
-        this.logListReadyCallResult(data)
-        //save queued logs to persistant storage
-        ? this.saveLogsBatch()
-        : Observable.of(data)
-    )
+    // .mergeMap( data => 
+    //     //if settings list and using logging?
+    //     (typeof(data) === 'object' &&
+    //     data.hasOwnProperty('functionCall') &&
+    //     data.hasOwnProperty('result') &&
+    //     data['functionCall'] == 'processSettingsData' &&
+    //     data['result'] == true)
+    //     ? this.loadAppData([this.utilsService.financeAppResourceData,
+    //         this.utilsService.financeAppMaterialData,
+    //         this.utilsService.financeAppTotalsData,
+    //         this.utilsService.financeAppSummaryData], this.settingsService.year)
+    //     : Observable.of(data)
+    // )
     .mergeMap( data => 
         (typeof(data) == 'object' && 
         data.hasOwnProperty('listName') &&
@@ -1248,12 +1229,12 @@ let init$ =
                             this.workdaysService.generatePlaceholderWorkdays())
         : Observable.of(data)
     )       
-    .mergeMap(data => 
-        this.isWDListReady(data)
-        ? this.settingsService.workingDaysListReady(true)
-        : Observable.of(data)
+    // .mergeMap(data => 
+    //     this.isWDListReady(data)
+    //     ? this.settingsService.workingDaysListReady(true)
+    //     : Observable.of(data)
     
-    )
+    // )
     .mergeMap(data =>
         //working day list exists or create working day list succeeds
         this.workingDayListReadyCallResult(data)
@@ -1274,7 +1255,7 @@ let init$ =
         data['listName'] == this.utilsService.financeAppWorkingDaysData &&
         data['result'] == true)
         ? this.workdaysService.processItems(data['data'])
-        : Observable.of(data)        
+        : Observable.of(data)
     )
     //collect notifications passed down the observable chain and add them to the notifcaiton table
     .mergeMap((data:any) => 
@@ -1317,9 +1298,11 @@ isLogListReady(data): boolean{
         data.hasOwnProperty('listName') &&
         data.hasOwnProperty('apiCall') &&
         data.hasOwnProperty('result') &&
+        data.hasOwnProperty('listExists') &&
         data['apiCall'] == this.utilsService.apiCallListExists &&
         data['listName'] == this.utilsService.financeAppLogsData &&        
-        data['result'] == true)
+        data['result'] == true &&
+        data['listExists'] == true)
 
         ||
 
@@ -1340,9 +1323,11 @@ isWDListReady(data): boolean{
         data.hasOwnProperty('listName') &&
         data.hasOwnProperty('apiCall') &&
         data.hasOwnProperty('result') &&
+        data.hasOwnProperty('listExists') &&
         data['apiCall'] == this.utilsService.apiCallListExists &&
         data['listName'] == this.utilsService.financeAppWorkingDaysData &&        
-        data['result'] == true)
+        data['result'] == true &&
+        data['listExists'] == true)
 
         ||
 
@@ -1390,29 +1375,29 @@ updateField(fieldName: string, listName: string, attributeType: string, newSchem
 }
 
 
-checkUseSettingsList():Observable<any>{
-    let setting$ = new Observable((observer:Observer<any>) => {
-        let result = this.settingsService.useSettingsList
-        this.logService.log(`use settings list: ${result}`, this.utilsService.infoStatus, true)
+// checkUseSettingsList():Observable<any>{
+//     let setting$ = new Observable((observer:Observer<any>) => {
+//         let result = this.settingsService.useSettingsList
+//         this.logService.log(`use settings list: ${result}`, this.utilsService.infoStatus, true)
 
-        observer.next({
-            functionCall: 'checkUseSettingsList',
-            value: result
-        })
+//         observer.next({
+//             functionCall: 'checkUseSettingsList',
+//             value: result
+//         })
 
-        observer.complete()
-    })
+//         observer.complete()
+//     })
 
-    return setting$
-}
+//     return setting$
+// }
 
-checkUseLoggingList():boolean{
-    let result = <boolean>this.settingsService.useLoggingList
-    this.logService.log(`use logging list: ${result}`, this.utilsService.infoStatus, false)
-    console.error('use settings list', result);
+// checkUseLoggingList():boolean{
+//     let result = <boolean>this.settingsService.useLoggingList
+//     this.logService.log(`use logging list: ${result}`, this.utilsService.infoStatus, false)
+//     console.error('use settings list', result);
     
-    return result
-}
+//     return result
+// }
 
 processSettingsData(data){
     if (data.hasOwnProperty('data') &&
@@ -1467,24 +1452,60 @@ processSettingsData(data){
 
 
 loadAppData(listArray:Array<string>, year:number):Observable<any>{
-    let getData$ = Observable
-        .from(listArray)
-        .mergeMap((listName:any) =>
+    let _transactionId = UUID.UUID();
+
+    let getData$ = 
+        this.uiStateService.updateMessage(`Loading App Data`, this.utilsService.loadingStatus)
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Load App Data')
+            : Observable.of(data)
+        )
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+            ? Observable.from(listArray)
+            : Observable.of(data)
+        )
+        //check list/year isn't function hasn't already been called
+        .mergeMap((listName:string) =>
             (typeof(listName) == 'string' &&
             listName.length > 0)
+            ? this.stateService.checkLoadAppDataState(listName)
+            : Observable.of(listName)
+        )
+        .mergeMap((data:any) => 
+        //in the event that loading operation is not already in flight then proceed
+        //if loading operation is running for list then don't proceed
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('listName') &&
+            data.hasOwnProperty('isLoading') &&
+            data.functionCall == 'checkLoadAppDataState' &&
+            data.result == true &&
+            data.isLoading == false)
             ? this.commonApiService.getItems(
-                                            listName, 
-                                            this.listService.getListContext(listName),
+                                            data.listName, 
+                                            this.listService.getListContext(data.listName),
                                             this.utilsService.includeFields(
                                                 this.listService.getArrayFieldNames(
-                                                    listName)),
+                                                    data.listName)),
                                             this.utilsService.genCamlQuery({
                                                                             value: year,
                                                                             fieldRef: 'Year',
                                                                             type: 'Number',
                                                                         })
                                             )
-            : Observable.of(listName)
+            : Observable.of(data)
         )
         .mergeMap((data:any) =>
             // process list data
@@ -1498,70 +1519,108 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
             : Observable.of(data)
         )
         .mergeMap((data:any) =>
+        //at this point update the stae of isLoading to false
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('result') &&
             data.hasOwnProperty('listName') &&
             data.functionCall == 'processListData' &&
-            data.result == true
-            )
-            ? this.dataContextService.emitValues([data.listName])
+            data.result == true)
+            ? this.stateService.updateLoadingAppDataState(data.listName, false)
             : Observable.of(data)
         )
+        .mergeMap((data:any) =>
+            //now emit data values to list
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('listName') &&
+            data['functionCall'] == `updateLoadingAppDataState` &&
+            data['result'] == true)
+            ? this.dataContextService.emitValues([data['listName']])
+            : Observable.of(data)
+        )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('reportHeading') &&
+            data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            : Observable.of(data)
+        )        
+        //if there are no data items for this table in this year then add placeholder row
         .mergeMap((data:any) => 
             (typeof(data) === 'object' &&
             data.hasOwnProperty('functionCall') &&
-            data.hasOwnProperty('result') &&
             data.hasOwnProperty('resultLength') &&
             data.hasOwnProperty('listName') &&
             data.functionCall == 'processListData' &&
-            data.result == false &&
             data.resultLength == 0)
             ? this.addDataRow(data.listName, this.settingsService.year, true)
             : Observable.of(data)
         )
-
-    return getData$
+        return getData$
 }
 
-//get required lists
-loadAppDataLists(listArray:Array<string>, year:number):Array<Observable<any>>{
-    console.log('LOAD APP DATA LISTS CALLED')
+// //get required lists
+// loadAppDataLists(listArray:Array<string>, year:number):Array<Observable<any>>{
+//     console.log('LOAD APP DATA LISTS CALLED')
     
-    let _observableArray = []
-    let config:any
+//     let _observableArray = []
+//     let config:any
 
-    if (year) {
-        config = {
-            fieldRef: 'Year',
-            type: 'Number',
-            value: year
-        } 
-    } else {
-        let _msg = 'error constructing year object for function loadAppDataLists, defaulting to getAllItems without filter'
-        this.logService.log(_msg, this.utilsService.errorStatus, false)
-        config = undefined
-    }
+//     if (year) {
+//         config = {
+//             fieldRef: 'Year',
+//             type: 'Number',
+//             value: year
+//         } 
+//     } else {
+//         let _msg = 'error constructing year object for function loadAppDataLists, defaulting to getAllItems without filter'
+//         this.logService.log(_msg, this.utilsService.errorStatus, false)
+//         config = undefined
+//     }
 
-    if(Array.isArray(listArray) && listArray.length>0) {
-        listArray.forEach(listName => {
-            _observableArray.push(this.commonApiService.getItems(
-                                            listName, 
-                                            this.listService.getListContext(listName),
-                                            this.utilsService.includeFields(
-                                                this.listService.getArrayFieldNames(
-                                                    listName)),
-                                            this.utilsService.genCamlQuery(config)
-                                            ))
-        })
-    }
+//     if(Array.isArray(listArray) && listArray.length>0) {
+//         listArray.forEach(listName => {
+//             _observableArray.push(this.commonApiService.getItems(
+//                                             listName, 
+//                                             this.listService.getListContext(listName),
+//                                             this.utilsService.includeFields(
+//                                                 this.listService.getArrayFieldNames(
+//                                                     listName)),
+//                                             this.utilsService.genCamlQuery(config)
+//                                             ))
+//         })
+//     }
 
-    return _observableArray
-}
+//     return _observableArray
+// }
 
 getAppData(listArray:Array<string>, year:number): Observable<any>{
+    let _transactionId = UUID.UUID();
+
     let get$ = 
-        this.dataContextService.checkForCachedData(listArray, year)
+        this.uiStateService.updateMessage(`Getting App Data`, this.utilsService.loadingStatus)
+        .mergeMap(data =>
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'updateMessage' &&
+                data.result == true)
+            ? this.notificationService.initTransaction(_transactionId, 'Get App Data')
+            : Observable.of(data)
+        )
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+            ? this.dataContextService.checkForCachedData(listArray, year)
+            : Observable.of(data)
+        )
         .mergeMap(data =>
         (typeof(data) == 'object' &&
         data.hasOwnProperty('functionCall') &&
@@ -1574,6 +1633,14 @@ getAppData(listArray:Array<string>, year:number): Observable<any>{
         ? this.dataContextService.emitValues([data.listName])
         : Observable.of(data)
         )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('reportHeading') &&
+            data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            : Observable.of(data)
+        )        
         .mergeMap(data =>
         (
             (typeof(data) == 'object' &&
@@ -1729,7 +1796,7 @@ updateTable(event: any): Observable<any> {
                 data.hasOwnProperty('reportHeading') &&
                 data.hasOwnProperty('reportResult'))
                 ? this.notificationService.addNotification(data, _transactionId)
-                :Observable.of(data)
+                : Observable.of(data)
             )
             .mergeMap(data =>
                 (
@@ -1756,6 +1823,7 @@ saveAppData(){
 
     let submitData$ = 
         this.uiStateService.updateMessage('saving data', this.utilsService.loadingStatus)
+        // create new entry in transaction table   
         .mergeMap(data =>
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
@@ -1765,22 +1833,36 @@ saveAppData(){
             ? this.notificationService.initTransaction(_transactionId, 'Saving Data')
             : Observable.of(data)
         )
-        // create new entry in transaction table
-        .mergeMap((data:any) => 
+        .mergeMap(data => 
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('result') &&
             data.functionCall == 'initTransaction' &&
-            data.result == true)
+            data.result == true)            
+            ? this.stateService.checkSaveAppDataState()
+            : Observable.of(data)
+        )
 
-        ? Observable.from(this.prepDataForApi([
-                    {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
-                    {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
-                    {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData},
-                    {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData}
-                ])
-            ).mergeAll()
-        : Observable.of(data)
+        .mergeMap((data:any) => 
+            //if checkdata is false then proceed otherwise cancel operation - 
+            //we do not want to run this function if it is already running otherwise data duplication issues    
+        
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.hasOwnProperty('isSaving') &&
+            data.functionCall == 'checkSaveAppDataState' &&
+            data.result == true &&
+            data.isSaving ==  false)
+
+            ? Observable.from(this.prepDataForApi([
+                        {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
+                        {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
+                        {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData},
+                        {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData}
+                    ])
+                ).mergeAll()
+            : Observable.of(data)
         )
         .mergeMap((data:any) => 
         // When adding an item to a list we need to update the ID with the newly createed ID value
@@ -1828,6 +1910,7 @@ saveAppData(){
         ? this.dataContextService.getIndexValue(data['listName'], data['ID'], {apiCall: data['apiCall']})
         : Observable.of(data)
         )
+        //update stae of data items
         .mergeMap(data => 
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
@@ -1839,6 +1922,15 @@ saveAppData(){
             data.result == true)
             ? this.dataContextService.updateStateValue(data.indexValue, this.utilsService.inertState, data.tableName, data.data)
             : this.placeholderObservable(data)
+        )
+        //update state of save app data function call after updating state value of data items
+        .mergeMap(data => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'updateStateValue')
+            ? this.stateService.updateSaveAppDataState(false)
+            : Observable.of(data)
         )
         //collect notifications passed down the observable chain and add them to the notifcaiton table
         .mergeMap((data:any) => 

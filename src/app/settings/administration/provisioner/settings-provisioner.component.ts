@@ -1,5 +1,6 @@
 import { Component } from  '@angular/core'
 import { ScriptService } from '../../../service/scripts.service'
+import { UtilsService } from '../../../service/utils.service'
 
 @Component({
     selector: 'settings-provisioner',
@@ -9,10 +10,18 @@ export class SettingsProvisionerComponent {
 
     public logs: Array<any> = []
 
-    constructor(private scriptService: ScriptService){}
+    constructor(private scriptService: ScriptService,
+                private utilsService: UtilsService){}
 
 provisionHostLists(event){
-    this.scriptService.provisioner()
+    this.scriptService.provisioner(
+            [this.utilsService.financeAppResourceData, 
+            this.utilsService.financeAppMaterialData,
+            this.utilsService.financeAppTotalsData,
+            this.utilsService.financeAppLogsData,
+            this.utilsService.financeAppSettingsData,
+            this.utilsService.financeAppWorkingDaysData,
+            this.utilsService.financeAppSummaryData])
         .subscribe(
             data => {
                 console.log(data)

@@ -55,17 +55,8 @@ export class SettingsWorkDaysComponent implements OnInit {
                 }
 
     ngOnInit(){
-        if(this.settingsService.useWorkDaysList) {
-            if(this.settingsService.workingDaysListReady) {
-                    this.workdayData = this.workdayService.workdayData
-                    this.years = this.processYears()
-            } else {
-                this.getWorkDays(true)
-            }
-        } else {
-            this.workdayData = this.workdayService.generateDummyData()
-            this.years = this.processYears()
-        }
+        this.workdayData = this.workdayService.workdayData
+        this.years = this.processYears()
     }
 
     getWorkDays(event){

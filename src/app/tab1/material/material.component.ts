@@ -111,7 +111,9 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
             if (!this.cmGridOptions.rowData) {
                 this.cmGridOptions.rowData = data;
 
-            } else if (this.cmGridOptions.api) {
+            } 
+            
+            if (this.cmGridOptions.api) {
                 this.cmGridOptions.api.setRowData(data);
              
             }
@@ -128,7 +130,9 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
         this.totalStream = this.dataContext.getTotalDataStream().subscribe(data => {
             if (!this.mattGridOptions.rowData) {
                 this.mattGridOptions.rowData = data;
-            } else if (this.mattGridOptions.api) {
+            } 
+            
+            if (this.mattGridOptions.api) {
                 this.mattGridOptions.api.setRowData(data);
             } else {
                 console.error('unable to set updated total data')
@@ -225,7 +229,9 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
             this.scriptService.getAppData([this.utilsService.financeAppMaterialData, 
                                         this.utilsService.financeAppTotalsData],
                                         this.settingsService.year)
-                                        .subscribe(this.getSubscriber());
+                            .subscribe(data => console.log(data),
+                                        err => console.log(err),
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         } else {
             console.log('waiting for application to complete before loading data')
         }

@@ -162,19 +162,25 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
 
             if (!this.tsGridOptions.rowData) {
                 this.tsGridOptions.rowData = data;
-            } else if (this.tsGridOptions.api) {
+            } 
+            
+            if (this.tsGridOptions.api) {
                 this.tsGridOptions.api.setRowData(data);
             }
             
             if (!this.atsGridOptions.rowData) {
                 this.atsGridOptions.rowData = data;
-            } else if (this.atsGridOptions.api) {
+            }
+            
+            if (this.atsGridOptions.api) {
                 this.atsGridOptions.api.setRowData(data);
             }
             
             if (!this.rtsGridOptions.rowData) {
                 this.rtsGridOptions.rowData = data;
-            } else if (this.rtsGridOptions.api) {
+            }
+            
+            if (this.rtsGridOptions.api) {
                 this.rtsGridOptions.api.setRowData(data);
             }
 
@@ -193,7 +199,9 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
 
             if (!this.rtstGridOptions.rowData) {
                 this.rtstGridOptions.rowData = data;
-            } else if (this.rtstGridOptions.api) {
+            } 
+            
+            if (this.rtstGridOptions.api) {
                 this.rtstGridOptions.api.setRowData(data);
             }
 
@@ -290,7 +298,9 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
             this.scriptService.getAppData([this.utilsService.financeAppResourceData, 
                                         this.utilsService.financeAppTotalsData],
                                         this.settingsService.year)
-                                        .subscribe(this.getSubscriber());
+                            .subscribe(data => console.log(data),
+                                        err => console.log(err),
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         }
     }
 

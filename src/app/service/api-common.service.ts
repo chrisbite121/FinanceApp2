@@ -364,10 +364,10 @@ createList(listName:string, contextType:string):Observable<any>{
             this.logService.log('unable to load field definition', this._error, false)
             this.logService.log(e, this._error, false);
 
-            let reportResult: IReportResult = {
+            let reportResult = {
                 reportHeading: this.utilsService.apiCallCreateList,
                 reportResult: this.utilsService.errorStatus,
-                listName: listName,
+                description: `error creating list - ${listName}`,
                 fieldName: this.utilsService.NaStatus,
             }
             observer.next(reportResult)
@@ -389,10 +389,10 @@ createList(listName:string, contextType:string):Observable<any>{
             };
             observer.next(result);
 
-            let reportResult: IReportResult = {
+            let reportResult = {
                 reportHeading: this.utilsService.apiCallCreateList,
                 reportResult: this.utilsService.successStatus,
-                listName: listName,
+                description: `success creating list - ${listName}`,
                 fieldName: this.utilsService.NaStatus,
             }
             observer.next(reportResult)
@@ -412,10 +412,10 @@ createList(listName:string, contextType:string):Observable<any>{
             };            
             observer.next(result);
 
-            let reportResult: IReportResult = {
+            let reportResult = {
                 reportHeading: this.utilsService.apiCallCreateList,
                 reportResult: this.utilsService.failStatus,
-                listName: listName,
+                description: `failed creating list - ${listName}`,
                 fieldName: this.utilsService.NaStatus,
             }
             observer.next(reportResult)
@@ -673,15 +673,16 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: this.utilsService.apiCallListExists,
                     listName: listName,
                     reportResult: reportResult,
-                    description: `successfully determined if list ${listName} exists - list exists: ${listFlag}`,
+                    description: `list ${listName} exists - : ${listFlag}`,
                 }
 
                 observer.next(reportData);
                 
-                let result: IListExists = {
+                let result = {
                     apiCall: this.utilsService.apiCallListExists,
                     listName: listName,
-                    result: listFlag
+                    result: true,
+                    listExists: listFlag
                 }
 
                 observer.next(result);

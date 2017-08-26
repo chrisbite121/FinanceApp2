@@ -45,10 +45,10 @@ const ApplicationControlledSettings = {
     viewList: true,
     addListItems: true,
 
-    useSettingsList: true,
-    useLoggingList: true,
-    useWorkDaysList: true,
-    logginListReady: false,
+    // useSettingsList: true,
+    // useLoggingList: true,
+    // useWorkDaysList: true,
+    // logginListReady: false,
 
     initAppComplete: false,
     hostUrl: '',
@@ -71,12 +71,12 @@ export class SettingsService {
     private _yearStream: Subject<number> = new Subject();
 
     //updated by the init script once logging list has been verified
-    private _loggingListReady: boolean;
-    private _workgDayListReady: boolean;
+    // private _loggingListReady: boolean;
+    // private _workgDayListReady: boolean;
 
     constructor(){
-        this._loggingListReady = false;
-        this._workgDayListReady = false;
+        // this._loggingListReady = false;
+        // this._workgDayListReady = false;
         
         //
 
@@ -110,9 +110,9 @@ export class SettingsService {
         this._appSettings.initAppComplete = value
     }
 
-    set loggingListReady(value:boolean) {
-        this._loggingListReady = value;
-    }
+    // set loggingListReady(value:boolean) {
+    //     this._loggingListReady = value;
+    // }
 
     set manageList(value:boolean) {
         this._appSettings.manageList = value
@@ -146,22 +146,22 @@ export class SettingsService {
         return this._appSettings.manageWeb
     }
 
-    get loggingListReady(){
-        return this._loggingListReady
-    }
+    // get loggingListReady(){
+    //     return this._loggingListReady
+    // }
 
-    get useSettingsList(){
-        return this._appSettings.useSettingsList
-    }
+    // get useSettingsList(){
+    //     return this._appSettings.useSettingsList
+    // }
 
-    get useLoggingList(){
-        return this._appSettings.useLoggingList
-    }
+    // get useLoggingList(){
+    //     return this._appSettings.useLoggingList
+    // }
 
-    get useWorkDaysList(){
-        console.log('checking to see if we can are using workdays list')
-        return this._appSettings.useWorkDaysList
-    }
+    // get useWorkDaysList(){
+    //     console.log('checking to see if we can are using workdays list')
+    //     return this._appSettings.useWorkDaysList
+    // }
 
 
     get sharePointMode() {
@@ -190,37 +190,37 @@ export class SettingsService {
         return this._settings.verbose
     }
 
-    logListReady(value) {
-        let logListReady$ = new Observable((observer:any) => {
-            this._loggingListReady = value
+    // logListReady(value) {
+    //     let logListReady$ = new Observable((observer:any) => {
+    //         this._loggingListReady = value
 
-            let result = {
-                functionCall: 'logListReady',
-                result: value
-            }
-            observer.next(result)
-            observer.complete()
-        })
+    //         let result = {
+    //             functionCall: 'logListReady',
+    //             result: value
+    //         }
+    //         observer.next(result)
+    //         observer.complete()
+    //     })
 
-        return logListReady$
+    //     return logListReady$
         
-    }
+    // }
 
-    workingDaysListReady(value) {
-        let wdListReady$ = new Observable((observer:any) => {
-            this._workgDayListReady = value
-            console.log('workdays list created')
-            let result = {
-                functionCall: 'wdListReady',
-                result: value
-            }
-            observer.next(result)
-            observer.complete()
-        })
+    // workingDaysListReady(value) {
+    //     let wdListReady$ = new Observable((observer:any) => {
+    //         this._workgDayListReady = value
+    //         console.log('workdays list created')
+    //         let result = {
+    //             functionCall: 'wdListReady',
+    //             result: value
+    //         }
+    //         observer.next(result)
+    //         observer.complete()
+    //     })
 
-        return wdListReady$
+    //     return wdListReady$
         
-    }
+    // }
     
 
     processSettingsData(data) {

@@ -82,7 +82,9 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterContentCheck
 
             if(!this.nsGridOptions.rowData){
                 this.nsGridOptions.rowData = data;
-            } else if (this.nsGridOptions.api) {
+            } 
+            
+            if (this.nsGridOptions.api) {
                 this.nsGridOptions.api.setRowData(data)
             }
         })
@@ -100,7 +102,9 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterContentCheck
         if(this.settingsService.initAppComplete) {
             this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
                                         this.settingsService.year)
-                                            .subscribe(this.getSubscriber())
+                            .subscribe(data => console.log(data),
+                                        err => console.log(err),
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         }
     }
 

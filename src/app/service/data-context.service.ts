@@ -156,6 +156,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
 
         //need to pull out the field names from list spec and put them into array
         let fieldNameArray = this.listService.getArrayFieldNames(listName);
+        let tableName = this.getTableName(listName)
 
         if (data.length>0) {
 
@@ -163,40 +164,64 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 //set base template of item and update internal field values
                 let _item = this.createPlaceholderObject(listName)
 
-                //filter out superlous item data and create an object of just the required fields
-                for (let key in item) {
-                    let indexValue = fieldNameArray.findIndex((element) => {
-                        return element == key
-                    })
-                    if (indexValue >= 0){
-                        
-                        Object.defineProperty(_item, key, {
-                            value: item[key],
-                            writable: true
-                        }) 
-                    }
-                }
-
                 //process ID value, This value is not stored as part of the list definition so it
                 //needs to be handled seperately
                 if(item.hasOwnProperty('ID')) {
+                    // need to check that item isn't already in the list
+                    let _index = this.getItemIndex(item['ID'], tableName)
+
+                    if (_index == -1) {
+                        /////item does not already exist on table
+                        ///ok to add property details to placeholder object
+                        ///and add to table
+
                         Object.defineProperty(_item, 'ID', {
                             value: item['ID'],
                             writable: true
                         })
-                } else {
-                    this.logService.log(`processListData error: unable to update ID for item, cannot find property on list: ${listName}`, this.utilsService.errorStatus, false)
-                }
+                        //filter out superlous item data and create an object of just the required fields
+                        for (let key in item) {
+                            let indexValue = fieldNameArray.findIndex((element) => {
+                                return element == key
+                            })
+                            if (indexValue >= 0){
+                                
+                                Object.defineProperty(_item, key, {
+                                    value: item[key],
+                                    writable: true
+                                }) 
+                            }
+                        }
+                        //process State value, this needs to be set to inert as its just been retreived
+                        console.log(`updating state for item on list: ${listName}`)
+                        Object.defineProperty(_item, 'State', {
+                            value: this.utilsService.inertState,
+                            writable: true
+                        })
 
-                //process State value, this needs to be updated to inert as its an existing item
-                console.log(`updating state for item on list: ${listName}`)
-                Object.defineProperty(_item, 'State', {
-                    value: this.utilsService.inertState,
-                    writable: true
-                })
-                
-                // add item array to correct table
-                this.addDataToTable(listName, _item)
+                        // add item array to correct table
+                        this.addDataToTable(listName, _item)
+
+
+
+                    } else {
+                        //item id is already in the table - do not add this item again to the table
+                        observer.next({
+                            reportHeading: 'doesItemAlreadyExistOnTable',
+                            reportResult: this.utilsService.errorStatus,
+                            description: `item with ID ${item['ID']} already exists on list`
+                        })
+                    }
+                } else {
+                    //cannot find an ID property on the item - do not add this tiem to the table
+                    this.logService.log(`processListData error: unable to update ID for item, cannot find property on list: ${listName}`, this.utilsService.errorStatus, false)
+                    observer.next({
+                        reportHeading: 'processListData',
+                        reportResult: this.utilsService.failStatus,
+                        description: 'cannot find ID value for retreived item'
+                    })
+
+                }
             })
 
             observer.next({
@@ -206,26 +231,35 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
             })
 
             observer.next({
-                reportHeading: 'processListData',
-                result: this.utilsService.successStatus,
+                functionCall: 'processListData',
                 listName: listName,
-                numberItems: data.length
+                resultLength: data.length,
+            })            
+
+            observer.next({
+                reportHeading: 'processListData',
+                reportResult: this.utilsService.successStatus,
+                description: `completed processing data for list: ${listName}`,
             })
 
         } else {
-
-
-            let _msg = `no data found for listName ${listName}, need to create placeholder data`
+            let _msg = `no data found for listName ${listName} - creating placeholder data...`
             this.logService.log(_msg, this.utilsService.infoStatus, false)
             observer.next({
-                functionCall: 'processListData',
+                reportHeading: 'processListData',
+                reportResult: this.utilsService.successStatus,
                 listName: listName,
-                desc: _msg
+                description: _msg
+            })
+
+            observer.next({
+                functionCall: 'processListData',
+                result: true,
+                listName: listName
             })            
             
             observer.next({
                 functionCall: 'processListData',
-                result: false,
                 listName: listName,
                 resultLength: 0,
             })
@@ -534,7 +568,6 @@ addDataItemToTable(listName:string, item):Observable<any> {
                                 reportResult: this.utilsService.failStatus,
                                 listName: listName,
                                 tableName: _tableName,
-                                result: false,
                                 dataExists: false,
                                 description: `failed to find data for ${listName} in functionCall: checkForCachedData`
                             })                            
@@ -799,6 +832,12 @@ getTableDetails(listName: string, data: object): Observable<any> {
                 data: data,
                 result: true
             })
+
+            observer.next({
+                reportHeading: 'getTableDetails',
+                reportResult: this.utilsService.successStatus,
+                description: `tableName successfully retrieved: ${_tableName}`
+            })
         } else {
             observer.next({
                 functionCall: 'getTableDetails',
@@ -806,6 +845,13 @@ getTableDetails(listName: string, data: object): Observable<any> {
                 result: false,
                 msg: `unable to identify table name for list ${listName}`
             })
+
+            observer.next({
+                reportHeading: 'getTableDetails',
+                reportResult: this.utilsService.failStatus,
+                description: `failed to retreive tableName for list ${listName}`
+            })
+
         }
 
         observer.complete()
@@ -1241,6 +1287,7 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
 }
 
 emitValues(listArray:Array<string>): Observable<any>{
+    console.error('EMIT VALUES CALLED')
     let emit$ = new Observable((observer:Observer<any>) => {
         if(Array.isArray(listArray)){
         //emit values
@@ -1299,14 +1346,16 @@ emitValues(listArray:Array<string>): Observable<any>{
             description: 'successfully emitted values',
             listArray: listArray,
         })
+        observer.complete()
     } else {
         observer.next({
             reportheading: 'emitValues',
             reportResult: this.utilsService.errorStatus,
             description: 'error status: listArray is not of type Array'
         })
+        observer.complete()
     }
-    observer.complete()
+    
     })
         
     return emit$
@@ -2164,6 +2213,65 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
 
         return
     }
+
+    // doesItemAlreadyExistOnTable(ID:any, tableName: string): Observable<any> {
+    //     let exists$ = new Observable((observer:any) => {
+    //         if(this[tableName]){
+    //             let _index = this[tableName].findIndex(element => {
+    //                 return element.ID == ID
+    //             })
+    //             this.logService.log(`index value ${_index} for item with ID: ${ID} on table: ${tableName}`)
+    
+    //             if (_index == -1) {
+    //                 observer.next({
+    //                     functionCall: `doesItemAlreadyExistOnTable`,
+    //                     result: true,
+    //                     exist: false
+    //                 })
+
+    //                 observer.next({
+    //                     reportHeading: 'doesItemAlreadyExistOnTable',
+    //                     reportResult: this.utilsService.failStatus,
+    //                     description: `item with ID ${ID} does not exist on list`
+    //                 })
+    //             } else if (_index > 0) {
+    //                 observer.next({
+    //                     functionCall: `doesItemAlreadyExistOnTable`,
+    //                     result: true,
+    //                     exist: true
+    //                 })
+
+    //                 observer.next({
+    //                     reportHeading: 'doesItemAlreadyExistOnTable',
+    //                     reportResult: this.utilsService.errorStatus,
+    //                     description: `item with ID ${ID} already exists on list`
+    //                 })
+    //             } else {
+    //                 observer.next({
+    //                     functionCall: `doesItemAlreadyExistOnTable`,
+    //                     result: false,
+    //                     exist: 'unknown'
+    //                 })
+
+    //                 observer.next({
+    //                     reportHeading: 'doesItemAlreadyExistOnTable',
+    //                     reportResult: this.utilsService.failStatus,
+    //                     description: `unknown error determining indexvalue for list item with ID: ${ID}`                        
+    //                 })                    
+    //             }
+    
+    //         } else {
+    //             this.logService.log(`error could not find table in function call 'doesItemAlreadyExistOnTable on table: ${tableName}`, this.utilsService.errorStatus, false)
+    //             observer.next({
+    //                 reportHeading: 'doesItemAlreadyExistOnTable',
+    //                 reportResult: this.utilsService.failStatus,
+    //                 description: `cannot find table with tableName: ${tableName}`
+    //             })
+    //         }
+    //         observer.complete()
+    //     })
+    //     return exists$
+    // }
 
     // markChange(indexValue:number, ID: number, fieldName: string, tableName: string){
     //     let highlight:any = {

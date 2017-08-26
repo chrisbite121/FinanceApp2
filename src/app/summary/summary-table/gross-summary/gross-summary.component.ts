@@ -82,7 +82,9 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
         this.summaryData = this.dataContextService.getSummaryDataStream().subscribe(data => {
             if(!this.gsGridOptions.rowData){
                 this.gsGridOptions.rowData = data;
-            } else if (this.gsGridOptions.api) {
+            } 
+            
+            if (this.gsGridOptions.api) {
                 this.gsGridOptions.api.setRowData(data)
             }
 
@@ -107,7 +109,9 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
         if(this.settingsService.initAppComplete) {
             this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
                                         this.settingsService.year)
-                                            .subscribe(this.getSubscriber())
+                            .subscribe(data => console.log(data),
+                                        err => console.log(err),
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         }
 
         

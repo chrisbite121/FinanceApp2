@@ -18,6 +18,7 @@ import { ListService } from './service/list.service'
 import { ScriptService } from './service/scripts.service'
 import { HealthReportService } from './service/health-report.service'
 import { NotificationService } from './service/notification.service'
+import { StateService } from './service/state.service'
 
 // application
 import {AppComponent} from "./app.component";
@@ -56,6 +57,7 @@ import { appRoutes } from './routes'
         DialogComponent
     ],
   providers:    [ 
+        UtilsService,
         LogService,
         HistoryService,
         WorkdayService,
@@ -64,12 +66,12 @@ import { appRoutes } from './routes'
         DataCalcService,
         DataContextService,
         CommonApiService,
-        UtilsService,
         UiStateService,
         ListService,
         ScriptService,
         HealthReportService,
-        NotificationService
+        NotificationService,
+        StateService
 
         ],    
     bootstrap: [AppComponent]

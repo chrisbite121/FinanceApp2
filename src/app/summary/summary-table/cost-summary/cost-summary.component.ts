@@ -82,10 +82,12 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
         })
 
         this.summaryData = this.dataContextService.getSummaryDataStream().subscribe(data => {
-
+            console.error('COST SUMMARY DATA RECEIVED')
             if(!this.csGridOptions.rowData){
                 this.csGridOptions.rowData = data;
-            } else if (this.csGridOptions.api) {
+            } 
+            
+            if (this.csGridOptions.api) {
                 this.csGridOptions.api.setRowData(data)
             }
             
@@ -110,7 +112,9 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
         if(this.settingsService.initAppComplete) {
             this.scriptService.getAppData([this.utilsService.financeAppSummaryData],
                                         this.settingsService.year)
-                                            .subscribe(this.getSubscriber())
+                            .subscribe(data => console.log(data),
+                                        err => console.log(err),
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         }
 
 

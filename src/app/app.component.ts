@@ -10,7 +10,7 @@ import { ScriptService} from './service/scripts.service'
 import { CommonApiService } from './service/api-common.service'
 import { SettingsService } from './service/settings.service'
 import { NotificationService } from './service/notification.service'
-
+import { UiStateService } from './service/ui-state.service'
 @Component({
   selector: 'my-app',
   templateUrl: './app.component.html',
@@ -23,7 +23,8 @@ export class AppComponent  {
               private scriptService: ScriptService,
               private commonApiService: CommonApiService,
               private settingsService: SettingsService,
-              private notificationService: NotificationService){
+              private notificationService: NotificationService,
+              private uiStateService: UiStateService){
                 
                 if (this.settingsService.sharePointMode) {
                     this.initSharePointApplication()
@@ -43,23 +44,6 @@ export class AppComponent  {
     initSharePointApplication() {
         this.logService.log('initSharePointApplication Called', this.utilsService.infoStatus, false)
         this.scriptService.initApp()
-        //when settings data is process receive 'year' value and call loadAppData
-        .mergeMap(data =>
-            (typeof(data) == 'object' &&
-            data.hasOwnProperty('reportHeading') &&
-            data.hasOwnProperty('reportValue') &&
-            data.hasOwnProperty('settingsValue') &&
-            data.hasOwnProperty('value') &&
-            data.reportHeading == 'processSettingsData' &&
-            data.reportValue == this.utilsService.successStatus &&
-            data.settingsValue == 'year'
-            )
-            ? this.scriptService.loadAppData([this.utilsService.financeAppResourceData,
-                                            this.utilsService.financeAppMaterialData,
-                                            this.utilsService.financeAppTotalsData,
-                                            this.utilsService.financeAppSummaryData], data.value)
-            : Observable.of(data)
-        )
         .subscribe(
                 data => {
                     this.logService.log(data, this.utilsService.infoStatus, true)
@@ -71,10 +55,20 @@ export class AppComponent  {
                     console.error(err)
                 },
                 () => {
-                    this.logService.log('app initialisation calls complete')
-                    // grid components need to know if init call complete before they attempt to load data
-                    this.settingsService.initAppComplete = true;
-                    console.log('app initialisation calls complete')
+                    this.logService.log('initialisation call complete - loading app data', this.utilsService.infoStatus, false)
+                    this.scriptService.loadAppData([this.utilsService.financeAppResourceData,
+                        this.utilsService.financeAppMaterialData,
+                        this.utilsService.financeAppTotalsData,
+                        this.utilsService.financeAppSummaryData], this.settingsService.year)
+                            .subscribe(data => console.log(data),
+                                        err => console.log(err),
+                                        () => { // grid components need to know if init call complete before they attempt to load data
+                                                this.logService.log('init app call complete, loading app data', this.utilsService.infoStatus, true)
+                                                this.settingsService.initAppComplete = true;
+                                                this.uiStateService.updateMessage('Init App Complete', 'complete')
+                                             }
+                                    )
+                    
                 }
         )
     }

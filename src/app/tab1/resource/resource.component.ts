@@ -206,19 +206,25 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
 
             if (!this.puGridOptions.rowData) {
                 this.puGridOptions.rowData = data;
-            } else if (this.puGridOptions.api) {
+            } 
+            
+            if (this.puGridOptions.api) {
                 this.puGridOptions.api.setRowData(data);
             }
 
             if (!this.ahGridOptions.rowData) {
                 this.ahGridOptions.rowData = data;
-            } else if (this.ahGridOptions.api) {
+            } 
+            
+            if (this.ahGridOptions.api) {
                 this.ahGridOptions.api.setRowData(data);
             }
 
             if (!this.prGridOptions.rowData) {
                 this.prGridOptions.rowData = data;
-            } else if (this.prGridOptions.api) {
+            } 
+            
+            if (this.prGridOptions.api) {
                 this.prGridOptions.api.setRowData(data);
             }
 
@@ -235,7 +241,9 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         this.totalStream = this.dataContextService.getTotalDataStream().subscribe(data => {
             if (!this.prtGridOptions.rowData) {
                 this.prtGridOptions.rowData = data;
-            } else if (this.prtGridOptions.api) {
+            } 
+            
+            if (this.prtGridOptions.api) {
                 this.prtGridOptions.api.setRowData(data);
             }
 
@@ -244,7 +252,9 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         this.workdayStream = this.workdayService.getWorkdayStream().subscribe(data => {
             if (!this.wdGridOptions.rowData){
                 this.wdGridOptions.rowData = <Array<IYear>>data;
-            } else if (this.wdGridOptions.api) {
+            } 
+            
+            if (this.wdGridOptions.api) {
                 this.wdGridOptions.api.setRowData(data)
             }
 
@@ -317,7 +327,6 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     }
 
     deleteResourceRow(){
-        
         let selectedNode:any = this.puGridOptions.api.getSelectedNodes();
         console.log(selectedNode)
         
@@ -355,7 +364,9 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             this.scriptService.getAppData([this.utilsService.financeAppResourceData, 
                                             this.utilsService.financeAppTotalsData],
                                             this.settingsService.year)
-                                                .subscribe(this.getSubscriber());
+                    .subscribe(data => console.log(data),
+                                err => console.log(err),
+                                ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
         } else {
             console.log('waiting for application to complete before loading data')
         }
