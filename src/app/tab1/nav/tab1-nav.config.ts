@@ -34,5 +34,11 @@ export const pivotGrid:Array<Object> = [
     title: 'Aggregate',
     routerLink: ['/tab1', 'aggregate' ],
     content: 'This is the aggregate tab.',
-  }    
+  }
+  // {
+  //   dataContent: 'work',
+  //   title: 'Work Resource',
+  //   routerLink: ['/tab1', 'work' ],
+  //   content: 'This is the work resource tab.',
+  // }      
 ] 

@@ -37,14 +37,23 @@ export class StateService {
                 isSaving: this._savingAppData
             })
 
-            if(!this._savingAppData) {
+            console.log(this._savingAppData == false)
+            if (this._savingAppData == false) {
                 observer.next({
                     reportHeading: 'checkSaveAppDataState',
                     reportResult: this.utilsService.failStatus,
                     description: 'canceling save operation as a previous save operation has not completed'
                 })
+                observer.complete()
+            } else {
+                observer.next({
+                    reportHeading: 'checkSaveAppDataState',
+                    reportResult: this.utilsService.successStatus,
+                    description: 'proceeding with save operation, no other save operation is currently running'
+                })
+                observer.complete()
             }
-            observer.complete()
+            
         })
         return check$
     }

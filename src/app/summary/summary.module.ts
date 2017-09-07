@@ -16,11 +16,7 @@ import { CostSummaryComponent } from './summary-table/cost-summary/cost-summary.
 //Ag-Grid
 import {AgGridModule} from "ag-grid-angular/main";
 
-//charts
-import { GroupChartComponent } from '../chart/group/group.component'
-import { HorizontalChartComponent } from '../chart/horizontal/horizontal.component'
-import { PieChartComponent } from '../chart/pie/pie.component'
-import { StackChartComponent } from '../chart/stack/stack.component'
+
 
 import { summaryRoutes } from './summary.routes'
 
@@ -36,10 +32,6 @@ import { summaryRoutes } from './summary.routes'
         HomeComponent,
         DashboardComponent,
         SummaryNavComponent,
-        GroupChartComponent,
-        HorizontalChartComponent,
-        PieChartComponent,
-        StackChartComponent,
         SummaryTableComponent,
         NetSummaryComponent,
         GrossSummaryComponent,

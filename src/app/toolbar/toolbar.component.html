@@ -1,4 +1,4 @@
-<div class="toolbar">
+<div *ngIf="showToolbar" class="toolbar" [@fadeInAnimation]>
     <div class="ms-CommandButton ms-CommandButton--noLabel" *ngIf='showSave'>
       <button class="ms-CommandButton-button" (click)="saveData($event)">
         <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Save"></i></span> 

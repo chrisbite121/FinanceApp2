@@ -9,6 +9,7 @@ import { LogListComponent } from './list-manager/log-list/log-list.component'
 import { LookFeelComponent } from './look-feel/look-feel.component'
 import { UserPermissionsComponent } from './user-permissions/user-permissions.component';
 import { TestComponent } from './test/test.component'
+import { SampleDashboardComponent } from './sample-dashboard/sample-dashboard.component'
 
 import { AdministrationComponent } from './administration/administration.component'
 import { SettingsProvisionerComponent } from './administration/provisioner/settings-provisioner.component';
@@ -136,7 +137,12 @@ const settingsSubRoutes = [
         path: 'test',
         component: TestComponent,
         outlet: 'settingsContent'
-    }
+    },
+    {
+        path: 'sampledashboard',
+        component: SampleDashboardComponent,
+        outlet: 'settingsContent'
+    },    
     // {
     //     path: '',
     //     component: SettingsMenuComponent,

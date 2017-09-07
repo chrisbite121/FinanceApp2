@@ -7,18 +7,17 @@
 
     <div class="ms-Grid"  class="header-row">
         <div class="ms-Grid-row">
-            <div class="ms-Grid-col ms-u-sm1 ">
+            <div class="ms-Grid-col ms-u-sm3 ">
                 <div class="ms-Grid-row">
                     <of-icon-panel [contentName]="'Resource'" class="info-icon"></of-icon-panel>
                     <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
                         {{title}}    
                     </span>
-                    
+                    <i *ngIf="collapsed" class="ms-Icon ms-Icon--ChevronDownSmall action-icon" (click)="toggleMenu()" aria-hidden="true"></i>
+                    <i *ngIf="!collapsed" class="ms-Icon ms-Icon--ChevronUpSmall action-icon" (click)="toggleMenu()" aria-hidden="true"></i>
+                    <i class="ms-Icon ms-Icon--Add action-icon" (click)="addResourceRow();"></i>
+                    <i class="ms-Icon ms-Icon--Delete action-icon" (click)="deleteResourceRow();"></i> 
                 </div>
-            </div>
-            <div class="ms-Grid-col ms-u-sm2">
-                <i class="ms-Icon ms-Icon--Add action-icon" (click)="addResourceRow();"></i>
-                <i class="ms-Icon ms-Icon--Delete action-icon" (click)="deleteResourceRow();"></i> 
             </div>
             <div class="ms-Grid-col ms-u-sm9">
             </div>

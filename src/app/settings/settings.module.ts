@@ -33,7 +33,7 @@ import { MaterialListComponent } from './list-manager/material-list/material-lis
 import { SettingListComponent } from './list-manager/setting-list/setting-list.component';
 import { WorkdaysListComponent } from './list-manager/workdays-list/workdays-list.component';
 import { SummaryListComponent } from './list-manager/summary-list/summary-list.component';
-
+import { SampleDashboardComponent } from './sample-dashboard/sample-dashboard.component'
 
 import { settingsRoutes } from './settings.routes';
 
@@ -41,7 +41,7 @@ import { settingsRoutes } from './settings.routes';
     imports:  [CommonModule,
                 RouterModule.forChild(settingsRoutes),
                 FormsModule,
-               SharedModule],
+                SharedModule],
     declarations: [ 
         SettingsComponent,
         
@@ -55,6 +55,7 @@ import { settingsRoutes } from './settings.routes';
         ApiLoggerComponent,
         UserPermissionsComponent,
         TestComponent,
+        SampleDashboardComponent,
 
         AdministrationComponent,
         SettingsResetComponent,

@@ -22,6 +22,11 @@ import { FabricCommandButtonWrapperComponent } from '../../office-fabric/command
 import { FabricSpinnerWrapperComponent } from '../../office-fabric/spinner/fabric.spinner.wrapper.component'
 import { FabricDialogWrapperComponent } from '../../office-fabric/dialog/fabric.dialog.wrapper.component'
 import { FabricIconPanelWrapperComponent } from '../../office-fabric/panel/fabric.panel.wrapper.component'
+import { PagerService } from '../../service/pagination.service'
+
+import { ColorPickerService } from '../../shared/color-picker/color-picker.service';
+import { Rgba } from '../../shared/color-picker/formats'
+
 
 
 const label:ICommandButtonLabel = {
@@ -55,6 +60,31 @@ const commandButtonValues: Array<ICommandButtonEntry> = [
 export class TestComponent {
     public commandButtonValues = commandButtonValues
     public commandButtonLabel = label
+    public color = '#ff0000'
+
+    // array of all items to be paged
+    private allItems: any[];
+    
+    // pager object
+    pager: any = {};
+    
+    // paged items
+    pagedItems: any[];
+
+    constructor(private pagerService: PagerService){
+        this.allItems = [];
+
+        for(let i=0;i<100;i++) {
+            this.allItems.push({
+                                    name: 'name' + String(i),
+                                    id: Math.random() * 1000
+                                })
+        }
+        // initialize to page 1
+        this.setPage(1);
+
+        console.log(this.allItems)
+    }
 
 
     testme(event) {
@@ -75,4 +105,17 @@ export class TestComponent {
     createPanel($event){
 
     }
+
+
+    setPage(page: number) {
+        if (page < 1 || page > this.pager.totalPages) {
+            return;
+        }
+ 
+        // get pager object from service
+        this.pager = this.pagerService.getPager(this.allItems.length, page, 10);
+ 
+        // get current page of items
+        this.pagedItems = this.allItems.slice(this.pager.startIndex, this.pager.endIndex + 1);
+    }    
 }

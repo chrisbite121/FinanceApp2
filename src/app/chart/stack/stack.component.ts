@@ -1,7 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, Input } from '@angular/core';
 import * as d3 from 'd3'
 
-import { placeholderData, stackConfig } from './stack.config'
+// import { placeholderData, stackConfig } from './stack.config'
+import { newTotalDataRow } from '../../config/new-total'
+
 
 @Component({
   selector: 'chart-stack',
@@ -23,6 +25,7 @@ export class StackChartComponent implements OnInit, OnChanges {
   private y: any
   private z: any
   private keys: any
+  private legendKeys: any
   private stack: any
   private values: any
   private dataArray: any
@@ -34,16 +37,12 @@ export class StackChartComponent implements OnInit, OnChanges {
   private bars: any
   private stackedData: any
 
-  @Input() public chartData: any
+  @Input() public chartData: object
 
   @ViewChild('chart') chartContainer:ElementRef
   @ViewChild('tooltip') tooltip: ElementRef
 
   constructor() {
-      if (placeholderData) {
-        this.data = placeholderData[0]
-      }
-
     //set hardcoded values
     this.short1 = ['PR', 'RTS', 'Mat']
     this.short2 = [
@@ -64,27 +63,33 @@ export class StackChartComponent implements OnInit, OnChanges {
         'November',
         'December'
     ]      
-    this.keys = ['resource', 'travelSubsistence', 'material']      
+    this.keys = ['resource', 'travelSubsistence', 'material']
+    this.legendKeys = ['Material','Travel & Subsistence', 'Resource']
    }
 
   ngOnInit() {
-      if (this.data) {
-        this.constructDataObjects()
-        this.createChart()
-        this.updateChart()
+    if (this.chartData &&
+        typeof(this.chartData) == 'object') {
+        this.data = this.chartData
+      } else {
+        this.data = newTotalDataRow
       }
-
+    
+    this.constructDataObjects()
+    this.createChart()
+    this.updateChart()
   }
 
   ngOnChanges(){
-    if (this.chartData) {
+    if (this.chartData && this.element) {//the this.element check makes sure that the chart has been created first
         this.data = this.chartData
         this.constructDataObjects()
         this.updateChart()
     }
-  }  
+  }
 
   constructDataObjects(){
+      console.log(this.data)
     this.dataArray = [
         { month: 'Jan', resource: this.data.PRJan, travelSubsistence: this.data.RTSJan, material: this.data.MatJan },
         { month: 'Feb', resource: this.data.PRFeb, travelSubsistence: this.data.RTSFeb, material: this.data.MatFeb },
@@ -105,7 +110,8 @@ export class StackChartComponent implements OnInit, OnChanges {
                     return (this.short1.map(val => {
                                 return this.data[val+month]
                             })).reduce((a,b) => a + b, 0) // reduce sums the values in array
-    })    
+    })
+ 
   }
 
   createChart(){
@@ -114,8 +120,8 @@ export class StackChartComponent implements OnInit, OnChanges {
 
     this.svg = d3.select(this.chartContainer.nativeElement)
                 .append('svg')
-                .attr('height',600)
-                .attr('width', 600),
+                .attr('height',300)
+                .attr('width', 500),
     this.margin = {top: 20, right: 20, bottom: 30, left: 40},
     this.width = +this.svg.attr("width") - this.margin.left - this.margin.right,
     this.height = +this.svg.attr("height") - this.margin.top - this.margin.bottom,
@@ -136,15 +142,13 @@ export class StackChartComponent implements OnInit, OnChanges {
         .rangeRound([this.height, 0]);
 
     this.z = d3.scaleOrdinal()
-        .range(["#7b6888", "#8a89a6", "#98abc5"]);
+        .range(["#98abc5","#8a89a6","#7b6888"]);
 
     this.stack = d3.stack()
         .keys(this.keys)
         .order(d3.stackOrderNone)
         .offset(d3.stackOffsetNone);
 
-
-        
     this.x.domain(this.short2);
 
     this.legend = this.g.append("g")
@@ -152,7 +156,7 @@ export class StackChartComponent implements OnInit, OnChanges {
             .attr("font-size", 10)
             .attr("text-anchor", "end")
             .selectAll("g")
-            .data(this.keys.slice().reverse())
+            .data(this.legendKeys.slice().reverse())
             .enter().append("g")
             .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });    
     
@@ -191,9 +195,50 @@ export class StackChartComponent implements OnInit, OnChanges {
         .attr("font-weight", "bold")
         .attr("text-anchor", "start")
         .text("Total Project Costs LBE");
-               
 
-  }
+        let div = this.div         
+
+        this.stackedData = this.bars.selectAll('g')
+        .data(this.stack(this.dataArray))
+        .enter()
+        .append('g')
+            .attr('fill', (d:any):any => { 
+                return this.z(d.key) 
+            })
+        .selectAll('rect')
+        .data((d):any => { return d })
+        .enter().append('rect')
+        .attr('x', (d:any) => {
+            return this.x(d.data.month)
+        })
+        .attr('width', this.x.bandwidth())
+        .attr('height', 0)
+        .attr('y', this.height)
+        .on("mouseover", function(d) {
+            d3.select(div).transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            d3.select(div).html("£" + (d[1]-d[0]))	
+                .style("left", (d3.event.pageX - 600) + "px")		
+                .style("top", (d3.event.pageY - 500) + "px")
+                .style('height','20px')
+            d3.select(this).style('opacity', 0.5);
+            d3.select(this).style('cursor', 'pointer')
+            })					
+        .on("mouseout", function(d) {
+            d3.select(div).transition()		
+                .duration(500)		
+                .style("opacity", 0)
+            d3.select(this).style('opacity', 1);	
+        })
+        .transition().duration(3000)
+        .attr('y', d => {
+            return this.y(d[1])
+        })
+        .attr('height', d => {
+            return this.y(d[0]) - this.y(d[1])
+        })          
+    }
 
 
 
@@ -223,14 +268,14 @@ export class StackChartComponent implements OnInit, OnChanges {
             .attr('fill', (d:any):any => { 
                 return this.z(d.key) 
             })
-
-
+    
     let update = 
         this.stackedData
         .selectAll('rect')
-        .data((d):any => { return d })        
+        .data((d):any => { return d })  
+         
 
-
+    console.log(update.enter())
     //remove excess values -- Not used here
     // update
     //     .enter()
@@ -247,39 +292,39 @@ export class StackChartComponent implements OnInit, OnChanges {
         })        
 
     //add values
-    update    
-        .enter().append('rect')
-            .attr('x', (d:any) => {
-                return this.x(d.data.month)
-            })
-            .attr('width', this.x.bandwidth())
-            .attr('height', 0)
-            .attr('y', this.height)
-            .on("mouseover", function(d) {
-                d3.select(div).transition()		
-                    .duration(200)		
-                    .style("opacity", .9);		
-                d3.select(div).html("£" + (d[1]-d[0]))	
-                    .style("left", (d3.event.pageX) + "px")		
-                    .style("top", (d3.event.pageY - 20) + "px")
-                    .style('height','20px')
-                d3.select(this).style('opacity', 0.5);
-                d3.select(this).style('cursor', 'pointer')
-                })					
-            .on("mouseout", function(d) {		
-                d3.select(div).transition()		
-                    .duration(500)		
-                    .style("opacity", 0)
-                d3.select(this).style('opacity', 1);	
-            })
-            .transition().duration(3000)
-            .attr('y', d => {
-                return this.y(d[1])
-            })
-            .attr('height', d => {
-                return this.y(d[0]) - this.y(d[1])
-            })
-            
+    // update    
+    //     .enter().append('rect')
+    //         .attr('x', (d:any) => {
+    //             return this.x(d.data.month)
+    //         })
+    //         .attr('width', this.x.bandwidth())
+    //         .attr('height', 0)
+    //         .attr('y', this.height)
+    //         .on("mouseover", function(d) {
+    //             d3.select(div).transition()		
+    //                 .duration(200)		
+    //                 .style("opacity", .9);		
+    //             d3.select(div).html("£" + (d[1]-d[0]))	
+    //                 .style("left", (d3.event.pageX - 600) + "px")		
+    //                 .style("top", (d3.event.pageY - 500) + "px")
+    //                 .style('height','20px')
+    //             d3.select(this).style('opacity', 0.5);
+    //             d3.select(this).style('cursor', 'pointer')
+    //             })					
+    //         .on("mouseout", function(d) {
+    //             d3.select(div).transition()		
+    //                 .duration(500)		
+    //                 .style("opacity", 0)
+    //             d3.select(this).style('opacity', 1);	
+    //         })
+    //         .transition().duration(3000)
+    //         .attr('y', d => {
+    //             return this.y(d[1])
+    //         })
+    //         .attr('height', d => {
+    //             return this.y(d[0]) - this.y(d[1])
+    //         })
+
 }
 
 }

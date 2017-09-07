@@ -47,10 +47,16 @@ module.exports = {
 
     resolve: {
         extensions: ['.js', '.ts']
+        // modules: ['./node_modules']
     },
 
     module: {
         loaders: [
+            // {
+            //     test: /\.js$/,
+            //     loaders: ['angular2-template-loader'],
+            //     exclude: /node_modules/
+            // },            
             {
                 test: /\.ts$/,
                 loader: '@ngtools/webpack'
@@ -85,7 +91,11 @@ module.exports = {
                 test: /\.css$/,
                 include: helpers.root('src/app'),
                 loader: 'raw-loader'
-            }
+            },
+            {
+                test: /\.scss$/,
+                loaders: ['raw-loader', 'sass-loader']
+            }             
         ]
     },
     plugins: [
@@ -93,7 +103,12 @@ module.exports = {
             name: ['app', 'vendor', 'polyfills']
         }),
 
-        aotPlugin,
+        // aotPlugin,
+
+        new AotPlugin ({
+            tsConfigPath: './tsconfig.aot.json',
+            entryModule: helpers.root('src/app/app.module#AppModule')
+          }),
 
         new HtmlWebpackPlugin({
             template: 'config/index.html'

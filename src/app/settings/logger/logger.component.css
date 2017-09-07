@@ -1,4 +1,4 @@
-.pagination a {
+/* .pagination a {
             color: black;
             float: left;
             padding: 8px 16px;
@@ -11,8 +11,13 @@
     color: white;
 }
 
-.pagination a:hover:not(.active) {background-color: #ddd;}
+.pagination a:hover:not(.active) {background-color: #ddd;} */
 
 th, td {
     padding: 2px, 5px, 2px, 5px
+}
+
+a {
+    cursor: pointer;
+    cursor: hand;  
 }

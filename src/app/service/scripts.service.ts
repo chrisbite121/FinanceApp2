@@ -1812,6 +1812,20 @@ updateTable(event: any): Observable<any> {
                 ? this.saveAppData()
                 : Observable.of(data)
             )
+            .mergeMap(data =>
+                (
+                    (typeof(data) == 'object' &&
+                    data.hasOwnProperty('functionCall') &&
+                    data.hasOwnProperty('result') &&
+                    data.result == false &&
+                    data.functionCall == 'emitValues'
+                    )
+                    || !this.settingsService.autoSave
+                    || !this.settingsService.sharePointMode
+                )
+                ? Observable.of(this.uiStateService.updateSaveStatus(true))
+                : Observable.of(data)
+            )            
 
         return updateTable$
     }
@@ -1842,11 +1856,10 @@ saveAppData(){
             ? this.stateService.checkSaveAppDataState()
             : Observable.of(data)
         )
-
-        .mergeMap((data:any) => 
-            //if checkdata is false then proceed otherwise cancel operation - 
-            //we do not want to run this function if it is already running otherwise data duplication issues    
-        
+        //if checkdata is false then proceed otherwise cancel operation - 
+        //if not currently running a save operation then set the save data state to true to prevent 
+        //another operation from running
+        .mergeMap(data => 
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('result') &&
@@ -1854,7 +1867,16 @@ saveAppData(){
             data.functionCall == 'checkSaveAppDataState' &&
             data.result == true &&
             data.isSaving ==  false)
-
+            ? this.stateService.updateSaveAppDataState(true)
+            : Observable.of(data)
+        )
+        .mergeMap((data:any) => 
+            //we do not want to run this function if it is already running otherwise data duplication issues    
+            (typeof(data)=='object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'updateSaveAppDataState' &&
+            data.result == true )    
             ? Observable.from(this.prepDataForApi([
                         {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
                         {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
@@ -1930,6 +1952,16 @@ saveAppData(){
             data.hasOwnProperty('result') &&
             data.functionCall == 'updateStateValue')
             ? this.stateService.updateSaveAppDataState(false)
+            : Observable.of(data)
+        )
+        //hide unsaved changes icon
+        .mergeMap(data => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'updateSaveAppDataState' &&
+            data.result == true)
+            ? Observable.of(this.uiStateService.updateSaveStatus(true))
             : Observable.of(data)
         )
         //collect notifications passed down the observable chain and add them to the notifcaiton table

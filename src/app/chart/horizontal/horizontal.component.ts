@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, Input } from '@angular/core';
 import * as d3 from 'd3'
 
-import { placeholderData, configData } from './horizontal.config'
+// import { placeholderData, configData } from './horizontal.config'
+import { newMaterialDataRow } from '../../config/new-mat'
 
 @Component({
   selector: 'chart-horizontal',
@@ -24,7 +25,7 @@ export class HorizontalChartComponent implements OnInit, OnChanges {
   private axis;
 
   constructor() {
-    this.data = placeholderData;
+    this.data = [ newMaterialDataRow ];
 
    }
 
@@ -49,8 +50,8 @@ export class HorizontalChartComponent implements OnInit, OnChanges {
     this.element = this.chartContainer.nativeElement
 
     this.margin = { top: 20, right: 10, bottom: 100, left: 90 }
-    this.width = 800 - this.margin.right - this.margin.left,
-    this.height = 400 - this.margin.top - this.margin.bottom;
+    this.width = 600 - this.margin.right - this.margin.left,
+    this.height = 300 - this.margin.top - this.margin.bottom;
 
     this.svg = d3.select(this.chartContainer.nativeElement)
         .append("svg")

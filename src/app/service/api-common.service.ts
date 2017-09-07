@@ -403,7 +403,7 @@ createList(listName:string, contextType:string):Observable<any>{
         }
 
         function onListCreateFailed(sender, args) {
-            let resultMsg = 'Request Failed. ' + args.get_message() + ' <br/> ' + args.get_stackTrace();
+            let resultMsg = 'Request Failed. ' + args.get_message();
             
             let result: ICreateListResult = {
                 apiCall: this.utilsService.apiCallCreateList,
@@ -1369,6 +1369,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: this.utilsService.apiCallAddItem,
                     reportResult: this.utilsService.successStatus,
                     listName: listName,
+                    description: resultMsg,
                     itemId: itemId,
                     ID: ID,
                     itemValues: itemValues
@@ -1740,7 +1741,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                 let reportResult = {
                     reportHeading: this.utilsService.apiCallGetItem,
                     reportResult: this.utilsService.successStatus,
-                    descrption: 'item retrieved successfully',
+                    description: `Item on list ${listName} retrieved successfully`,
                     listName: listName,
                     fieldName: this.utilsService.NaStatus
                 }
@@ -1757,7 +1758,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             }
 
             function failure(sender, args) {
-                let apiResult = 'Request Failed to get items. ' + args.get_message() + ' <br/> ' + args.get_stackTrace()
+                let apiResult = 'Request Failed to get items. ' + args.get_message()
                 let result = `failed to execute query for getItem on list: ${listName} with queryString: ${queryString}`
                 observer.next(result);
                 this.logService.log(result, this._error, false);
@@ -1790,7 +1791,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: 'getItems',
                     reportResult: this.utilsService.errorStatus,
                     listName: listName,
-                    message: `unable to create clientContext on list ${listName}`
+                    description: `unable to create clientContext on list ${listName}`
                 });
                 observer.complete()
                 return;
@@ -1809,7 +1810,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                         reportHeading: 'getItems',
                         reportResult: this.utilsService.errorStatus,
                         listName: listName,
-                        message: `unable to create hostweb clientContext on list ${listName}`
+                        description: `unable to create hostweb clientContext on list ${listName}`
                     });
                     observer.complete()
                     return;
@@ -1824,7 +1825,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: 'getItems',
                     reportResult: this.utilsService.errorStatus,
                     listName: listName,
-                    message: `unable to determine context type: get items failed on list ${listName}`
+                    description: `unable to determine context type: get items failed on list ${listName}`
                 });
                 observer.complete()
                 return;
@@ -1858,7 +1859,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     reportHeading: 'getItems',
                     reportResult: this.utilsService.errorStatus,
                     listName: listName,
-                    message: `error loading context information for function getItems on list ${listName}`
+                    description: `error loading context information for function getItems on list ${listName}`
                 });
                 observer.complete()                
                 return;
@@ -1878,7 +1879,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                         reportHeading: 'getItems',
                         reportResult: this.utilsService.errorStatus,
                         listName: listName,
-                        message: errmsg
+                        description: errmsg
                     });
                     observer.complete()     
                     return;
@@ -1896,13 +1897,15 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
 
 
                     } catch (e) {
-                        this.logService.log(`error occured while iterating through list items on list ${listName}`, this._error, false);
-                        this.logService.log(e, this._error, false);
+                        let description = `error occured while iterating through list items on list ${listName}`
+                        this.logService.log(description, this._error, false);
+                        this.logService.log(`error response: ` + e, this._error, false);
 
-                        let reportResult: IReportResult = {
+                        let reportResult = {
                             reportHeading: this.utilsService.apiCallGetItems,
                             reportResult: this.utilsService.errorStatus,
                             listName: listName,
+                            description: description,
                             fieldName: this.utilsService.NaStatus
                         }
                         observer.next(reportResult)
@@ -1912,10 +1915,10 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
                     }
                 }
 
-                let reportResult: IReportResult = {
+                let reportResult = {
                     reportHeading: this.utilsService.apiCallGetItems,
                     reportResult: this.utilsService.successStatus,
-                    listName: listName,
+                    description: `successfully retreived item for list: ${listName}`,
                     fieldName: this.utilsService.NaStatus
                 }
                 observer.next(reportResult)
@@ -1932,12 +1935,12 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
             }
 
             function failure(sender, args) {
-                let result = 'Request Failed to get items, message from api: ' + args.get_message();
+                let result = `failed for list ${listName}: ` + args.get_message();
 
-                let reportResult: IReportResult = {
+                let reportResult = {
                     reportHeading: this.utilsService.apiCallGetItems,
                     reportResult: this.utilsService.errorStatus,
-                    listName: listName,
+                    description: result,
                     fieldName: this.utilsService.NaStatus
                 }
                 observer.next(reportResult)

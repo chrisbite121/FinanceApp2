@@ -1,10 +1,10 @@
 <div class="ms-Grid-row">
   <div class="ms-Grid-col ms-u-sm10">
     <div class="messageContainer">
-      <span *ngIf='errorStatus' class='message ms-font-s' (click)="showDialog($event)">
+      <span *ngIf='errorStatus' class='message ms-font-s' (click)="showDialog($event)" [@fadeInAnimation]>
           errors detected
         </span>
-      <span *ngIf='errorStatus'>
+      <span *ngIf='errorStatus' [@fadeInAnimation]>
           &nbsp;<img [src]='errorImageUrl' (click)="showDialog($event)" class="handHover" style="margin-top:3px">
       </span>
       &nbsp;&nbsp;&nbsp;
@@ -14,12 +14,14 @@
     </div>
   </div>
   <div class="ms-Grid-col ms-u-sm2">
-    <div *ngIf='icon == "loading"'>
+    <div *ngIf='icon == "loading"' [@fadeInAnimation]>
       <of-spinner></of-spinner>
     </div>
-    <div *ngIf='icon== "complete"'>
+    <div *ngIf='icon== "complete"' [@fadeInAnimation]>
       <img [src]='successImageUrl' (click)="showDialog($event)" class="handHover" style="margin-top:5px; height:13px">
+      <img [src]='unsavedImageUrl' *ngIf="unsavedStatus" class="handHover" style="height: 13px">
     </div>
+   
     <div *ngIf='icon=="none"'>
         
     </div>    

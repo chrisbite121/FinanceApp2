@@ -1,39 +1,50 @@
 <h2>look and feel</h2>
 
-
 <div class="ms-Grid">
   <div class="ms-Grid-row">
-     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
-        Table Header Colour
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
+        Header Colour
      </div>
-    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg1"> 
+      <input class="colour-picker" [(colorPicker)]="headerColourValue" [style.background]='headerColourValue' />
+    </div>     
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
      <of-textfield [innerlabel]="'Table Header Colour'" [id]="'headercolour'" (textEntered)='headerColourSet($event)' [defaultValue]="headerColourValue"></of-textfield>
     </div>
   </div>
 
   <div class="ms-Grid-row">
-     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
         Header Font Colour
      </div>
-    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg1"> 
+      <input class="colour-picker" [(colorPicker)]="headerFontColourValue" [style.background]='headerFontColourValue' />
+   </div>          
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
      <of-textfield [innerlabel]="'Header Font Colour'" [id]="'headerfontcolour'" (textEntered)='headerFontColourSet($event)' [defaultValue]="headerFontColourValue"></of-textfield>
     </div>
   </div>
 
   <div class="ms-Grid-row">
-     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
         Highlight Colour
      </div>
-    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg1"> 
+      <input class="colour-picker" [(colorPicker)]="highlightColourValue" [style.background]='highlightColourValue' />
+   </div>     
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
      <of-textfield [innerlabel]="'Highlight Colour'" [id]="'highlightcolour'" (textEntered)='highlightColourSet($event)' [defaultValue]="highlightColourValue"></of-textfield>
     </div>
   </div>
 
   <div class="ms-Grid-row">
-     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+     <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
         Highlight Font Colour
      </div>
-    <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
+     <div class="ms-Grid-col ms-u-sm2 ms-u-md2 ms-u-lg1"> 
+        <input class="colour-picker" [(colorPicker)]="highlightFontColourValue" [style.background]='highlightFontColourValue' />
+     </div>
+    <div class="ms-Grid-col ms-u-sm4 ms-u-md4 ms-u-lg2">
      <of-textfield [innerlabel]="'Highlight Font Colour'" [id]="'highlightfontcolour'" (textEntered)='highlightFontColourSet($event)' [defaultValue]="highlightFontColourValue"></of-textfield>
     </div>
   </div>  

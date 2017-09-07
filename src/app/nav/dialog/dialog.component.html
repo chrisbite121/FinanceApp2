@@ -10,7 +10,7 @@
                     <span class="ms-Label">Option1</span> 
                     </label>
                 </div> -->
-                    <div *ngFor="let _id of transactionArray" class="container">
+                    <div *ngFor="let _id of pagedItems" class="container">
                         <div class="card">
                             <div class="ms-font-l table-header">
                                 {{notifications[_id]['title']}} - {{notifications[_id]['timestamp'] | date:'HH:mm:ss'}}
@@ -31,21 +31,30 @@
                         </table>
                         </div>
                     </div>
+                    <div class="container">
+                        <div class="pagination-center">
+                            <!-- pager -->
+                            <ul *ngIf="pager.pages && pager.pages.length" class="pagination pagination-sm handHover">
+                                <li [ngClass]="{disabled:pager.currentPage === 1}" class="page-item">
+                                    <a (click)="setPage(1)" class="page-link">First</a>
+                                </li>
+                                <li [ngClass]="{disabled:pager.currentPage === 1}" class="page-item">
+                                    <a (click)="setPage(pager.currentPage - 1)" class="page-link">Previous</a>
+                                </li>
+                                <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}" class="page-item">
+                                    <a (click)="setPage(page)" class="page-link">{{page}}</a>
+                                </li>
+                                <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item">
+                                    <a (click)="setPage(pager.currentPage + 1)" class="page-link">Next</a>
+                                </li>
+                                <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item">
+                                    <a (click)="setPage(pager.totalPages)" class="page-link">Last</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <!-- <table >
-                    <tr>
-                        <th>Transaction ID</th>
-                        <th>Time</th>
-                        <th>Report Heading</th>
-                        <th>Report Result</th>
-                    </tr>
-                    <tr *ngFor="let noti of notifications" class="ms-font-s">
-                        <td class="ms-fontSize-mi">{{noti.id}}</td>
-                        <td>{{noti.timestamp}}</td>
-                        <td>{{noti.reportHeading}}</td>
-                        <td>{{noti.reportResult}}</td>
-                    </tr>
-                </table> -->
+
                 <div class="ms-Dialog-actions">
                 <button class="ms-Button ms-Dialog-action ms-Button--primary">
                     <span class="ms-Button-label" >Close</span> 

@@ -4,10 +4,12 @@ import { UtilsService } from '../../service/utils.service'
 import { SettingsService } from '../../service/settings.service'
 import { UiStateService } from '../../service/ui-state.service'
 
+
+
 @Component({
     selector: 'look-feel',
     templateUrl: './look-feel.component.html',
-    styles: [``]
+    styleUrls: [`./look-feel.component.css`]
 })
 export class LookFeelComponent implements OnInit {
     public headerColourValue:string;

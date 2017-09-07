@@ -6,8 +6,8 @@ import { TravelComponent } from './travel/travel.component'
 import { Tab1NavComponent } from './nav/tab1-nav.component'
 // import { AggregateComponent } from './aggregate/aggregate.component'
 import  { TotalComponent } from './total/total.component'
-
 import { Aggregate2Component } from './aggregate2/aggregate2.component'
+import { WorkResourceComponent } from './work-resource/work-resource.component'
 
 const tab1SubRoutes = [
     {
@@ -30,6 +30,10 @@ const tab1SubRoutes = [
         path: 'total',
         component: TotalComponent
     }, 
+    {
+        path: 'work',
+        component: WorkResourceComponent
+    },     
     {
         path: '',
         component: ResourceComponent

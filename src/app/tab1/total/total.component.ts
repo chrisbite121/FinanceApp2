@@ -63,8 +63,11 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
         //     this.scriptService.updateTable($event).subscribe(this.getSubscriber());
         // };
         this.tGridOptions.onGridReady = () => {
-            //Remove Header
-            this.tGridOptions.api.setHeaderHeight(0)
+            if(this.tGridOptions.api){
+                //Remove Header
+                this.tGridOptions.api.setHeaderHeight(0)
+            }
+
         }
 
         this.tGridOptions.singleClickEdit = true;
@@ -125,7 +128,8 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
                                         this.settingsService.year)
                         .subscribe(data => console.log(data),
                                     err => console.log(err),
-                                    ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
+                                    ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus)
+                                        .subscribe(this.getSubscriber()));
         }
     }
 

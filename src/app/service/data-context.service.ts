@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core'
+import { Injectable } from '@angular/core'
 
 //models
 import { IResourceModel } from '../model/resource.model'
@@ -283,6 +283,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 _item['ListName'] = listName;
                 _item['Year'] = this.settingsService.year;
                 _item['ItemId'] = _itemId;
+                _item['Mat'] = 'Material Name ' + this._MaterialData.length
                 //temporarily assign itemid as ID until object is saved
                 _item['ID'] = _itemId;
             break;
@@ -555,6 +556,12 @@ addDataItemToTable(listName:string, item):Observable<any> {
                                 result: true,
                                 dataExists: true,
                             })
+
+                            observer.next({
+                                reportHeading: `checkForCachedData`,
+                                reportResult: this.utilsService.successStatus,
+                                description: `successfully found data in list: ${listName}`
+                            })
                         } else {
                             observer.next({
                                 functionCall:'checkForCachedData',
@@ -582,6 +589,12 @@ addDataItemToTable(listName:string, item):Observable<any> {
                             description: `failed to find listName ${listName} in functionCall: checkForCachedData`
                         })
                     }
+                })
+            } else {
+                observer.next({
+                    reportHeading: 'checkForCachedData',
+                    reportResult: this.utilsService.failStatus,
+                    description: `failed to find listArray to iterate through`
                 })
             }
 
@@ -1287,7 +1300,6 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
 }
 
 emitValues(listArray:Array<string>): Observable<any>{
-    console.error('EMIT VALUES CALLED')
     let emit$ = new Observable((observer:Observer<any>) => {
         if(Array.isArray(listArray)){
         //emit values

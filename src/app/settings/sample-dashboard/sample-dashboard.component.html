@@ -1,0 +1,26 @@
+<!-- <chart-group [chartData]='groupedData'></chart-group>
+
+<chart-horizontal [chartData]='horizontalData'></chart-horizontal>
+
+<chart-pie [data]='pieData'></chart-pie>
+
+<chart-stack [chartData]='stackData'></chart-stack> -->
+
+<div class="ms-Grid">
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm6">
+            <chart-group [@fadeInAnimation] [chartData]='groupedData'></chart-group>
+        </div>
+        <div class="ms-Grid-col ms-u-sm6">
+            <chart-horizontal [@fadeInAnimation] [chartData]='horizontalData'></chart-horizontal>
+        </div>
+    </div>
+    <div class="ms-Grid-row">
+        <div class="ms-Grid-col ms-u-sm6">
+            <chart-pie [@fadeInAnimation] [data]='pieData'></chart-pie>
+        </div>
+        <div class="ms-Grid-col ms-u-sm6">
+            <chart-stack [@fadeInAnimation] [chartData]='stackData'></chart-stack>
+        </div>
+    </div>
+</div>

@@ -57,5 +57,38 @@ set logs upper limit
 <h3>Enable Debugging Mode</h3>
 <h3>Store context type for each list in settings list</h3>
 
+<div>
 <of-icon-panel></of-icon-panel>
+</div>
 
+<input class='colour-picker' [(colorPicker)]="color" [style.background]='color' />
+
+
+<div>
+    <div class="container">
+        <div class="text-center">
+
+            <!-- items being paged -->
+            <div *ngFor="let item of pagedItems">{{item.name}}</div>
+ 
+            <!-- pager -->
+            <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
+                <li [ngClass]="{disabled:pager.currentPage === 1}" class="page-item">
+                    <a (click)="setPage(1)" class="page-link">First</a>
+                </li>
+                <li [ngClass]="{disabled:pager.currentPage === 1}" class="page-item">
+                    <a (click)="setPage(pager.currentPage - 1)" class="page-link">Previous</a>
+                </li>
+                <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}" class="page-item">
+                    <a (click)="setPage(page)" class="page-link">{{page}}</a>
+                </li>
+                <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item">
+                    <a (click)="setPage(pager.currentPage + 1)" class="page-link">Next</a>
+                </li>
+                <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item">
+                    <a (click)="setPage(pager.totalPages)" class="page-link">Last</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

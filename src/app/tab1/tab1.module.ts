@@ -15,10 +15,9 @@ import { MaterialComponent } from './material/material.component'
 import { TravelComponent } from './travel/travel.component'
 // import { AggregateComponent } from './aggregate/aggregate.component'
 import { TotalComponent } from './total/total.component'
-
 import { Aggregate2Component } from './aggregate2/aggregate2.component'
-
 import { Tab1NavComponent } from './nav/tab1-nav.component'
+import { WorkResourceComponent } from './work-resource/work-resource.component'
 
 import  { tab1Routes } from './tab1.routes'
 
@@ -41,7 +40,8 @@ import  { tab1Routes } from './tab1.routes'
         // AggregateComponent,
         TotalComponent,
         Aggregate2Component,
-        NumericEditorComponent
+        NumericEditorComponent,
+        WorkResourceComponent
     ],
     exports: [ Tab1Component ]
 })

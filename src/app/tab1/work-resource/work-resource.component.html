@@ -1,0 +1,28 @@
+<div *ngIf="tableReady" [@fadeInAnimation]> 
+    <div class="ms-Grid"  class="header-row">
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-u-sm3 ">
+                <div class="ms-Grid-row">
+                    <of-icon-panel [contentName]="title" class="info-icon"></of-icon-panel>
+                    <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
+                        {{title}}    
+                    </span>
+                    <i *ngIf="collapsed" class="ms-Icon ms-Icon--ChevronDownSmall action-icon" (click)="toggleMenu()" aria-hidden="true"></i>
+                    <i *ngIf="!collapsed" class="ms-Icon ms-Icon--ChevronUpSmall action-icon" (click)="toggleMenu()" aria-hidden="true"></i>
+                    <i class="ms-Icon ms-Icon--Add action-icon" (click)="addWorkResourceRow();"></i>
+                    <i class="ms-Icon ms-Icon--Delete action-icon" (click)="deleteWorkResourceRow();"></i> 
+                </div>
+            </div>
+            <div class="ms-Grid-col ms-u-sm9">
+            </div>
+        </div>    
+    </div>
+
+    <ag-grid-angular #agGrid20  
+                            [style.height.px]="wresTableHeight" 
+                            [style.width.px]="wresTableWidth"
+                            class="ag-fresh agGridTable" 
+                            [gridOptions]="wresGridOptions"
+                            [@slideInOut]="isCollapsed()">
+    </ag-grid-angular>
+</div>

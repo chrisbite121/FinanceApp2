@@ -52,21 +52,24 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterContentCheck
 
         //Summary Table gridoptions
         this.nsGridOptions.context = {}
-        this.nsGridOptions.onCellValueChanged = ($event: any) => {
-            let _rowIndex = $event.node.rowIndex
-            let _colId = $event.column.colId 
-            let _focusTable = 'gsGridOptions'
-            this.scriptService.updateTable($event)
-                .subscribe(
-                    data => console.log(data),
-                    err => console.log(err),
-                    () => { 
-                        console.error('COMPLETED');                            
-                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
-                });
-        }
+        // this.nsGridOptions.onCellValueChanged = ($event: any) => {
+        //     let _rowIndex = $event.node.rowIndex
+        //     let _colId = $event.column.colId 
+        //     let _focusTable = 'gsGridOptions'
+        //     this.scriptService.updateTable($event)
+        //         .subscribe(
+        //             data => console.log(data),
+        //             err => console.log(err),
+        //             () => { 
+        //                 console.error('COMPLETED');                            
+        //                 this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+        //         });
+        // }
         this.nsGridOptions.onGridReady = () => {
-            this.nsGridOptions.api.setHeaderHeight(0)
+            if(this.nsGridOptions.api){
+                this.nsGridOptions.api.setHeaderHeight(0)
+            }
+            
         }
 
 
@@ -104,7 +107,8 @@ export class NetSummaryComponent implements OnInit, OnDestroy, AfterContentCheck
                                         this.settingsService.year)
                             .subscribe(data => console.log(data),
                                         err => console.log(err),
-                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus)
+                                                .subscribe(this.getSubscriber()));
         }
     }
 

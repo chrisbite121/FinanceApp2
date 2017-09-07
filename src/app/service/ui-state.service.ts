@@ -124,7 +124,8 @@ export class UiStateService {
             messageData: {
                 icon: 'none',
                 message: '',
-                errorStatus: false
+                errorStatus: false,
+                unsavedStatus: false,
             }
 
         }
@@ -138,21 +139,20 @@ export class UiStateService {
         }
     }
 
-    updateFocusedCell(listName:string, gridOptions:string, rowIndex:number, columnId:string){
+    moveFocusedCell(listName:string, gridOptions:string, rowIndex:number, columnId:string, rowCount:number, direction:string){
         console.log('Uupdate focused cell called')
         let tableName = this.getTableName(listName)
-        let indexValue = this.getNewColumnId(tableName, columnId)
-        let newColumnId = this[tableName][indexValue].columnId
-        let newGridOptions = this[tableName][indexValue].gridOptions
-        console.log(newGridOptions)
+        let newIndexValue = this.getNewIndexValue(tableName, columnId, direction)
+        let newColumnId = this[tableName][newIndexValue].columnId
+        let newGridOptions = this[tableName][newIndexValue].gridOptions
+        let newRowIndex = this.getNewRowIndex(rowIndex, rowCount, direction)
 
         if(listName.length>0 &&
             newGridOptions.length>0 &&
             typeof(rowIndex)=='number' &&
             typeof(newColumnId) == 'string' &&
             newColumnId.length > 0) {
-
-                this.updateFocusedCellData(listName, newGridOptions, rowIndex, newColumnId)
+                this.updateFocusedCellData(listName, newGridOptions, newRowIndex, newColumnId)
             } else {
                 this.logService.log(`error in functionCall updateFocusedCell`, this.utilsService.errorStatus, false)
             }
@@ -183,7 +183,7 @@ export class UiStateService {
             // this._focusCellStream.next({listName, gridOptions, rowIndex, columnId })
     }
 
-    getNewColumnId(tableName, columnId){
+    getNewIndexValue(tableName:string, columnId:string, direction:string){
         
         let oldIndexValue: number;
         if(tableName.length>0 &&
@@ -200,12 +200,37 @@ export class UiStateService {
 
         console.log(this[tableName].length)
         console.log(oldIndexValue)
-        if(this[tableName].length == oldIndexValue + 1) {
-            //return to start of table
-            newIndexValue = 0
-        } else {
-            newIndexValue = oldIndexValue + 1;
+        switch(direction) {
+            case this.utilsService.directionRight:
+                if(this[tableName].length == oldIndexValue + 1) {
+                    //return to start of table
+                    newIndexValue = 0
+                } else {
+                    newIndexValue = oldIndexValue + 1;
+                }
+            break;
+            case this.utilsService.directionLeft:
+                if(oldIndexValue === 0) {
+                    newIndexValue = this[tableName].length
+                } else {
+                    newIndexValue = oldIndexValue - 1
+                }
+            break;
+            case this.utilsService.directionUp:
+                newIndexValue = oldIndexValue
+
+            break;
+            case this.utilsService.directionDown:
+                newIndexValue = oldIndexValue
+            break;
+            case this.utilsService.directionStay:
+                newIndexValue = oldIndexValue
+            break;
+            default:
+                this.logService.log(`error identifying directiion to move cell focus getIndexValue: ${direction}`, this.utilsService.errorStatus, false)
+            break
         }
+        
         return newIndexValue
     }
 
@@ -258,6 +283,47 @@ export class UiStateService {
         this._uiState.messageData.errorStatus = value;
         this.emitMessageData()
         return
+    }
+
+    updateSaveStatus(value: boolean): void {
+        this._uiState.messageData.unsavedStatus = value;
+        this.emitMessageData()
+        return
+    }
+
+    getNewRowIndex(rowIndex: number, rowCount: number, direction: string){
+        let newRowIndex: number
+        switch(direction){
+            case this.utilsService.directionLeft:
+                newRowIndex = rowIndex
+            break;
+            case this.utilsService.directionRight:
+                newRowIndex = rowIndex
+            break;
+            case this.utilsService.directionDown:
+                if (rowIndex == 0 && rowCount == 1) {
+                    newRowIndex = rowIndex
+                } else if (rowIndex < (rowCount-1)) {
+                    newRowIndex = rowIndex + 1
+                } else if (rowIndex == (rowCount-1)) {
+                    newRowIndex = rowIndex
+                }
+            break;
+            case this.utilsService.directionUp:
+                if (rowIndex == 0) {
+                    newRowIndex = rowIndex
+                } else if (rowIndex <= (rowCount-1)) {
+                    newRowIndex = rowIndex-1
+                }
+            break;
+            case this.utilsService.directionStay:
+                newRowIndex = rowIndex;
+            break;
+            default:
+                this.logService.log(`error identifying direction to move cell focus in getRowIndex: ${direction}`, this.utilsService.errorStatus, false)
+            break            
+        }
+        return newRowIndex
     }
 
     // uiState():Observable<any> {

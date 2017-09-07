@@ -7,7 +7,8 @@
                             <span class="ms-font-xl ms-fontWeight-semibold title" (click)="toggleMenu()">
                                 {{title}}    
                             </span>
-                            
+                            <i *ngIf="collapsed" class="ms-Icon ms-Icon--ChevronDownSmall action-icon" (click)="toggleMenu()" aria-hidden="true"></i>
+                            <i *ngIf="!collapsed" class="ms-Icon ms-Icon--ChevronUpSmall action-icon" (click)="toggleMenu()" aria-hidden="true"></i> 
                         </div>
                     </div>
                     <div class="ms-Grid-col ms-u-sm9">

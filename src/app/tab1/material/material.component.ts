@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked } from '@angular/core'
+import { Component, OnInit, OnDestroy, ElementRef, AfterContentChecked, ViewChild } from '@angular/core'
 
 import { GridOptions } from 'ag-grid'
 
@@ -64,21 +64,38 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
 
         //Project cost material gridoptions
         this.cmGridOptions.context = {};
+        
         this.cmGridOptions.onCellValueChanged = ($event: any) => {
-            let _rowIndex = $event.node.rowIndex
-            let _colId = $event.column.colId
-            let _focusTable = 'cmGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppMaterialData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event)
-                .subscribe(
-                    data => console.log(data),
-                    err => console.log(err),
-                    () => { 
-                        console.error('COMPLETED');                            
-                        this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
-                });
+            if(+$event.newValue !== $event.oldValue) {
+                this.scriptService.updateTable($event)
+                    .subscribe(
+                        data => console.log(data),
+                        err => console.log(err),
+                        () => { 
+                            console.error('COMPLETED');                            
+                            this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                    });
+                } else {
+                    this.updateFocusedCell()
+                }
 
         };
+
+        this.cmGridOptions.tabToNextCell = (params: any) => {
+            let _focusTable = 'cmGridOptions'
+            this.handleTab(params, _focusTable, this.utilsService.financeAppMaterialData)
+            return null;
+        }
+        this.cmGridOptions.navigateToNextCell = (params: any) => {
+            let _focusTable = 'cmGridOptions'
+            this.handleNavigate(params, _focusTable, this.utilsService.financeAppMaterialData)
+            return null;
+        }
+
+        this.cmGridOptions.onCellClicked = (event: any) => {
+            let _focusTable = 'cmGridOptions'
+            this.handleClick(event, _focusTable, this.utilsService.financeAppMaterialData)
+        }
 
         this.cmGridOptions.singleClickEdit = true;
         this.cmGridOptions.enableColResize = true;
@@ -90,7 +107,10 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
         this.mattGridOptions.context = {};
         this.mattGridOptions.onGridReady = () => {
             //Remove Header
-             this.mattGridOptions.api.setHeaderHeight(0)
+            if(this.mattGridOptions.api){
+                this.mattGridOptions.api.setHeaderHeight(0)                
+            }
+
         }
         this.mattGridOptions.singleClickEdit = true;
         this.mattGridOptions.enableColResize = true;
@@ -120,11 +140,7 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
             this.resizeMaterialTable(data.length);
 
             //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }            
+            this.updateFocusedCell()
         })
 
         this.totalStream = this.dataContext.getTotalDataStream().subscribe(data => {
@@ -160,17 +176,7 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
                 }
             }
         })        
-
-        // this.uiStateService.uiState().subscribe(data => {
-        //     this.uiState = data;
-            
-        // })
-
-            this.refreshGrid()
-        
-        //get inital ui state values
-        // this.uiStateService.updateState();
-
+        this.refreshGrid()
     }
 
     ngAfterContentChecked () {
@@ -182,6 +188,8 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
             this.changeHeaderFontColour(this.settingsService.settings.headerFontColour)
         }
         
+        
+
     }
 
     ngOnDestroy(){
@@ -193,8 +201,13 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
 
     addMaterialRow(){
         this.scriptService.addDataRow(this.utilsService.financeAppMaterialData, this.settingsService.year, this.settingsService.autoSave)
-            .subscribe(this.getSubscriber());
-        return
+        .subscribe(
+            data => console.log(data),
+            err => console.log(err),
+            () => {
+                this.uiStateService.updateMessage(`row created`, this.utilsService.completeStatus).subscribe()
+            }
+        );
     }
     
 
@@ -231,7 +244,8 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
                                         this.settingsService.year)
                             .subscribe(data => console.log(data),
                                         err => console.log(err),
-                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus)
+                                            .subscribe(this.getSubscriber()));
         } else {
             console.log('waiting for application to complete before loading data')
         }
@@ -284,5 +298,51 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
     public toggleMenu(): void {
         this.collapsed = !this.collapsed;
     }
+
+
+    updateFocusedCell(){
+        let focusedCellData = this.uiStateService.getFocusCellData()
+        if(this[focusedCellData.gridOptions]) {
+            this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+            this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+        }
+    }
+
+    handleClick(event, focusTable, listName){
+        console.error('CLICK')
+        let _colId = event.column.colId;
+        let _rowIndex = event.node.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        this[focusTable].api.stopEditing(false)
+    }
+
+    handleTab(params, focusTable, listName){
+        let _colId = params.previousCellDef.column.colId;
+        let _rowIndex = params.previousCellDef.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        this[focusTable].api.stopEditing()
+    }
+
+    handleNavigate(params, focusTable, listName){
+        let _colId = params.previousCellDef.column.colId;
+        let _rowIndex = params.previousCellDef.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        //right arrow
+        if(params.event.keyCode == 39) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        //left arrow
+        } else if (params.event.keyCode == 37) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionLeft)
+        //key up
+        } else if (params.event.keyCode == 38) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionUp)
+        //key down
+        } else if (params.event.keyCode == 40) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionDown)
+        }
+        this[focusTable].api.stopEditing()
+    }   
 
 }

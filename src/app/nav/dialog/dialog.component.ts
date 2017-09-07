@@ -5,6 +5,7 @@ import { Component, Input, Output, EventEmitter, ElementRef, AfterContentInit } 
 import { Dialog } from './Dialog';
 
 import { NotificationService } from '../../service/notification.service'
+import { PagerService } from '../../service/pagination.service'
 
 @Component({
     selector: 'notification-dialog',
@@ -16,8 +17,13 @@ export class DialogComponent implements AfterContentInit {
     public dialog: Dialog;
     public notifications: object;
     public transactionArray:Array<string>;
+    // pager object
+    public pager: any = {};
+    // paged items
+    public pagedItems: any[];    
     constructor(private element: ElementRef,
-                private notificationService: NotificationService){ 
+                private notificationService: NotificationService,
+                private pagerService: PagerService){ 
                     this.notifications = [];
                  }
 
@@ -30,11 +36,24 @@ export class DialogComponent implements AfterContentInit {
     openDialog($event): void {
         this.notifications = this.notificationService.getNotifications()
         this.transactionArray = Object.keys(this.notifications).slice().reverse()
+        this.setPage(1)
         this.dialog.open()
     }
 
     closeDialog($event): void {
         // this.dialog.close()
+    }
+
+    setPage(page: number) {
+        if (page < 1 || page > this.pager.totalPages) {
+            return;
+        }
+ 
+        // get pager object from service
+        this.pager = this.pagerService.getPager(this.transactionArray.length, page, 10);
+ 
+        // get current page of items
+        this.pagedItems = this.transactionArray.slice(this.pager.startIndex, this.pager.endIndex + 1);
     }
 }
 

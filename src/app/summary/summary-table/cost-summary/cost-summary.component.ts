@@ -55,11 +55,8 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
             //Summary Table gridoptions
             this.csGridOptions.context = {}
             this.csGridOptions.onCellValueChanged = ($event: any) => {
-                let _rowIndex = $event.node.rowIndex
-                let _colId = $event.column.colId                
-                let _focusTable = 'gsGridOptions'
-                this.uiStateService.updateFocusedCell(this.utilsService.financeAppSummaryData, _focusTable, _rowIndex, _colId)
-                this.scriptService.updateTable($event)
+                if(+$event.newValue !== $event.oldValue) {
+                    this.scriptService.updateTable($event)
                     .subscribe(
                         data => console.log(data),
                         err => console.log(err),
@@ -67,11 +64,33 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
                             console.error('COMPLETED');                            
                             this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
                     });
-
+                } else {
+                    this.updateFocusedCell()
+                }
             }
             this.csGridOptions.onGridReady = () => {
-                this.csGridOptions.api.setHeaderHeight(0)
+                if(this.csGridOptions.api){
+                    this.csGridOptions.api.setHeaderHeight(0)
+                }
+                
             }
+
+            this.csGridOptions.tabToNextCell = (params: any) => {
+                let _focusTable = 'csGridOptions'
+                this.handleTab(params, _focusTable, this.utilsService.financeAppSummaryData)
+                return null;
+            }
+            this.csGridOptions.navigateToNextCell = (params: any) => {
+                console.error('CLICK')
+                let _focusTable = 'csGridOptions'
+                this.handleNavigate(params, _focusTable, this.utilsService.financeAppSummaryData)
+                return null;
+            }
+    
+            this.csGridOptions.onCellClicked = (event: any) => {
+                let _focusTable = 'csGridOptions'
+                this.handleClick(event, _focusTable, this.utilsService.financeAppSummaryData)
+            }            
 
        
         }
@@ -92,11 +111,7 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
             }
             
             //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }
+            this.updateFocusedCell()
         })
 
         this.csSummaryContextStream = this.dataContextService.getResourceContextStream().subscribe(data => {
@@ -114,7 +129,8 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
                                         this.settingsService.year)
                             .subscribe(data => console.log(data),
                                         err => console.log(err),
-                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
+                                        ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus)
+                                                .subscribe(this.getSubscriber()))
         }
 
 
@@ -136,5 +152,50 @@ export class CostSummaryComponent implements OnInit, OnDestroy, AfterContentChec
             complete(){ console.log('completed') }
         }
      }
-    
+
+     updateFocusedCell(){
+        let focusedCellData = this.uiStateService.getFocusCellData()
+        if(this[focusedCellData.gridOptions]) {
+            this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+            this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+        }
+    }
+
+    handleClick(event, focusTable, listName){
+        console.error('CLICK')
+        let _colId = event.column.colId;
+        let _rowIndex = event.node.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        this[focusTable].api.stopEditing(false)
+    }
+
+    handleTab(params, focusTable, listName){
+        let _colId = params.previousCellDef.column.colId;
+        let _rowIndex = params.previousCellDef.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        this[focusTable].api.stopEditing()
+    }
+
+    handleNavigate(params, focusTable, listName){
+        let _colId = params.previousCellDef.column.colId;
+        let _rowIndex = params.previousCellDef.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        //right arrow
+        if(params.event.keyCode == 39) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        //left arrow
+        } else if (params.event.keyCode == 37) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionLeft)
+        //key up
+        } else if (params.event.keyCode == 38) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionUp)
+        //key down
+        } else if (params.event.keyCode == 40) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionDown)
+        }
+        this[focusTable].api.stopEditing()
+    }      
+
 }

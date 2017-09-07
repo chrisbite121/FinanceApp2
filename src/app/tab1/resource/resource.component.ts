@@ -92,7 +92,9 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             this.workdayService.updateWorkingDays($event);
         };
         this.wdGridOptions.onGridReady = () => {
-            this.wdGridOptions.api.setHeaderHeight(0)
+            if(this.wdGridOptions.api) {
+                this.wdGridOptions.api.setHeaderHeight(0)
+            }
         }
         this.wdGridOptions.suppressCellSelection=true;
         this.wdGridOptions.domLayout = 'forPrint'         
@@ -105,38 +107,56 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
        
 
         this.puGridOptions.onCellValueChanged = ($event: any) => {
-            let _rowIndex = $event.node.rowIndex
-            let _colId = $event.column.colId
-            let _focusTable = 'puGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event)
+            if(+$event.newValue !== +$event.oldValue) {
+                this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
                     err => console.log(err),
                     () => { 
-                        console.error('COMPLETED');                            
+                        console.error('COMPLETED PU');                            
                         this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
                 });
+            } else {
+                this.updateFocusedCell()
+            }
+            
         };
         this.puGridOptions.context = {};
         this.puGridOptions.rowSelection = 'single';
         this.puGridOptions.enableColResize = true;    
 
+        this.puGridOptions.tabToNextCell = (params: any) => {
+            let _focusTable = 'puGridOptions'
+            this.handleTab(params, _focusTable, this.utilsService.financeAppResourceData)
+            return null;
+        }
+        this.puGridOptions.navigateToNextCell = (params: any) => {
+            let _focusTable = 'puGridOptions'
+            this.handleNavigate(params, _focusTable, this.utilsService.financeAppResourceData)
+            return null;
+        }
+
+        this.puGridOptions.onCellClicked = (event: any) => {
+            let _focusTable = 'puGridOptions'
+            this.handleClick(event, _focusTable, this.utilsService.financeAppResourceData)
+        }
+
         //actual hours gridoptions
         this.ahGridOptions.context = {};
         this.ahGridOptions.onCellValueChanged = ($event: any) => {
-            let _rowIndex = $event.node.rowIndex
-            let _colId = $event.column.colId
-            let _focusTable = 'ahGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event)
+            if(+$event.newValue !== +$event.oldValue) {
+                this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
                     err => console.log(err),
                     () => { 
-                        console.error('COMPLETED');                            
+                        console.error('COMPLETED AH');                            
                         this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
                 });
+            } else {
+                this.updateFocusedCell()
+            }
+            
         };
         // this.ahGridOptions.rowSelection = 'single';
         this.ahGridOptions.singleClickEdit = true;
@@ -144,21 +164,38 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         this.ahGridOptions.suppressCellSelection=true;
         this.ahGridOptions.domLayout = 'forPrint'        
 
+        this.ahGridOptions.tabToNextCell = (params: any) => {
+            let _focusTable = 'ahGridOptions'
+            this.handleTab(params, _focusTable, this.utilsService.financeAppResourceData)
+            return null;
+        }
+        this.ahGridOptions.navigateToNextCell = (params: any) => {
+            let _focusTable = 'ahGridOptions'
+            this.handleNavigate(params, _focusTable, this.utilsService.financeAppResourceData)
+            return null;
+        }
+
+        this.ahGridOptions.onCellClicked = (event: any) => {
+            let _focusTable = 'ahGridOptions'
+            this.handleClick(event, _focusTable, this.utilsService.financeAppResourceData)
+        }
+
         //project resource gridoptions
         this.prGridOptions.context = {};
         this.prGridOptions.onCellValueChanged = ($event: any) => {
-            let _rowIndex = $event.node.rowIndex
-            let _colId = $event.column.colId
-            let _focusTable = 'prGridOptions'
-            this.uiStateService.updateFocusedCell(this.utilsService.financeAppResourceData, _focusTable, _rowIndex, _colId)
-            this.scriptService.updateTable($event)
+            if(+$event.newValue !== $event.oldValue){
+                this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
                     err => console.log(err),
                     () => { 
-                        console.error('COMPLETED');                            
+                        console.error('COMPLETED PR');                            
                         this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
                 });
+            } else {
+                this.updateFocusedCell()
+            }
+            
         };
         // this.prGridOptions.rowSelection = 'single';
         this.prGridOptions.singleClickEdit = true;
@@ -166,19 +203,36 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         this.prGridOptions.suppressCellSelection=true;
         this.prGridOptions.domLayout = 'forPrint'
 
+        this.prGridOptions.tabToNextCell = (params: any) => {
+            let _focusTable = 'prGridOptions'
+            this.handleTab(params, _focusTable, this.utilsService.financeAppResourceData)
+            return null;
+        }
+        this.prGridOptions.navigateToNextCell = (params: any) => {
+            let _focusTable = 'prGridOptions'
+            this.handleNavigate(params, _focusTable, this.utilsService.financeAppResourceData)
+            return null;
+        }
+
+        this.prGridOptions.onCellClicked = (event: any) => {
+            let _focusTable = 'prGridOptions'
+            this.handleClick(event, _focusTable, this.utilsService.financeAppResourceData)
+        }
+
         //Project Resource Totals gridoptions
         this.prtGridOptions.context = {};
         this.prtGridOptions.onGridReady = () => {
-            //Remove Header
-            this.prtGridOptions.api.setHeaderHeight(0)
+            if(this.prtGridOptions.api) {
+                //Remove Header
+                this.prtGridOptions.api.setHeaderHeight(0)
+            }
         }
         
         this.prtGridOptions.singleClickEdit = true;
         this.prtGridOptions.enableColResize = true;
         this.prtGridOptions.suppressCellSelection=true;
         this.prtGridOptions.domLayout = 'forPrint'        
-
-                                          
+           
     }
 
     ngOnInit() {
@@ -201,8 +255,6 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         });
 
         this.resouceStream = this.dataContextService.getResourceDataStream().subscribe(data => {
-           console.error('RESOURCE DATA RECEIVED')
-
 
             if (!this.puGridOptions.rowData) {
                 this.puGridOptions.rowData = data;
@@ -230,12 +282,8 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
 
             this.resizeTables(data.length);
 
-            // redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
-            let focusedCellData = this.uiStateService.getFocusCellData()
-            if(this[focusedCellData.gridOptions]) {
-                this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
-                this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
-            }
+            //redrawing the grid causing the table to lose focus, we need to check focused cell data and re enter edit mode
+            this.updateFocusedCell()
         })
         
         this.totalStream = this.dataContextService.getTotalDataStream().subscribe(data => {
@@ -319,8 +367,6 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
                 err => console.log(err),
                 () => {
                     this.uiStateService.updateMessage(`row created`, this.utilsService.completeStatus).subscribe()
-                    console.log(`add resource row completed`);
-                    
                 }
             );
         return
@@ -366,7 +412,9 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
                                             this.settingsService.year)
                     .subscribe(data => console.log(data),
                                 err => console.log(err),
-                                ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus));
+                                ()=> this.uiStateService.updateMessage(`App Data Retrieved`, this.utilsService.completeStatus)
+                                        .subscribe(this.getSubscriber()))
+                    
         } else {
             console.log('waiting for application to complete before loading data')
         }
@@ -428,4 +476,50 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     public toggleMenu(): void {
         this.collapsed = !this.collapsed;
     }
+
+    updateFocusedCell(){
+        let focusedCellData = this.uiStateService.getFocusCellData()
+        console.log(focusedCellData)
+        if(this[focusedCellData.gridOptions]) {
+            this[focusedCellData.gridOptions].api.setFocusedCell(focusedCellData.rowIndex, focusedCellData.colId)
+            this[focusedCellData.gridOptions].api.startEditingCell({colKey: focusedCellData.colId,rowIndex: focusedCellData.rowIndex})
+        }
+    }
+
+    handleClick(event, focusTable, listName){
+        console.error('CLICK')
+        let _colId = event.column.colId;
+        let _rowIndex = event.node.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        this[focusTable].api.stopEditing(false)
+    }
+
+    handleTab(params, focusTable, listName){
+        let _colId = params.previousCellDef.column.colId;
+        let _rowIndex = params.previousCellDef.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        this[focusTable].api.stopEditing()
+    }
+
+    handleNavigate(params, focusTable, listName){
+        let _colId = params.previousCellDef.column.colId;
+        let _rowIndex = params.previousCellDef.rowIndex;
+        let _rowCount = this[focusTable].api.getDisplayedRowCount()
+        //right arrow
+        if(params.event.keyCode == 39) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        //left arrow
+        } else if (params.event.keyCode == 37) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionLeft)
+        //key up
+        } else if (params.event.keyCode == 38) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionUp)
+        //key down
+        } else if (params.event.keyCode == 40) {
+            this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionDown)
+        }
+        this[focusTable].api.stopEditing()
+    }   
 }

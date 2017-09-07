@@ -31,9 +31,12 @@
         <of-commandbutton [label]='commandButtonLabel' [list]='commandButtonValues' (buttonClicked)='commandButtonClick($event)'></of-commandbutton>
     </div>
 </div>
+
+
   <div class="ms-Grid-row">
-      <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
-            <table>
+   <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
+    <div class="container">
+            <table class="table table-hover table-sm">
                 <tr>
                     <th>ID</th>
                     <th>type</th>
@@ -41,25 +44,34 @@
                     <th>timestamp</th>
                     <th>status</th>
                 </tr>
-                <tr *ngFor= "let log of _logs">
-                    <td>{{log.ItemId}}</td>
+                <tr *ngFor= "let log of pagedItems" [ngClass]="{'table-danger': log.Type=='error'}">
+                    <td scope="row">{{log.ItemId}}</td>
                     <td>{{log.Type}}</td>
                     <td>{{log.Description}}</td>
                     <td>{{log.Timestamp | date:'medium' }}</td>
                     <td>{{log.State}}</td>
                 </tr>
             </table>
-      </div>
-  </div> 
-</div>
 
-<div class="pagination">
-  <a href="#">&laquo;</a>
-  <a href="#">1</a>
-  <a class="active" href="#">2</a>
-  <a href="#">3</a>
-  <a href="#">4</a>
-  <a href="#">5</a>
-  <a href="#">6</a>
-  <a href="#">&raquo;</a>
+    <!-- pager -->
+    <ul *ngIf="pager.pages && pager.pages.length" class="pagination pagination-sm">
+        <li [ngClass]="{disabled:pager.currentPage === 1}" class="page-item">
+            <a (click)="setPage(1)" class="page-link">First</a>
+        </li>
+        <li [ngClass]="{disabled:pager.currentPage === 1}" class="page-item">
+            <a (click)="setPage(pager.currentPage - 1)" class="page-link">Previous</a>
+        </li>
+        <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}" class="page-item">
+            <a (click)="setPage(page)" class="page-link">{{page}}</a>
+        </li>
+        <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item">
+            <a (click)="setPage(pager.currentPage + 1)" class="page-link">Next</a>
+        </li>
+        <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}" class="page-item">
+            <a (click)="setPage(pager.totalPages)" class="page-link">Last</a>
+        </li>
+    </ul>
+   </div>
+  </div> 
+ </div>
 </div>

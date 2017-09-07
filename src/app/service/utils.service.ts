@@ -334,4 +334,24 @@ private _Parser;
     get completeStatus(){
         return 'complete'
     }
+
+    get directionRight(){
+        return 'right'
+    }
+
+    get directionLeft(){
+        return 'left'
+    }
+
+    get directionUp(){
+        return 'up'
+    }
+
+    get directionDown(){
+        return 'down'
+    }
+
+    get directionStay(){
+        return 'stay'
+    }
 }

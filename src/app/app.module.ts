@@ -1,5 +1,5 @@
-import {NgModule} from "@angular/core";
-import {BrowserModule} from "@angular/platform-browser";
+import { NgModule } from "@angular/core";
+import { BrowserModule } from "@angular/platform-browser";
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 
@@ -19,6 +19,9 @@ import { ScriptService } from './service/scripts.service'
 import { HealthReportService } from './service/health-report.service'
 import { NotificationService } from './service/notification.service'
 import { StateService } from './service/state.service'
+import { PagerService } from './service/pagination.service'
+import { GridOptionsService } from './service/grid-options.service'
+
 
 // application
 import {AppComponent} from "./app.component";
@@ -71,8 +74,9 @@ import { appRoutes } from './routes'
         ScriptService,
         HealthReportService,
         NotificationService,
-        StateService
-
+        StateService,
+        PagerService,
+        GridOptionsService
         ],    
     bootstrap: [AppComponent]
 })

@@ -66,6 +66,7 @@ export class AppComponent  {
                                                 this.logService.log('init app call complete, loading app data', this.utilsService.infoStatus, true)
                                                 this.settingsService.initAppComplete = true;
                                                 this.uiStateService.updateMessage('Init App Complete', 'complete')
+                                                    .subscribe()
                                              }
                                     )
                     

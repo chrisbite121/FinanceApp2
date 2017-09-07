@@ -7,6 +7,7 @@ import { LogService } from '../../service/log.service'
 import { CommonApiService } from '../../service/api-common.service'
 import { UtilsService } from '../../service/utils.service'
 import { ScriptService } from '../../service/scripts.service'
+import { PagerService } from '../../service/pagination.service'
 
 import { FabricDropdownWrapperComponent } from '../../office-fabric/dropdown/fabric.dropdown.wrapper.component'
 import { FabricToggleWrapperComponent } from '../../office-fabric/toggle/fabric.toggle.wrapper.component'
@@ -26,12 +27,16 @@ export class LoggerComponent implements OnInit {
     public commandButtonValues: Array<ICommandButtonEntry>
     public logTypeOptions: Array<string>
     public logTypeDefaultValue: string
-
+    // pager object
+    public pager: any = {};
+    // paged items
+    public pagedItems: any[];
 
     constructor(private logService: LogService,
                 private commonApiService: CommonApiService,
                 private utilsService: UtilsService,
-                private scriptService: ScriptService){
+                private scriptService: ScriptService,
+                private pagerService: PagerService){
         this._logs = [];
         this.commandButtonLabel = CommandButtonLabel
         this.commandButtonValues = CommandButtonValues
@@ -51,18 +56,20 @@ export class LoggerComponent implements OnInit {
         } else {
             console.error('unable to reverse logs')
         }
+        this.setPage(1)
     }
 
     refreshLogs(event){
-        console.log('refresh logs')
-        this._logs = JSON.parse(JSON.stringify(this.logService.logs));
-             this._logs = this._logs.filter((value, index, array) => {
-                if (this._enableVerbose == false) {
-                    return value.Verbose == false
-                } else {
-                    return value.Verbose == false || value.Verbose == true
-                }
-            });           
+            console.log('refresh logs')
+            this._logs = JSON.parse(JSON.stringify(this.logService.logs));
+                this._logs = this._logs.filter((value, index, array) => {
+                    if (this._enableVerbose == false) {
+                        return value.Verbose == false
+                    } else {
+                        return value.Verbose == false || value.Verbose == true
+                    }
+                });
+            this.setPage(1)           
         }
 
     showVerbose(value){
@@ -83,6 +90,7 @@ export class LoggerComponent implements OnInit {
                 return value.Type == type
             })))
         }
+        this.setPage(1)
     }
 
     saveLogs(event){
@@ -148,6 +156,18 @@ export class LoggerComponent implements OnInit {
                 console.error(`unrecognised command request: ${id}`)
             break;
         }
+    }
+
+    setPage(page: number) {
+        if (page < 1 || page > this.pager.totalPages) {
+            return;
+        }
+ 
+        // get pager object from service
+        this.pager = this.pagerService.getPager(this._logs.length, page, 20);
+ 
+        // get current page of items
+        this.pagedItems = this._logs.slice(this.pager.startIndex, this.pager.endIndex + 1);
     }
 
 }

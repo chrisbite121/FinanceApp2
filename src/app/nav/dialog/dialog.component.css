@@ -1,6 +1,6 @@
 .dialog-container {
-    width: 600px; 
-    max-width:600px
+    width: 6500px; 
+    max-width:650px
 }
 
 
@@ -51,4 +51,14 @@ td {
 .table-header{
     padding-top:10px;
     padding-left:10px;
+}
+
+.pagination-center {
+    margin: auto;
+    max-width: 200px;
+}
+
+.handHover {
+    cursor: pointer; 
+    cursor: hand;
 }

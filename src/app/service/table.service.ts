@@ -12,7 +12,7 @@ export class TableService {
     constructor(private settingsService: SettingsService) {}
 
     workDays:Array<any> = [
-        { field: 'Placeholder', headerName: '', width: 300},
+        { field: 'Placeholder', headerName: '', width: 325},
         { field: 'January', headerName: 'January', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params) => { return this.daysFormatter(params) }},
         { field: 'Febuary', headerName: 'Febuary', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params) => { return this.daysFormatter(params) }},
         { field: 'March', headerName: 'March', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params) => { return this.daysFormatter(params) }},
@@ -29,7 +29,9 @@ export class TableService {
 
 
     percentageUtilised = [
+        
         { field: 'checkBox1', headerName: '', width: 20, checkboxSelection: true },
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Name', headerName: '(PU) Name', width: 130, editable: true },
         { field: 'Role', headerName: 'Role', width: 150, editable: true },
         { field: 'PUJan', headerName: 'January', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
@@ -44,11 +46,12 @@ export class TableService {
         { field: 'PUOct', headerName: 'October', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
         { field: 'PUNov', headerName: 'November', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
         { field: 'PUDec', headerName: 'December', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
-        { field: 'PUForecast', headerName: 'Forecast', width: 100, editable: false, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> { return this.currencyFormatter(params) }},
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'PUForecast', headerName: 'Forecast', width: 100, editable: false, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> { return this.currencyFormatter(params) }}
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ];    
 
     actualHours = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Role', headerName: '(AH) Role', width: 150 },
         { field: 'ContractedDayHours', headerName: 'Contracted Daily Hours', width: 150, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursPerDayFormatter(params) }  },
         { field: 'AHJan', headerName: 'January',width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) }  },
@@ -64,12 +67,13 @@ export class TableService {
         { field: 'AHNov', headerName: 'November', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
         { field: 'AHDec', headerName: 'December', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } }, 
         { field: 'AHTotalHours', headerName: 'Total Hours', width: 100, editable: false, cellEditorFramework: NumericEditorComponent, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) }  }, 
-        { field: 'AHOverHours', headerName: 'Over Hours', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) }  },
+        { field: 'AHOverHours', headerName: 'Over Hours', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) }  }
         //this column is needed at the end so the last edited column can be 'tabbed' out
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ];
 
     projectResource = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Role', headerName: '(PR) Role', width: 150 },
         { field: 'PRDayRate', headerName: 'Day Rate', width: 75, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.poundsPerDayFormatter(params) } },
         { field: 'PRBudget', headerName: 'Resource Budget', width: 75, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -88,12 +92,13 @@ export class TableService {
         { field: 'PRYtdTotal', headerName: 'YTD Total',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }, 
         { field: 'PRLbe', headerName: 'LBE',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'PRYtdVarianceToBudget', headerName: 'Forecast Variance to Budget',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'PRForecastVarianceToBudget', headerName: 'Forecast Variance to Budget',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRForecastVarianceToBudget', headerName: 'Forecast Variance to Budget',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }
         //this column is needed at the end so the last edited column can be 'tabbed' out
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
 
     travelSubsistence = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'checkBox', headerName: '', width: 20, checkboxSelection: true },
         { field: 'Role', headerName: '(TS) Role', width: 130 },
         { field: 'TSDayRate', headerName: 'T&S Day Rate', width: 150, editable: true, cellEditorFramework: NumericEditorComponent },
@@ -109,30 +114,32 @@ export class TableService {
         { field: 'TSOct', headerName: 'October', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'TSNov', headerName: 'November', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'TSDec', headerName: 'December', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }, 
-        { field: 'TSForecast', headerName: 'Forecast', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'TSForecast', headerName: 'Forecast', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
 
     actualTravelSubsistence = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Role', headerName: '(ATS) Role', width: 150  },
         { field: 'Placeholder2', headerName: '', width: 150 },
-        { field: 'ATSJan', headerName: 'January', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSFeb', headerName: 'Febuary', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSMar', headerName: 'March', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSApr', headerName: 'April', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSMay', headerName: 'May', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSJun', headerName: 'June', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSJul', headerName: 'July', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSAug', headerName: 'August', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSSep', headerName: 'September', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSOct', headerName: 'October', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSNov', headerName: 'November', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSDec', headerName: 'December', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'ATSYtdTotal',headerName: 'YTD Total', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'ATSJan', headerName: 'January', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSFeb', headerName: 'Febuary', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSMar', headerName: 'March', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSApr', headerName: 'April', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSMay', headerName: 'May', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSJun', headerName: 'June', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSJul', headerName: 'July', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSAug', headerName: 'August', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSSep', headerName: 'September', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSOct', headerName: 'October', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSNov', headerName: 'November', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSDec', headerName: 'December', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'ATSYtdTotal',headerName: 'YTD Total', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
 
     projectResourceTandS = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Role', headerName: '(RTS) Role', width: 150  },
         { field: 'TSDayRate', headerName: 'T&S Day Rate', width: 75, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.poundsPerDayFormatter(params) } },
         { field: 'RTSBudget', headerName: 'T&S Budget', width: 75, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -151,12 +158,13 @@ export class TableService {
         { field: 'RTSYtdTotal', headerName: 'YTD Total', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'RTSLbe', headerName: 'LBE', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'RTSYtdVarianceToBudget', headerName: 'YTD Variance to Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'RTSVarianceToBudget', headerName: 'Forecast Variance to Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'RTSVarianceToBudget', headerName: 'Forecast Variance to Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
 
     ProjectCostsMaterials = [
         { field: 'checkBox3', headerName: '', width: 20, checkboxSelection: true },
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Mat', headerName: 'Project Costs (Materials)', width: 130, editable: true }, 
         { field: 'MatBudget', headerName: 'Project Budget', width: 150, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) }  },
         { field: 'MatJan', headerName: 'January', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -174,12 +182,12 @@ export class TableService {
         { field: 'MatYtdTotal', headerName: 'YTD Total', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'MatLbe', headerName: 'LBE', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'MatYtdVarianceToBudget', headerName: 'Forecast Variance to Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'MatVarianceToBudget', headerName: 'Forecast Variance to Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'MatVarianceToBudget', headerName: 'Forecast Variance to Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
     
     Totals = [
-        { field: 'Placeholder1', headerName: 'Totals', width: 200 },
+        { field: 'Placeholder1', headerName: 'Totals', width: 225 },
         { field: 'TProjectBudget', headerName: 'Project Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'TJan', headerName: 'January', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'TFeb', headerName: 'Febuary', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -201,6 +209,7 @@ export class TableService {
 
     //Project Resource Totals
     PRTotals = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Placeholder4', headerName: 'Totals', width: 200, cellStyle:  (params) => { return this.cellStyle(params) } },
         { field: 'PRBudget', headerName: 'Project Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'PRJan', headerName: 'January', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -223,7 +232,7 @@ export class TableService {
 
     //Resource Travel Subsistence Totals
     RTSTotals = [
-        { field: 'Placeholder5', headerName: 'Totals', width: 200, cellStyle:  (params) => { return this.cellStyle(params) } },
+        { field: 'Placeholder5', headerName: 'Totals', width: 225, cellStyle:  (params) => { return this.cellStyle(params) } },
         { field: 'RTSBudget', headerName: 'Project Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'RTSJan', headerName: 'January', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'RTSFeb', headerName: 'Febuary', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -245,6 +254,7 @@ export class TableService {
 
     //material totals
     MatTotals = [
+        { field: '#', headerName: '#', width: 25, valueGetter: 'node.id' },
         { field: 'Placeholder6', headerName: 'Totals', width: 200, cellStyle:  (params) => { return this.cellStyle(params) } },
         { field: 'MatBudget', headerName: 'Project Budget', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'MatJan', headerName: 'January', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
@@ -278,8 +288,8 @@ export class TableService {
         { field: 'VarianceCostHeader', headerName: '', width : 150, cellStyle:  (params) => { return this.cellStyleStatic(params) }  },
         { field: 'CostVariance', headerName: '', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'CostVairancePercentage', headerName: '', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'CostRag', headerName: '', width: 60, cellStyle:  (params) => { return this.cellStyleRag(params) } },
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'CostRag', headerName: '', width: 60, cellStyle:  (params) => { return this.cellStyleRag(params) } }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
 
     GrossSummary = [
@@ -293,8 +303,8 @@ export class TableService {
         { field: 'VarianceGrossHeader', headerName: '', width : 150, cellStyle:  (params) => { return this.cellStyleStatic(params) }  },
         { field: 'GrossBenefitVariance', headerName: '', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'GrossBenefitVariancePercentage', headerName: '', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
-        { field: 'GrossRag', headerName: '', width: 60, cellStyle:  (params) => { return this.cellStyleRag(params) } },
-        { field: 'editorStopper', headerName: '', width: 1, editable:true }
+        { field: 'GrossRag', headerName: '', width: 60, cellStyle:  (params) => { return this.cellStyleRag(params) } }
+        // { field: 'editorStopper', headerName: '', width: 1, editable:true }
     ]
 
     NetSummary = [
@@ -309,6 +319,62 @@ export class TableService {
         { field: 'NetBenefitVariance', headerName: '', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
         { field: 'NetBenefitVariancePercentage', headerName: '', width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.percentageFormatter(params) } },
         { field: 'NetRag', headerName: '', width: 60, cellStyle:  (params) => { return this.cellStyleRag(params) } }
+    ]
+    
+    
+    resourceTable = [
+        { field: 'checkBox1', headerName: '', width: 20, checkboxSelection: true },
+        { field: 'Name', headerName: '(PU) Name', width: 130, editable: true },
+        { field: 'Role', headerName: 'Role', width: 150, editable: true },
+        
+        { field: 'PUJan', headerName: 'January', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUFeb', headerName: 'Febuary', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUMar', headerName: 'March', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUApr', headerName: 'April', width: 100, editable: true , cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUMay', headerName: 'May', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUJun', headerName: 'June', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUJul', headerName: 'July', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUAug', headerName: 'August', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUSep', headerName: 'September', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUOct', headerName: 'October', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUNov', headerName: 'November', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUDec', headerName: 'December', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.percentageFormatter(params) } },
+        { field: 'PUForecast', headerName: 'Forecast', width: 100, editable: false, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> { return this.currencyFormatter(params) }},
+        
+        { field: 'ContractedDayHours', headerName: 'Contracted Daily Hours', width: 150, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursPerDayFormatter(params) }  },
+        { field: 'AHJan', headerName: 'January',width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) }  },
+        { field: 'AHFeb', headerName: 'Febuary', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHMar', headerName: 'March', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHApr', headerName: 'April', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHMay', headerName: 'May', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHJun', headerName: 'June', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHJul', headerName: 'July', width: 100, editable: true , cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) }},
+        { field: 'AHAug', headerName: 'August', width: 100, editable: true , cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) }},
+        { field: 'AHSep', headerName: 'September', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHOct', headerName: 'October', width: 100, editable: true , cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) }},
+        { field: 'AHNov', headerName: 'November', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } },
+        { field: 'AHDec', headerName: 'December', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> { return this.hoursFormatter(params) } }, 
+        { field: 'AHTotalHours', headerName: 'Total Hours', width: 100, editable: false, cellEditorFramework: NumericEditorComponent, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) }  }, 
+        { field: 'AHOverHours', headerName: 'Over Hours', width: 100, editable: true, cellEditorFramework: NumericEditorComponent, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) }  },
+        
+        { field: 'PRDayRate', headerName: 'Day Rate', width: 75, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.poundsPerDayFormatter(params) } },
+        { field: 'PRBudget', headerName: 'Resource Budget', width: 75, editable: true, cellEditorFramework: NumericEditorComponent, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRJan', headerName: 'January',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRFeb', headerName: 'Febuary',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRMar', headerName: 'March',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRApr', headerName: 'April',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRMay', headerName: 'May',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRJun', headerName: 'June',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRJul', headerName: 'July',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRAug', headerName: 'August',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRSep', headerName: 'September',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PROct', headerName: 'October',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRNov', headerName: 'November',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRDec', headerName: 'December',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }, 
+        { field: 'PRYtdTotal', headerName: 'YTD Total',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }, 
+        { field: 'PRLbe', headerName: 'LBE',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRYtdVarianceToBudget', headerName: 'Forecast Variance to Budget',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } },
+        { field: 'PRForecastVarianceToBudget', headerName: 'Forecast Variance to Budget',width: 100, cellStyle:  (params) => { return this.cellStyle(params) }, valueFormatter: (params)=> {return this.currencyFormatter(params) } }
     ]    
 
     getTableNames(PageName: string): string[] {
@@ -437,4 +503,5 @@ export class TableService {
         // i pulled this from stack overflow, i have no idea how it works
         return Math.floor(number).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
     }
+
 }

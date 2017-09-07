@@ -3,7 +3,8 @@ div {
 }
 
 div.tooltip {	
-    position: absolute;			
+    position: absolute;
+    z-index: 1;			
     text-align: center;			
     width: 65px;					
     height: 40px;					

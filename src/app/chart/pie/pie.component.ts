@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, Input, OnChanges } from '@angular/core';
 import * as d3 from 'd3'
 
+import { newDataRow } from '../../config/new-row'
+
 @Component({
   selector: 'chart-pie',
   templateUrl: './pie.component.html',
@@ -23,49 +25,54 @@ private instance;
 private label_group;
 private sliceLabel;
 private div;
+private title;
 
-/*jshint multistr: true */
-private tsvData = "apples	oranges\n\
-53245	200\n\
-28479	200\n\
-19697	200\n\
-24037	200\n\
-40245	200";
+// private jsonData = [
+//     {apples: 53245, RTSLbe: 200, Role: 'label1'},
+//     {apples: 28479, RTSLbe: 200, Role: 'label2'},
+//     {apples: 19697, RTSLbe: 200, Role: 'label3'},
+//     {apples: 24037, RTSLbe: 200, Role: 'label4'},
+//     {apples: 40245, RTSLbe: 200, Role: 'label5'},
+//     {apples: 39422, pears:342, Role: 'label6'}
+//   ]
 
-private jsonData = [
-    {apples: 53245, oranges: 200, text: 'label1'},
-    {apples: 28479, oranges: 200, text: 'label2'},
-    {apples: 19697, oranges: 200, text: 'label3'},
-    {apples: 24037, oranges: 200, text: 'label4'},
-    {apples: 40245, oranges: 200, text: 'label5'},
-    {apples: 39422, pears:342, text: 'label6'}
-  ]
+private jsonData = [ newDataRow ]
 
 
   constructor() {}
 
   ngOnInit() {
     let element = this.chartContainer.nativeElement
-    this.div = this.tooltip.nativeElement
+    
 
-    this.width = 960
-    this.height = 500
+    this.div = this.tooltip.nativeElement
+    let div = this.div
+
+    this.width = 600
+    this.height = 300
     this.radius = Math.min(this.width, this.height) / 2;
     
     this.color = d3.scaleOrdinal()
         .range(d3.schemeCategory20)
     
     this.pie = d3.pie()
-        .value(function(d) { return d['apples']; })
+        .value(function(d) { return d['RTSLbe']; })
         .sort(null);
     this.arc = d3.arc()
         .innerRadius(null)
         .outerRadius(this.radius - 20);
-    
+
+    d3.select(element).append('text')
+        .attr('position', 'absolute')
+        .attr('z-index', '1')
+        .attr('top', '0')
+        .attr('left', '0')
+        .text('Travel & Subsistence - LBE')
+        
     this.svg = d3.select(element).append("svg")
         .attr("width", this.width)
         .attr("height", this.height)
-      .append("g")
+        .append("g")
         .attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
 
     this.path = this.svg.datum(this.jsonData).selectAll("path")
@@ -74,7 +81,26 @@ private jsonData = [
     .attr("fill", (d, i) => { return this.color(i); })
     .attr("d", this.arc)
     .each(function(d) { 
-        this._current = d; }); // store the initial angles
+        this._current = d; })
+    .on("mouseover", function(d) {
+        d3.select(div).transition()		
+            .duration(200)		
+            .style("opacity", .9);		
+        d3.select(div).html('£' + d.data.RTSLbe)
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 500) + "px")
+            .style('height','20px')
+        d3.select(this).style('opacity', 0.5);
+        d3.select(this).style('cursor', 'pointer')
+        })					
+    .on("mouseout", function(d) {		
+        d3.select(div).transition()		
+            .duration(500)		
+            .style("opacity", 0)
+            // .style("left", 0 + "px")
+            // .style("top", 0 + "px")
+        d3.select(this).style('opacity', 1);	
+    }); // store the initial angles
 
     this.label_group = this.svg.append('g')
       .attr("class", "lblGroup")
@@ -95,7 +121,7 @@ private jsonData = [
         if (d.value === 0) { return 1e-6; }
         else { return 1; }
       })
-      .text(d => { return d.data.text; });
+      .text(d => { return d.data.Role; });
       // Store the displayed angles in _current.
       // Then, interpolate from _current to the new angles.
       // During the transition, _current is updated in-place by d3.interpolate.
@@ -108,7 +134,7 @@ private jsonData = [
       }
 
       if (this.svg) {
-        this.change('oranges')
+        this.change('RTSLbe')
       }
   }
 
@@ -118,7 +144,7 @@ private jsonData = [
     let div = this.div
 
     let value;
-    val ? value = val : value = 'oranges';
+    val ? value = val : value = 'RTSLbe';
 
     let update = this.svg.datum(this.jsonData).selectAll("path")
     .data(this.pie)
@@ -147,13 +173,12 @@ private jsonData = [
     .each(function(d) { 
         this._current = d; })
     .on("mouseover", function(d) {
-        console.log(d.data);
         d3.select(div).transition()		
             .duration(200)		
             .style("opacity", .9);		
-        d3.select(div).html('£' + d.data.oranges)
-            .style("left", (d3.event.pageX) + "px")		
-            .style("top", (d3.event.pageY - 20) + "px")
+        d3.select(div).html('£' + d.data.RTSLbe)
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 500) + "px")
             .style('height','20px')
         d3.select(this).style('opacity', 0.5);
         d3.select(this).style('cursor', 'pointer')
@@ -162,6 +187,8 @@ private jsonData = [
         d3.select(div).transition()		
             .duration(500)		
             .style("opacity", 0)
+            // .style("left", 0 + "px")
+            // .style("top", 0 + "px")
         d3.select(this).style('opacity', 1);	
     })        
     .transition().duration(750).attrTween("d", function(a) {
@@ -178,9 +205,9 @@ private jsonData = [
         d3.select(div).transition()		
             .duration(200)		
             .style("opacity", .9);		
-        d3.select(div).html('£' + d.data.oranges)	
-            .style("left", (d3.event.pageX) + "px")		
-            .style("top", (d3.event.pageY - 20) + "px")
+        d3.select(div).html('£' + d.data.RTSLbe)	
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 500) + "px")            
             .style('height','20px')
         d3.select(this).style('opacity', 0.5);
         d3.select(this).style('cursor', 'pointer')
@@ -189,6 +216,8 @@ private jsonData = [
         d3.select(div).transition()		
             .duration(500)		
             .style("opacity", 0)
+            // .style("left", 0 + "px")
+            // .style("top", 0 + "px")
         d3.select(this).style('opacity', 1);	
     })     
     .transition()
@@ -220,7 +249,7 @@ private jsonData = [
         if (d.value === 0) { return 1e-6; }
         else { return 1; }
       })
-      .text(d => { return d.data.text; });
+      .text(d => { return d.data.Role; });
 
     updateLabel
       .transition()
@@ -233,7 +262,7 @@ private jsonData = [
         if (d.value === 0) { return 1e-6; }
         else { return 1; }
       })
-      .text(d => { return d.data.text; });
+      .text(d => { return d.data.Role; });
 
   }
 }
