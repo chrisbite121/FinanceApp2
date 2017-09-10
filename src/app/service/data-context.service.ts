@@ -6,6 +6,7 @@ import { ITotalModel } from '../model/total.model'
 import { IMatModel } from '../model/material.model'
 import { ISummaryModel } from '../model/summary.model'
 import { ISettings } from '../model/settings.model'
+import { IWorkdayModel } from '../model/workday.model'
 
 import { Observable } from 'rxjs/Rx';
 import { Observer } from 'rxjs/Observer';
@@ -27,12 +28,13 @@ import { newDataRow } from '../config/new-row'
 import { newTotalDataRow } from '../config/new-total'
 import { newMaterialDataRow } from '../config/new-mat'
 import { newSummaryDataRow } from '../config/new-summary'
+import { newWorkdayDataRow } from '../config/new-workday'
 
 const newResourceRow:IResourceModel = newDataRow;
 const newMaterialRow:IMatModel = newMaterialDataRow;
-const newTotalRow: ITotalModel = newTotalDataRow
+const newTotalRow: ITotalModel = newTotalDataRow;
 const newSummaryRow: ISummaryModel = newSummaryDataRow;
-
+const newWorkdayRow: IWorkdayModel = newWorkdayDataRow;
 
 @Injectable()
 export class DataContextService {
@@ -41,20 +43,25 @@ export class DataContextService {
     private totalDataStream: Subject<any> = new Subject();
     private materialDataStream: Subject<any> = new Subject();
     private summaryDataStream: Subject<any> = new Subject();
+    private workingdayDataStream: Subject<any> = new Subject();
 
     private resourceContextStream: Subject<any> = new Subject();
     private totalContextStream: Subject<any> = new Subject();
     private materialContextStream: Subject<any> = new Subject();
     private summaryContextStream: Subject<any> = new Subject();
+    //workingday context stream not required as these values are never updated via a calculation
+    // private workingdayContextStream: Subject<any> = new Subject();
 
     private _ResourceData:IResourceModel[]
     private _TotalData:ITotalModel[]
     private _MaterialData: IMatModel[]
     private _SummaryData: ISummaryModel[]
-    private _ResourceDataName: string
-    private _MaterialDataName: string
-    private _TotalDataName: string
-    private _SummaryDataName: string
+    private _WorkdayData: IWorkdayModel[]
+    private _ResourceDataName: string;
+    private _MaterialDataName: string;
+    private _TotalDataName: string;
+    private _SummaryDataName: string;
+    private _WorkdayDataName: string;
 
     constructor(private commonApiService: CommonApiService,
                 private dataCalcService: DataCalcService,
@@ -69,16 +76,18 @@ export class DataContextService {
     
     init(){
         //get the names of the tables
-        this._ResourceDataName = this.utilsService.resourceDataSetName
-        this._MaterialDataName = this.utilsService.materialDataSetname
-        this._TotalDataName = this.utilsService.totalDataSetName
-        this._SummaryDataName = this.utilsService.summaryDataSetName
+        this._ResourceDataName = this.utilsService.resourceDataSetName;
+        this._MaterialDataName = this.utilsService.materialDataSetname;
+        this._TotalDataName = this.utilsService.totalDataSetName;
+        this._SummaryDataName = this.utilsService.summaryDataSetName;
+        this._WorkdayDataName = this.utilsService.workdayDataSetName;
 
         //create data objects
         this._ResourceData = new Array();
         this._MaterialData = new Array();
         this._TotalData = new Array();
         this._SummaryData = new Array();
+        this._WorkdayData = new Array();
 
         //process calculated fields to make sure data is correct
         //cannot do this until data has been loaded into cache
@@ -94,7 +103,9 @@ export class DataContextService {
                             this.createPlaceholderObject(this.utilsService.financeAppTotalsData))
             this.addDataToTable(this.utilsService.financeAppSummaryData,
                             this.createPlaceholderObject(this.utilsService.financeAppSummaryData))
-            
+            this.addDataToTable(this.utilsService.financeAppWorkingDaysData,
+                            this.createPlaceholderObject(this.utilsService.financeAppWorkingDaysData))
+
             this.calcResourceValues()
             this.calcMaterialValues()
             this.calcSummaryValues()            
@@ -129,6 +140,13 @@ export class DataContextService {
             return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year === this.settingsService.year)
         })
         return filteredSummaryDataStream
+    }
+
+    getWorkingdayDataStream(): Observable<any> {
+        let filteredWorkingdayDataStream = this.workingdayDataStream.asObservable().map((data, index) => {
+            return data.filter((row:any) => row.State !== this.utilsService.deleteState && row.Year == this.settingsService.year)
+        })
+        return filteredWorkingdayDataStream
     }
 
     getResourceContextStream(): Observable<any> {
@@ -179,7 +197,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                             value: item['ID'],
                             writable: true
                         })
-                        //filter out superlous item data and create an object of just the required fields
+                        //filter out superflous item data and create an object of just the required fields
                         for (let key in item) {
                             let indexValue = fieldNameArray.findIndex((element) => {
                                 return element == key
@@ -336,6 +354,14 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                 _item['YtdNetHeader'] = 'YTD - Net Benefit'
                 _item['VarianceNetHeader'] = 'Variance'
             break;
+            case this.utilsService.financeAppWorkingDaysData:
+                _item = JSON.parse(JSON.stringify(newWorkdayDataRow))
+                _item['State'] = 'create';
+                _item['Year'] = this.settingsService.year;
+                _item['ItemId'] = _itemId;
+                //temporarily assign itemid as ID until object is saved
+                _item['ID'] = _itemId;
+            break;
             default:
                 this.logService.log(`process list data error: unable to determine listName ${listName}, reverting to blank object palceholder`, this.utilsService.errorStatus, false)
             break;
@@ -362,6 +388,9 @@ emitContextValues(listArray:Array<string>):Observable<any>{
                     break;
                     case this.utilsService.financeAppSummaryData:
                         this.summaryContextStream.next(this._SummaryData)
+                    break;
+                    case this.utilsService.financeAppWorkingDaysData:
+                        //do nothing
                     break;
                     default:
                         let _msg = `emitContextValues Error: unable to determine which data set to refresh`
@@ -527,6 +556,15 @@ addDataItemToTable(listName:string, item):Observable<any> {
                     this._SummaryData.push(item)
                 }
             break
+            case this.utilsService.financeAppWorkingDaysData:
+                if(Array.isArray(this._WorkdayData)) {
+                    this._WorkdayData.push(item)
+                } else {
+                    console.error('ADDING SUMMARY DATA')
+                    this._WorkdayData = new Array();
+                    this._WorkdayData.push(item)
+                }                
+            break;
             default:
                 this.logService.log(`process list data error: unable to determine which dataset to update`, this.utilsService.errorStatus, false)
             break;
@@ -662,6 +700,10 @@ addDataItemToTable(listName:string, item):Observable<any> {
 
     get summaryData()  {
         return this._SummaryData
+    }
+
+    get workdayData() {
+        return this._WorkdayData
     }
 
     // updateStateAfterApiCall(listName, ID, apiCall):Observable<any> {
@@ -886,6 +928,9 @@ getTableName(listName){
             break;
             case this.utilsService.financeAppTotalsData:
                 tableName = this._TotalDataName;
+            break;
+            case this.utilsService.financeAppWorkingDaysData:
+                tableName = this._WorkdayDataName;
             break;
             default:
                 this.logService.log(`unable to identify tableName if functionCall: getTableDetails for listName: ${listName}`, 
@@ -1255,6 +1300,12 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
                 case this.utilsService.financeAppSummaryData:
                     this.calcSummaryValues();
                 break;
+                case this.utilsService.financeAppWorkingDaysData:
+                this.calcResourceValues();
+                this.calcMaterialValues();
+                this.calcTotalValues();
+                this.calcSummaryValues();
+                break;
                 default:
                     this.logService.log(`UpdateTable Error: unable to determine which data set to refresh`, this.utilsService.errorStatus, false);
                     observer.next({
@@ -1317,6 +1368,9 @@ emitValues(listArray:Array<string>): Observable<any>{
                     break;
                     case this.utilsService.financeAppSummaryData:
                         this.summaryDataStream.next(this._SummaryData)
+                    break;
+                    case this.utilsService.financeAppWorkingDaysData:
+                        this.workingdayDataStream.next(this._WorkdayData);
                     break;
                     default:
                         let _msg = `UpdateTable Error: unable to determine which data set to refresh`

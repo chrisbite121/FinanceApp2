@@ -327,6 +327,10 @@ private _Parser;
         return  '_SummaryData'
     }
 
+    get workdayDataSetName(){
+        return '_WorkdayData'
+    }
+
     get loadingStatus(){
         return 'loading'
     }
