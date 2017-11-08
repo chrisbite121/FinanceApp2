@@ -5,7 +5,7 @@ import { GridOptions } from 'ag-grid'
 import { TableService } from '../service/table.service'
 import { DataContextService } from '../service/data-context.service'
 import { UiStateService } from '../service/ui-state.service'
-import { WorkdayService } from '../service/workdays.service'
+// import { WorkdayService } from '../service/workdays.service'
 import { ScriptService } from '../service/scripts.service'
 import { SettingsService } from '../service/settings.service'
 

@@ -26,7 +26,7 @@ const userControlledsettings: ISettings = {
     ],
     //Sharepoint Mode needs to be removed from here
     //this value is set in application controlled settings
-    sharePointMode: false,
+    sharePointMode: true,
     autoSave: false,
     workingHoursInDay: 7.5,
     tsWeighting: 0.2,
@@ -290,37 +290,73 @@ export class SettingsService {
         this._settingsStream.next(this._settings);
     }
 
-    setSetting(attr: string, value: any): Observable<any> {
-        let update$ = new Observable((observer:Observer<any>) => {
-            let _attribute = attr.charAt(0).toLowerCase() + attr.slice(1)
-            if(this._settings.hasOwnProperty(_attribute)) {
+    // setSetting(attr: string, value: any): Observable<any> {
+    //     let update$ = new Observable((observer:Observer<any>) => {
+    //         let _attribute = attr.charAt(0).toLowerCase() + attr.slice(1)
+    //         if(this._settings.hasOwnProperty(_attribute)) {
 
-                this._settings[_attribute] = value
+    //             this._settings[_attribute] = value
                 
-                observer.next({
-                    functionCall: 'setSetting',
-                    result: true,
-                })
+    //             observer.next({
+    //                 functionCall: 'setSetting',
+    //                 result: true,
+    //             })
 
-                observer.next({
-                    reportHeading: 'setSetting',
-                    reportResult: 'success',
-                    description: `${_attribute}: Setting updated to ${value}`
-                })
-            } else {
-                observer.next({
-                    reportHeading: 'setSetting',
-                    reportResult: 'fail',
-                    description: `unable to update setting in functionCall: setSetting - could not find attribue ${attr}`
-                })
-            }
+    //             observer.next({
+    //                 reportHeading: 'setSetting',
+    //                 reportResult: 'success',
+    //                 description: `${_attribute}: Setting updated to ${value}`
+    //             })
+    //         } else {
+    //             observer.next({
+    //                 reportHeading: 'setSetting',
+    //                 reportResult: 'fail',
+    //                 description: `unable to update setting in functionCall: setSetting - could not find attribue ${attr}`
+    //             })
+    //         }
+
+    //         observer.complete()
+    //     })
+
+    //     return update$
+
+    // }
+
+    setSettings(settingsArray: IItemPropertyModel[]): Observable<any> {
+        let update$ = new Observable((observer:Observer<any>) => {
+            settingsArray.forEach(setting => {
+                let _attribute = setting.fieldName.charAt(0).toLowerCase() + setting.fieldName.slice(1)
+                if(this._settings.hasOwnProperty(_attribute)) {
+    
+                    this._settings[_attribute] = setting.fieldValue
+                    
+                    observer.next({
+                        functionCall: 'setSettings',
+                        result: true,
+                    })
+    
+                    observer.next({
+                        reportHeading: 'setSettings',
+                        reportResult: 'success',
+                        description: `${_attribute}: Setting updated to ${setting.fieldName}`
+                    })
+                } else {
+                    observer.next({
+                        reportHeading: 'setSettings',
+                        reportResult: 'fail',
+                        description: `unable to update setting in functionCall: setSetting - could not find attribue ${_attribute}`
+                    })
+                }
+            })
+            
+            
 
             observer.complete()
         })
 
         return update$
 
-    }
+    }    
 
     getSetting(attr: any): Observable<any> {
         let obs = Observable.create((observer: Observer<any>) => {

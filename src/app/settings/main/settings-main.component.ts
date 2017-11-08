@@ -91,9 +91,9 @@ export class SettingsMainComponent implements OnInit, AfterViewInit {
     }
 
     tsWeightingSet(value: any) {
+        //do not use this function. 
+        //we have an observable with debounce in ngOnInit
     }
-
-
 
     updateSetting(settingName, fieldValue) {
         this.scriptService.updateSetting(this.prepDataForUpdate(settingName, fieldValue))
@@ -115,23 +115,12 @@ export class SettingsMainComponent implements OnInit, AfterViewInit {
                     () => {
                         this.settingsService.getSettings()
                         if(settingName == 'Year') {
-                            this.dataContextService.checkForCachedData([this.utilsService.financeAppResourceData,
-                                                            this.utilsService.financeAppMaterialData,
-                                                            this.utilsService.financeAppTotalsData,
-                                                            this.utilsService.financeAppSummaryData], fieldValue)
-                            .mergeMap(data => 
-                                (typeof(data) == 'object' &&
-                                data.hasOwnProperty('functionCall') &&
-                                data.hasOwnProperty('listName') &&
-                                data.hasOwnProperty('result') &&
-                                data.hasOwnProperty('dataExists') &&
-                                data.functionCall == 'checkForCachedData' &&
-                                data.result == true &&
-                                data.dataExists == false
-                                )
-                                ? this.scriptService.loadAppData(data.listName, fieldValue)
-                                : Observable.of(data)
-                            )
+                            this.scriptService.getAppData([this.utilsService.financeAppResourceData,
+                                                                this.utilsService.financeAppMaterialData,
+                                                                this.utilsService.financeAppTotalsData,
+                                                                this.utilsService.financeAppSummaryData,
+                                                                this.utilsService.financeAppWorkingDaysData], +fieldValue)
+                                                                    .subscribe(this.utilsService.getSubscriber())
                         }
                         this.uiStateService.updateMessage('update settings complete', this.utilsService.completeStatus).subscribe()
                         console.log('completed updating setting')

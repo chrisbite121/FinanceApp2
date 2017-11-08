@@ -5,7 +5,7 @@ import { GridOptions } from 'ag-grid'
 import { TableService } from '../../service/table.service'
 import { DataContextService } from '../../service/data-context.service'
 import { UiStateService } from '../../service/ui-state.service'
-import { WorkdayService } from '../../service/workdays.service'
+// import { WorkdayService } from '../../service/workdays.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
@@ -39,8 +39,8 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
     public cmTableHeight: number = 100;
     public mattTableHeight: number = 30;
 
-    public cmTableWidth: number = 1901;
-    public mattTableWidth: number = 1901;
+    public cmTableWidth: number = 1926;
+    public mattTableWidth: number = 1926;
 
     // public _backgroundColour: string = '#99e7ff';
 
@@ -52,7 +52,7 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
     constructor(private tableService: TableService, 
                 private dataContext: DataContextService,
                 private uiStateService: UiStateService,
-                private workdayService: WorkdayService,
+                // private workdayService: WorkdayService,
                 private scriptService: ScriptService,
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
@@ -66,7 +66,8 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
         this.cmGridOptions.context = {};
         
         this.cmGridOptions.onCellValueChanged = ($event: any) => {
-            if(+$event.newValue !== $event.oldValue) {
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if(hasUpdated) {
                 this.scriptService.updateTable($event)
                     .subscribe(
                         data => console.log(data),
@@ -251,18 +252,18 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
         }
     }
 
-    saveUpdates(){
-        this.scriptService.saveAppData()
-            .subscribe(this.getSubscriber())
-    }
+    // saveUpdates(){
+    //     this.scriptService.saveAppData()
+    //         .subscribe(this.getSubscriber())
+    // }
 
     resizeTables(noRows: number) {
-        this.mattTableWidth = 1901;
+        this.mattTableWidth = 1926;
     }
 
     resizeMaterialTable(noRows: number) {
         this.cmTableHeight = (noRows * 25) + 40;
-        this.cmTableWidth = 1901;
+        this.cmTableWidth = 1926;
     }
 
     getSubscriber() {
@@ -313,16 +314,18 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
         let _colId = event.column.colId;
         let _rowIndex = event.node.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
         this[focusTable].api.stopEditing(false)
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        
     }
 
     handleTab(params, focusTable, listName){
         let _colId = params.previousCellDef.column.colId;
         let _rowIndex = params.previousCellDef.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
         this[focusTable].api.stopEditing()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        
     }
 
     handleNavigate(params, focusTable, listName){
@@ -343,6 +346,24 @@ export class MaterialComponent implements OnInit, OnDestroy, AfterContentChecked
             this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionDown)
         }
         this[focusTable].api.stopEditing()
-    }   
+    }
+    
+    checkIfValueChanged(event) {
+        let result:boolean = false;
+        
+        switch (typeof(event.oldValue)) {
+            case 'string':
+                event.oldValue === event.newValue ? result = false : result = true;
+            break;
+            case 'number':
+                +event.oldValue === +event.newValue ? result = false : result = true;
+            break;
+            default:
+
+            break;
+        }
+
+        return result;
+    }
 
 }

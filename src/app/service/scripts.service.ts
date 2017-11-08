@@ -8,7 +8,7 @@ import { ListService } from './list.service'
 import { HealthReportService } from './health-report.service'
 import { SettingsService } from './settings.service'
 import { DataContextService } from './data-context.service'
-import { WorkdayService } from './workdays.service'
+// import { WorkdayService } from './workdays.service'
 import { NotificationService } from './notification.service'
 import { StateService } from './state.service'
 
@@ -63,7 +63,7 @@ export class ScriptService {
                 private healthReportService: HealthReportService,
                 private settingsService: SettingsService,
                 private dataContextService: DataContextService,
-                private workdaysService: WorkdayService,
+                // private workdaysService: WorkdayService,
                 private notificationService: NotificationService,
                 private stateService: StateService){
         this.init()
@@ -1215,48 +1215,48 @@ let init$ =
     //         this.utilsService.financeAppSummaryData], this.settingsService.year)
     //     : Observable.of(data)
     // )
-    .mergeMap( data => 
-        (typeof(data) == 'object' && 
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('apiCall') &&
-        data.hasOwnProperty('result') &&
-        data['apiCall'] == this.utilsService.apiCallCreateList && 
-        data['listName'] == this.utilsService.financeAppWorkingDaysData &&          
-        data['result'] == true)
-        //if create workdays list then add placeholder data items
-        ? this.commonApiService.addItems(this.utilsService.financeAppWorkingDaysData, 
-                            this.utilsService.appWeb, 
-                            this.workdaysService.generatePlaceholderWorkdays())
-        : Observable.of(data)
-    )       
+    // .mergeMap( data => 
+    //     (typeof(data) == 'object' && 
+    //     data.hasOwnProperty('listName') &&
+    //     data.hasOwnProperty('apiCall') &&
+    //     data.hasOwnProperty('result') &&
+    //     data['apiCall'] == this.utilsService.apiCallCreateList && 
+    //     data['listName'] == this.utilsService.financeAppWorkingDaysData &&          
+    //     data['result'] == true)
+    //     //if create workdays list then add placeholder data items
+    //     ? this.commonApiService.addItems(this.utilsService.financeAppWorkingDaysData, 
+    //                         this.utilsService.appWeb, 
+    //                         this.workdaysService.generatePlaceholderWorkdays())
+    //     : Observable.of(data)
+    // )       
     // .mergeMap(data => 
     //     this.isWDListReady(data)
     //     ? this.settingsService.workingDaysListReady(true)
     //     : Observable.of(data)
     
     // )
-    .mergeMap(data =>
-        //working day list exists or create working day list succeeds
-        this.workingDayListReadyCallResult(data)
-        //save queued logs to persistant storage
-        ? this.commonApiService.getItems(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb, 
-                                this.utilsService.includeFields(
-                                    this.listService.getArrayFieldNames(this.utilsService.financeAppWorkingDaysData)),
-                                    this.utilsService.genCamlQuery())
-        : Observable.of(data)
-    )
-    .mergeMap(data => 
-        (typeof(data) == 'object' && 
-        data.hasOwnProperty('listName') &&
-        data.hasOwnProperty('apiCall') &&
-        data.hasOwnProperty('result') &&
-        data.hasOwnProperty('data') &&
-        data['apiCall'] == this.utilsService.apiCallGetItems && 
-        data['listName'] == this.utilsService.financeAppWorkingDaysData &&
-        data['result'] == true)
-        ? this.workdaysService.processItems(data['data'])
-        : Observable.of(data)
-    )
+    // .mergeMap(data =>
+    //     //working day list exists or create working day list succeeds
+    //     this.workingDayListReadyCallResult(data)
+    //     //save queued logs to persistant storage
+    //     ? this.commonApiService.getItems(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb, 
+    //                             this.utilsService.includeFields(
+    //                                 this.listService.getArrayFieldNames(this.utilsService.financeAppWorkingDaysData)),
+    //                                 this.utilsService.genCamlQuery())
+    //     : Observable.of(data)
+    // )
+    // .mergeMap(data => 
+    //     (typeof(data) == 'object' && 
+    //     data.hasOwnProperty('listName') &&
+    //     data.hasOwnProperty('apiCall') &&
+    //     data.hasOwnProperty('result') &&
+    //     data.hasOwnProperty('data') &&
+    //     data['apiCall'] == this.utilsService.apiCallGetItems && 
+    //     data['listName'] == this.utilsService.financeAppWorkingDaysData &&
+    //     data['result'] == true)
+    //     ? this.workdaysService.processItems(data['data'])
+    //     : Observable.of(data)
+    // )
     //collect notifications passed down the observable chain and add them to the notifcaiton table
     .mergeMap((data:any) => 
         (typeof(data) == 'object' &&
@@ -1282,15 +1282,15 @@ logListReadyCallResult(data){
     return outcome
 }
 
-workingDayListReadyCallResult(data){
-   let outcome = (typeof(data) === 'object' &&
-        data.hasOwnProperty('functionCall') &&
-        data.hasOwnProperty('result') &&
-        data['functionCall'] === 'wdListReady' &&
-        data['result'] === true)
+// workingDayListReadyCallResult(data){
+//    let outcome = (typeof(data) === 'object' &&
+//         data.hasOwnProperty('functionCall') &&
+//         data.hasOwnProperty('result') &&
+//         data['functionCall'] === 'wdListReady' &&
+//         data['result'] === true)
 
-    return outcome
-}
+//     return outcome
+// }
 
 isLogListReady(data): boolean{
     let outcome =         (
@@ -1451,8 +1451,16 @@ processSettingsData(data){
 }
 
 
-loadAppData(listArray:Array<string>, year:number):Observable<any>{
+loadAppData(listArray:Array<string>, year?:number):Observable<any>{
     let _transactionId = UUID.UUID();
+    let _config = null
+    if(year) {
+        _config =  {
+                value: year,
+                fieldRef: 'Year',
+                type: 'Number',
+            }
+    }
 
     let getData$ = 
         this.uiStateService.updateMessage(`Loading App Data`, this.utilsService.loadingStatus)
@@ -1499,11 +1507,7 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
                                             this.utilsService.includeFields(
                                                 this.listService.getArrayFieldNames(
                                                     data.listName)),
-                                            this.utilsService.genCamlQuery({
-                                                                            value: year,
-                                                                            fieldRef: 'Year',
-                                                                            type: 'Number',
-                                                                        })
+                                            this.utilsService.genCamlQuery(_config)
                                             )
             : Observable.of(data)
         )
@@ -1519,13 +1523,15 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
             : Observable.of(data)
         )
         .mergeMap((data:any) =>
-        //at this point update the stae of isLoading to false
+        //at this point update the state of isLoading to false
             (typeof(data) == 'object' &&
             data.hasOwnProperty('functionCall') &&
             data.hasOwnProperty('result') &&
             data.hasOwnProperty('listName') &&
             data.functionCall == 'processListData' &&
             data.result == true)
+            //this doesn't make sense when processing multiple lists.  
+            //Need to think of a way to wait until all have been processed
             ? this.stateService.updateLoadingAppDataState(data.listName, false)
             : Observable.of(data)
         )
@@ -1540,14 +1546,6 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
             ? this.dataContextService.emitValues([data['listName']])
             : Observable.of(data)
         )
-        //collect notifications passed down the observable chain and add them to the notifcaiton table
-        .mergeMap((data:any) => 
-            (typeof(data) == 'object' &&
-            data.hasOwnProperty('reportHeading') &&
-            data.hasOwnProperty('reportResult'))
-            ? this.notificationService.addNotification(data, _transactionId)
-            : Observable.of(data)
-        )        
         //if there are no data items for this table in this year then add placeholder row
         .mergeMap((data:any) => 
             (typeof(data) === 'object' &&
@@ -1559,6 +1557,14 @@ loadAppData(listArray:Array<string>, year:number):Observable<any>{
             ? this.addDataRow(data.listName, this.settingsService.year, true)
             : Observable.of(data)
         )
+        //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('reportHeading') &&
+            data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            : Observable.of(data)
+        )           
         return getData$
 }
 
@@ -1881,7 +1887,8 @@ saveAppData(){
                         {data: this.dataContextService.resourceData, listName: this.utilsService.financeAppResourceData},
                         {data: this.dataContextService.materialData, listName: this.utilsService.financeAppMaterialData},
                         {data: this.dataContextService.totalsData, listName: this.utilsService.financeAppTotalsData},
-                        {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData}
+                        {data: this.dataContextService.summaryData, listName: this.utilsService.financeAppSummaryData},
+                        {data: this.dataContextService.workdayData, listName: this.utilsService.financeAppWorkingDaysData}
                     ])
                 ).mergeAll()
             : Observable.of(data)
@@ -1961,7 +1968,7 @@ saveAppData(){
             data.hasOwnProperty('result') &&
             data.functionCall == 'updateSaveAppDataState' &&
             data.result == true)
-            ? Observable.of(this.uiStateService.updateSaveStatus(true))
+            ? Observable.of(this.uiStateService.updateSaveStatus(false))
             : Observable.of(data)
         )
         //collect notifications passed down the observable chain and add them to the notifcaiton table
@@ -2175,7 +2182,7 @@ let delete$ =
                 data.hasOwnProperty('reportResult'))
             ? this.notificationService.addNotification(data, _transactionId)
             :Observable.of(data)
-        )        
+        )
     return delete$
 }
 
@@ -2232,72 +2239,100 @@ createFieldArray(item, listName){
   
 
 
-updateWorkdays(id, data):Observable<any>{
+updateAppdata(listName, id, fieldValues:Array<IItemPropertyModel>):Observable<any>{
+    let _transactionId = UUID.UUID()
 
     let update$ = 
-       this.commonApiService
-            .updateItem(this.utilsService.financeAppWorkingDaysData,
-                                this.utilsService.appWeb, id, data
-        )
+        this.uiStateService.updateMessage(`Updating App Data`, this.utilsService.loadingStatus)
         .mergeMap(data =>
                 (typeof(data) == 'object' &&
-                data.hasOwnProperty('apiCall') &&
-                data.hasOwnProperty('data') &&
-                data.hasOwnProperty('listName') &&
+                data.hasOwnProperty('functionCall') &&
                 data.hasOwnProperty('result') &&
-                data.listName == 'FinanceAppWorkingDaysData' &&
-                data.apiCall == 'getItems' &&
+                data.functionCall == 'updateMessage' &&
                 data.result == true)
-        ? this.commonApiService.getItems(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb, 
-                                this.utilsService.includeFields(
-                                    this.listService.getArrayFieldNames(this.utilsService.financeAppWorkingDaysData)),
-                                    this.utilsService.genCamlQuery())
-        : this.placeholderObservable(data)
+            ? this.notificationService.initTransaction(_transactionId, 'Updating App Data')
+            : Observable.of(data)
         )
-        .mergeMap(data => 
-            (typeof(data) == 'object' && 
-            data.hasOwnProperty('listName') &&
-            data.hasOwnProperty('apiCall') &&
-            data.hasOwnProperty('result') &&
-            data.hasOwnProperty('data') &&
-            data['apiCall'] == this.utilsService.apiCallGetItems && 
-            data['listName'] == this.utilsService.financeAppWorkingDaysData &&
-            data['result'] == true)
-            ? this.workdaysService.processItems(data['data'])
-            :this.placeholderObservable(data)        
+        // create new entry in transaction table
+        .mergeMap((data:any) => 
+                (typeof(data) == 'object' &&
+                data.hasOwnProperty('functionCall') &&
+                data.hasOwnProperty('result') &&
+                data.functionCall == 'initTransaction' &&
+                data.result == true)
+                ? this.commonApiService
+                    .updateItem(listName,this.listService.getListContext(listName), id, fieldValues)
+                : Observable.of(data)
         )
+        .mergeMap(data =>
+                    (typeof(data) == 'object' &&
+                    data.hasOwnProperty('apiCall') &&
+                    data.hasOwnProperty('data') &&
+                    data.hasOwnProperty('listName') &&
+                    data.hasOwnProperty('result') &&
+                    // data.listName == 'FinanceAppWorkingDaysData' &&
+                    data.apiCall == 'getItems' &&
+                    data.result == true)
+            // ? this.commonApiService.getItems(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb, 
+            //                         this.utilsService.includeFields(
+            //                             this.listService.getArrayFieldNames(this.utilsService.financeAppWorkingDaysData)),
+            //                             this.utilsService.genCamlQuery())
+            ? this.loadAppData([listName])
+            : Observable.of(data)
+            )
+            // .mergeMap(data => 
+            //     (typeof(data) == 'object' && 
+            //     data.hasOwnProperty('listName') &&
+            //     data.hasOwnProperty('apiCall') &&
+            //     data.hasOwnProperty('result') &&
+            //     data.hasOwnProperty('data') &&
+            //     data['apiCall'] == this.utilsService.apiCallGetItems && 
+            //     data['listName'] == this.utilsService.financeAppWorkingDaysData &&
+            //     data['result'] == true)
+            //     ? this.workdaysService.processItems(data['data'])
+            //     : Observable.of(data)        
+            // )
+            //collect notifications passed down the observable chain and add them to the notifcaiton table
+        .mergeMap((data:any) => 
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('reportHeading') &&
+            data.hasOwnProperty('reportResult'))
+            ? this.notificationService.addNotification(data, _transactionId)
+            : Observable.of(data)
+)
 
     return update$
 }
 
-getWorkdays():Observable<any>{
-    let getworkdays$ =
-        this.commonApiService.getItems(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb, 
-                                this.utilsService.includeFields(
-                                    this.listService.getArrayFieldNames(this.utilsService.financeAppWorkingDaysData)),
-                                    this.utilsService.genCamlQuery())
-        .mergeMap(data => 
-            (typeof(data) == 'object' && 
-            data.hasOwnProperty('listName') &&
-            data.hasOwnProperty('apiCall') &&
-            data.hasOwnProperty('result') &&
-            data.hasOwnProperty('data') &&
-            data['apiCall'] == this.utilsService.apiCallGetItems && 
-            data['listName'] == this.utilsService.financeAppWorkingDaysData &&
-            data['result'] == true)
-            ? this.workdaysService.processItems(data['data'])
-            :this.placeholderObservable(data)        
-        )
+// getWorkdays():Observable<any>{
+//     let getworkdays$ =
+//         this.commonApiService.getItems(this.utilsService.financeAppWorkingDaysData, this.utilsService.appWeb, 
+//                                 this.utilsService.includeFields(
+//                                     this.listService.getArrayFieldNames(this.utilsService.financeAppWorkingDaysData)),
+//                                     this.utilsService.genCamlQuery())
+//         .mergeMap(data => 
+//             (typeof(data) == 'object' && 
+//             data.hasOwnProperty('listName') &&
+//             data.hasOwnProperty('apiCall') &&
+//             data.hasOwnProperty('result') &&
+//             data.hasOwnProperty('data') &&
+//             data['apiCall'] == this.utilsService.apiCallGetItems && 
+//             data['listName'] == this.utilsService.financeAppWorkingDaysData &&
+//             data['result'] == true)
+//             ? this.workdaysService.processItems(data['data'])
+//             // ? this.dataContextService.processListData(data['data'], this.utilsService.financeAppWorkingDaysData)
+//             :this.placeholderObservable(data)        
+//         )
 
-    return getworkdays$
-}
+//     return getworkdays$
+// }
 
 
-updateSetting(settingData):Observable<any>{
+updateSetting(settingsData:IItemPropertyModel[]):Observable<any>{
     let _transactionId = UUID.UUID();
 
     let updateSetting$ = 
-        this.uiStateService.updateMessage(`updating setting: ${settingData[0]['fieldName']}`, this.utilsService.loadingStatus)
+        this.uiStateService.updateMessage(`updating settings: `, this.utilsService.loadingStatus)
         .mergeMap(data =>
                 (typeof(data) == 'object' &&
                 data.hasOwnProperty('functionCall') &&
@@ -2325,7 +2360,6 @@ updateSetting(settingData):Observable<any>{
             data.hasOwnProperty('result') &&
             data.hasOwnProperty('value') &&
             data.hasOwnProperty('setting') &&
-            data.hasOwnProperty('result') &&
             data.functionCall == 'getSetting' &&
             data.setting == 'sharePointMode' &&
             data.result == true &&
@@ -2340,18 +2374,17 @@ updateSetting(settingData):Observable<any>{
             data.hasOwnProperty('result') &&
             data.hasOwnProperty('value') &&
             data.hasOwnProperty('setting') &&
-            data.hasOwnProperty('result') &&
             data.functionCall == 'getSetting' &&
             data.setting == 'sharePointMode' &&
             data.result == true &&
             data.value == false) 
             &&
-            settingData[0]['fieldName'] == 'SharePointMode'
+            settingsData[0]['fieldName'] == 'SharePointMode'
             )
         )
             ? this.commonApiService
                 .updateItem(this.utilsService.financeAppSettingsData,
-                                    this.utilsService.appWeb, "1", settingData)
+                                    this.utilsService.appWeb, "1", settingsData)
             : Observable.of(data)
         )
         //get the settings and update the cached settings data
@@ -2381,9 +2414,18 @@ updateSetting(settingData):Observable<any>{
             data.value == false)
             &&
             //make sure that the value that we are updating is not sharepoint mode
-            settingData[0]['fieldName'] !== 'SharePointMode'
+            settingsData[0]['fieldName'] !== 'SharePointMode'
         )
-            ? this.settingsService.setSetting(settingData[0]['fieldName'], settingData[0]['fieldValue'])
+            ? this.settingsService.setSettings(settingsData)
+            : Observable.of(data)
+        )
+        .mergeMap(data =>
+            (typeof(data) == 'object' &&
+            data.hasOwnProperty('functionCall') &&
+            data.hasOwnProperty('result') &&
+            data.functionCall == 'setSetting' &&
+            data.result == true)
+            ? Observable.of(this.settingsService.getSettings())
             : Observable.of(data)
         )
         //collect notifications passed down the observable chain and add them to the notifcaiton table

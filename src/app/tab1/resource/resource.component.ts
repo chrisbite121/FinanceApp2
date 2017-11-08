@@ -5,7 +5,7 @@ import { GridOptions } from 'ag-grid'
 import { TableService } from '../../service/table.service'
 import { DataContextService } from '../../service/data-context.service'
 import { UiStateService } from '../../service/ui-state.service'
-import { WorkdayService } from '../../service/workdays.service'
+// import { WorkdayService } from '../../service/workdays.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
@@ -53,7 +53,7 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     public prtTableHeight: number = 30;
 
 
-    public puTableWidth: number = 1800;
+    public puTableWidth: number = 1820;
     public ahTableWidth: number = 1800;
     public prTableWidth: number = 2000;
 
@@ -61,7 +61,7 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     public prtTableWidth: number = 2100;
     
     //continuous streams that need to be destroyed on exit
-    public resouceStream: Subscription
+    public resourceStream: Subscription
     public totalStream: Subscription
     public workdayStream: Subscription
     public resourceContextStream: Subscription
@@ -72,7 +72,7 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     constructor(private tableService: TableService, 
                 private dataContextService: DataContextService,
                 private uiStateService: UiStateService,
-                private workdayService: WorkdayService,
+                // private workdayService: WorkdayService,
                 private scriptService: ScriptService,
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
@@ -89,7 +89,16 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         this.wdGridOptions.context = { };
         this.wdGridOptions.singleClickEdit = true;
         this.wdGridOptions.onCellValueChanged = ($event: any) => {
-            this.workdayService.updateWorkingDays($event);
+            // this.workdayService.updateWorkingDays($event);
+            if(+$event.newValue !== +$event.oldValue) {
+                this.scriptService.updateTable($event).subscribe(
+                    data => console.log(data),
+                    err => console.log(err),
+                    () =>  { console.log('COMPLETED WD')
+                            this.uiStateService.updateMessage('update completed', this.utilsService.completeStatus).subscribe(this.getSubscriber())
+                    }
+                )
+            }
         };
         this.wdGridOptions.onGridReady = () => {
             if(this.wdGridOptions.api) {
@@ -107,7 +116,8 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
        
 
         this.puGridOptions.onCellValueChanged = ($event: any) => {
-            if(+$event.newValue !== +$event.oldValue) {
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if(hasUpdated) {
                 this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
@@ -144,7 +154,8 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         //actual hours gridoptions
         this.ahGridOptions.context = {};
         this.ahGridOptions.onCellValueChanged = ($event: any) => {
-            if(+$event.newValue !== +$event.oldValue) {
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if(hasUpdated) {
                 this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
@@ -183,7 +194,8 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         //project resource gridoptions
         this.prGridOptions.context = {};
         this.prGridOptions.onCellValueChanged = ($event: any) => {
-            if(+$event.newValue !== $event.oldValue){
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if(hasUpdated){
                 this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
@@ -254,13 +266,17 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             this.prtGridOptions.columnDefs = table;
         });
 
-        this.resouceStream = this.dataContextService.getResourceDataStream().subscribe(data => {
+        this.resourceStream = this.dataContextService.getResourceDataStream().subscribe(data => {
+            console.error('resource data received')
+            console.error(data);
+            console.error(this.puGridOptions.api)
 
             if (!this.puGridOptions.rowData) {
                 this.puGridOptions.rowData = data;
             } 
             
             if (this.puGridOptions.api) {
+                console.error('updating row data')
                 this.puGridOptions.api.setRowData(data);
             }
 
@@ -297,7 +313,9 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
 
         })
 
-        this.workdayStream = this.workdayService.getWorkdayStream().subscribe(data => {
+        // this.workdayStream = this.workdayService.getWorkdayStream().subscribe(data => {
+        this.workdayStream = this.dataContextService.getWorkingdayDataStream().subscribe(data => {
+            console.error('received workday data')
             if (!this.wdGridOptions.rowData){
                 this.wdGridOptions.rowData = <Array<IYear>>data;
             } 
@@ -353,7 +371,8 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
     }
 
     ngOnDestroy(){
-        this.resouceStream.unsubscribe()
+        console.log('destroying streams')
+        this.resourceStream.unsubscribe()
         this.totalStream.unsubscribe()
         this.workdayStream.unsubscribe()
         this.resourceContextStream.unsubscribe()
@@ -406,9 +425,10 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
 
     refreshGrid(){
         if(this.settingsService.initAppComplete){
-            this.workdayService.getWorkdayData();
+            // this.workdayService.getWorkdayData();
             this.scriptService.getAppData([this.utilsService.financeAppResourceData, 
-                                            this.utilsService.financeAppTotalsData],
+                                            this.utilsService.financeAppTotalsData,
+                                            this.utilsService.financeAppWorkingDaysData],
                                             this.settingsService.year)
                     .subscribe(data => console.log(data),
                                 err => console.log(err),
@@ -420,10 +440,10 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         }
     }
 
-    saveUpdates(){
-        this.scriptService.saveAppData()
-            .subscribe(this.getSubscriber())
-    }
+    // saveUpdates(){
+    //     this.scriptService.saveAppData()
+    //         .subscribe(this.getSubscriber())
+    // }
 
     resizeTables(noRows: number) {
         this.wdTableWidth = 1501
@@ -432,13 +452,13 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         this.ahTableHeight = (noRows * 25) + 30;
         this.prTableHeight = (noRows * 25) + 30;
 
-        this.puTableWidth = 1601;
-        this.ahTableWidth = 1701;
-        this.prTableWidth = 1901;
+        this.puTableWidth = 1626;
+        this.ahTableWidth = 1726;
+        this.prTableWidth = 1926;
 
         //Totals
 
-        this.prtTableWidth = 1920;
+        this.prtTableWidth = 1926;
 
     }
 
@@ -491,16 +511,18 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
         let _colId = event.column.colId;
         let _rowIndex = event.node.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
         this[focusTable].api.stopEditing(false)
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        
     }
 
     handleTab(params, focusTable, listName){
         let _colId = params.previousCellDef.column.colId;
         let _rowIndex = params.previousCellDef.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
         this[focusTable].api.stopEditing()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        
     }
 
     handleNavigate(params, focusTable, listName){
@@ -521,5 +543,24 @@ export class ResourceComponent implements OnInit, OnDestroy, AfterContentChecked
             this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionDown)
         }
         this[focusTable].api.stopEditing()
-    }   
+    }
+    
+    checkIfValueChanged(event) {
+        let result:boolean = false;
+        
+        switch (typeof(event.oldValue)) {
+            case 'string':
+                event.oldValue === event.newValue ? result = false : result = true;
+            break;
+            case 'number':
+                +event.oldValue === +event.newValue ? result = false : result = true;
+            break;
+            default:
+
+            break;
+        }
+
+        return result;
+    }
+
 }

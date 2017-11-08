@@ -14,6 +14,7 @@ declare var hostUrl;
 @Component({
     selector: 'of-main-commandbar',
     templateUrl: './fabric.mainCommandbar.wrapper.component.html',
+    styleUrls: ['./fabric.mainCommandbar.wrapper.component.css']
 })
 export class FabricMainCommandBarWrapperComponent implements AfterViewInit {
     

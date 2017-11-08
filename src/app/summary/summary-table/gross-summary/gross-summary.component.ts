@@ -161,16 +161,18 @@ export class GrossSummaryComponent implements OnInit, OnDestroy, AfterContentChe
         let _colId = event.column.colId;
         let _rowIndex = event.node.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
         this[focusTable].api.stopEditing(false)
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        
     }
 
     handleTab(params, focusTable, listName){
         let _colId = params.previousCellDef.column.colId;
         let _rowIndex = params.previousCellDef.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
         this[focusTable].api.stopEditing()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        
     }
 
     handleNavigate(params, focusTable, listName){

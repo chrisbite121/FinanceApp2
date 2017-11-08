@@ -34,7 +34,14 @@
                     [type]="'primary'" 
                     [id]="'settingsdata'" 
                     [description]="'Show Settings Data'"></of-button>
-     </div>                    
+     </div>    
+     <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+        <of-button (buttonClicked)='showWorkdaysData($event)' 
+                    [label]="'Workdays Data'" 
+                    [type]="'primary'" 
+                    [id]="'workdaydata'" 
+                    [description]="'Show Workday Data'"></of-button>
+     </div>                         
   </div>
 </div>
 

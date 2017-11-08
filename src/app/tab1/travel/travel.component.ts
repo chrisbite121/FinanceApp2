@@ -4,7 +4,7 @@ import { GridOptions } from 'ag-grid'
 
 import { TableService } from '../../service/table.service'
 import { DataContextService } from '../../service/data-context.service'
-import { WorkdayService } from '../../service/workdays.service'
+// import { WorkdayService } from '../../service/workdays.service'
 import { ScriptService } from '../../service/scripts.service'
 import { SettingsService } from '../../service/settings.service'
 import { UtilsService } from '../../service/utils.service'
@@ -55,7 +55,7 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
 
     constructor(private tableService: TableService, 
                 private dataContext: DataContextService,
-                private workdayService: WorkdayService,
+                // private workdayService: WorkdayService,
                 private scriptService: ScriptService,
                 private settingsService: SettingsService,
                 private utilsService: UtilsService,
@@ -71,7 +71,8 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
         //travel subsidence gridoptions
         this.tsGridOptions.context = {};
         this.tsGridOptions.onCellValueChanged = ($event: any) => {
-            if(+$event.oldValue !== +$event.newValue) {
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if(hasUpdated) {
                 this.scriptService.updateTable($event)
                 .subscribe(
                     data => console.log(data),
@@ -110,7 +111,8 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
         //actual travel subsidence gridoptions
         this.atsGridOptions.context = {};
         this.atsGridOptions.onCellValueChanged = ($event: any) => {
-            if (+$event.oldValue !== +$event.newValue) {
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if (hasUpdated) {
                 this.scriptService.updateTable($event)
                     .subscribe(
                         data => console.log(data),
@@ -148,7 +150,8 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
         //Project resource travel subsistence gridoptions
         this.rtsGridOptions.context = {};
         this.rtsGridOptions.onCellValueChanged = ($event: any) => {
-            if(+$event.oldValue !== $event.newValue){
+            let hasUpdated:boolean = this.checkIfValueChanged($event)
+            if(hasUpdated){
                 this.scriptService.updateTable($event).subscribe(this.getSubscriber());
             } else {
                 this.updateFocusedCell()
@@ -209,9 +212,6 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
         });
 
         this.resourceStream = this.dataContext.getResourceDataStream().subscribe(data => {
-            console.error('RESOURCE DATA RECEIVED')
-            console.log(data)
-
             if (!this.tsGridOptions.rowData) {
                 this.tsGridOptions.rowData = data;
             } 
@@ -321,21 +321,21 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
         }
     }
 
-    saveUpdates(){
-        this.scriptService.saveAppData()
-            .subscribe(this.getSubscriber());
-    }
+    // saveUpdates(){
+    //     this.scriptService.saveAppData()
+    //         .subscribe(this.getSubscriber());
+    // }
 
     resizeTables(noRows: number) {
         this.tsTableHeight = (noRows * 25) + 40;
         this.atsTableHeight = (noRows * 25) + 40;
         this.rtsTableHeight = (noRows * 25) + 40;
 
-        this.tsTableWidth = 1601;
-        this.atsTableWidth = 1601;
-        this.rtsTableWidth = 1901;
+        this.tsTableWidth = 1626;
+        this.atsTableWidth = 1626;
+        this.rtsTableWidth = 1926;
         //Totals
-        this.rtstTableWidth = 1901;
+        this.rtstTableWidth = 1926;
     }
 
     getSubscriber() {
@@ -384,16 +384,18 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
         let _colId = event.column.colId;
         let _rowIndex = event.node.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
         this[focusTable].api.stopEditing(false)
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionStay)
+        
     }
 
     handleTab(params, focusTable, listName){
         let _colId = params.previousCellDef.column.colId;
         let _rowIndex = params.previousCellDef.rowIndex;
         let _rowCount = this[focusTable].api.getDisplayedRowCount()
-        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
         this[focusTable].api.stopEditing()
+        this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionRight)
+        
     }
 
     handleNavigate(params, focusTable, listName){
@@ -414,6 +416,24 @@ export class TravelComponent implements OnInit, OnDestroy, AfterContentChecked {
             this.uiStateService.moveFocusedCell(listName, focusTable, _rowIndex, _colId, _rowCount, this.utilsService.directionDown)
         }
         this[focusTable].api.stopEditing()
-    }      
+    }
+    
+    checkIfValueChanged(event) {
+        let result:boolean = false;
+        
+        switch (typeof(event.oldValue)) {
+            case 'string':
+                event.oldValue === event.newValue ? result = false : result = true;
+            break;
+            case 'number':
+                +event.oldValue === +event.newValue ? result = false : result = true;
+            break;
+            default:
+
+            break;
+        }
+
+        return result;
+    }    
  
 }

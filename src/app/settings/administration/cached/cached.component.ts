@@ -74,6 +74,20 @@ export class CachedComponent {
         }
     }
 
+    showWorkdaysData(event){
+        let workdayData = this.dataContextService.workdayData
+        console.log(workdayData)
+
+        if(workdayData && Array.isArray(workdayData)) {
+            this.logs.push(`Number of items found: ${workdayData.length}`)
+            workdayData.forEach(element => {
+                this.logs.push(JSON.stringify(element))
+            })
+        } else {
+            this.logs.push('No items found')
+        }
+    }    
+
     showSettingsData(event){
         console.log('SETTINGS LIST')
         console.log(this.settingsService.settings)

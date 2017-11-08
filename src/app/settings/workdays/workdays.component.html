@@ -1,26 +1,26 @@
-Working Days
-
+<h2>Working Days</h2>
+<br/>
 <div class="ms-Grid">
   <div class="ms-Grid-row">
      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
         <of-button (buttonClicked)='getWorkDays($event)' 
-                    [label]="'Get Working Days'" 
+                    [label]="'Load List Data'" 
                     [type]="'primary'" 
                     [id]="'workingdays'" 
                     [description]="'get the working days for all years'"></of-button>
      </div>
   </div>
-
+<br/>
   <div class="ms-Grid-row" *ngIf='years'>
      <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
-        Select Year
+        Select Year to Modify
      </div>
     <div class="ms-Grid-col ms-u-sm7 ms-u-md5 ms-u-lg2">
       <of-dropdown [innerlabel]="" 
                   [id]="'currentYearToggle'" 
                   [disable]='false' 
                   [options]= "years" 
-                  [defaultValue]='selectedYear'
+                  [defaultValue]=''
                   (choiceSelectedEvent)='filterWorkdayData($event)'></of-dropdown>
     </div>
   </div>
@@ -130,22 +130,14 @@ Working Days
                             [id]="'savedata'" 
                             [description]="'get the working days for all years'"></of-button>
             </div>
+            <div class="ms-Grid-col ms-u-sm6 ms-u-md4 ms-u-lg2">
+              <of-button (buttonClicked)='cancelUpdates($event)' 
+                          [label]="'Cancel'" 
+                          [type]="" 
+                          [id]="'savedata'" 
+                          [description]="'get the working days for all years'"></of-button>
+          </div>            
           </div>  
         </div>
   </div>
-
-  <div class="ms-Grid-row">
-      <div class="ms-Grid-col ms-u-sm12 ms-u-md12 ms-u-lg12">
-            <table>
-                <tr>
-                  <th>Logs</th>
-                </tr>
-                <tr *ngFor= "let log of logs">
-                    <td>{{log}}
-                </tr>
-            </table>
-      </div>
-  </div>
-</div>
-
 

@@ -77,7 +77,7 @@
     </div> -->
 
 
-    <div class="ms-CommandButton ms-CommandButton--noLabel">
+    <div class="ms-CommandButton ms-CommandButton--noLabel toolbarButton">
       <button class="ms-CommandButton-button" [routerLink]="['/settings']">
         <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Settings"></i></span> 
         <span class="ms-CommandButton-label">Settings</span> 
@@ -87,19 +87,19 @@
   <!--- Left hand area menu -->
   <div class="ms-CommandBar-mainArea">
     <div class="ms-CommandButton">
-      <button class="ms-CommandButton-button" (click)="backToProjectSite();">
+      <button class="ms-CommandButton-button toolbarButton" (click)="backToProjectSite();">
         <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--DoubleChevronLeft12"></i></span> 
         <span class="ms-CommandButton-label">Back to Project Site</span> 
       </button>
     </div>    
     <div class="ms-CommandButton" [routerLink]="['/summary']">
-      <button class="ms-CommandButton-button">
+      <button class="ms-CommandButton-button toolbarButton">
         <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--AppIconDefault"></i></span> 
         <span class="ms-CommandButton-label">Summary</span> 
       </button>
     </div>
     <div class="ms-CommandButton">
-      <button class="ms-CommandButton-button" [routerLink]="['/tab1']">
+      <button class="ms-CommandButton-button toolbarButton" [routerLink]="['/tab1']">
         <span class="ms-CommandButton-icon ms-fontColor-themePrimary"><i class="ms-Icon ms-Icon--Tiles"></i></span> 
         <span class="ms-CommandButton-label">FY1</span> 
       </button>

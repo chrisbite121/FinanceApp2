@@ -18,6 +18,7 @@ export class StateService {
         this._loadingAppData[this.utilsService.financeAppMaterialData] = false;
         this._loadingAppData[this.utilsService.financeAppSummaryData] = false;
         this._loadingAppData[this.utilsService.financeAppTotalsData] = false;
+        this._loadingAppData[this.utilsService.financeAppWorkingDaysData] = false;
 
     }
 

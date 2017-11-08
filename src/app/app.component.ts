@@ -3,7 +3,6 @@ import { Observable } from 'rxjs/Rx';
 import { Observer } from 'rxjs/Observer';
 import 'rxjs/operator/mergeAll'
 
-
 import { UtilsService } from './service/utils.service'
 import { LogService } from './service/log.service'
 import { ScriptService} from './service/scripts.service'
@@ -59,7 +58,8 @@ export class AppComponent  {
                     this.scriptService.loadAppData([this.utilsService.financeAppResourceData,
                         this.utilsService.financeAppMaterialData,
                         this.utilsService.financeAppTotalsData,
-                        this.utilsService.financeAppSummaryData], this.settingsService.year)
+                        this.utilsService.financeAppSummaryData,
+                        this.utilsService.financeAppWorkingDaysData], this.settingsService.year)
                             .subscribe(data => console.log(data),
                                         err => console.log(err),
                                         () => { // grid components need to know if init call complete before they attempt to load data

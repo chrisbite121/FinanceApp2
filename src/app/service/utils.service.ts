@@ -358,4 +358,20 @@ private _Parser;
     get directionStay(){
         return 'stay'
     }
+
+    get Months() {
+        return [
+            'January', 
+            'Febuary', 
+            'March', 
+            'April', 
+            'May', 
+            'June', 
+            'July', 
+            'August', 
+            'September', 
+            'October', 
+            'November', 
+            'December']
+    }
 }

@@ -225,8 +225,8 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
                     } else {
                         //item id is already in the table - do not add this item again to the table
                         observer.next({
-                            reportHeading: 'doesItemAlreadyExistOnTable',
-                            reportResult: this.utilsService.errorStatus,
+                            reportHeading: 'processListData',
+                            reportResult: this.utilsService.successStatus,
                             description: `item with ID ${item['ID']} already exists on list`
                         })
                     }
@@ -357,6 +357,7 @@ processListData(data:Array<Object>, listName: string):Observable<any> {
             case this.utilsService.financeAppWorkingDaysData:
                 _item = JSON.parse(JSON.stringify(newWorkdayDataRow))
                 _item['State'] = 'create';
+                _item['ListName'] = listName;
                 _item['Year'] = this.settingsService.year;
                 _item['ItemId'] = _itemId;
                 //temporarily assign itemid as ID until object is saved
@@ -777,6 +778,7 @@ extractProperties(event): Observable<any>{
     let validate$ = new Observable((observer:Observer<any>) => {
         let ID, columnName, newValue, oldValue, indexValue, listName, tableName;
         if (event.data
+            && event.colDef
             && event.hasOwnProperty('colDef')
             && event.hasOwnProperty('newValue')
             && event.hasOwnProperty('oldValue')
@@ -832,6 +834,7 @@ extractProperties(event): Observable<any>{
 
 preProcessData(data): Observable<any>{
     let process$ = new Observable((observer:Observer<any>) => {
+        //This doesn't handle text fields -- NEED TO ADDRESS!!
         if (!Number(data.newValue)) {
             let _msg = `updateTable Error: Type error cannot convert newValue to number - ${data.newValue}`
             this.logService.log(_msg, this.utilsService.errorStatus, false);
@@ -1301,10 +1304,10 @@ processCalculatedFields(listName:string, data:any): Observable<any>{
                     this.calcSummaryValues();
                 break;
                 case this.utilsService.financeAppWorkingDaysData:
-                this.calcResourceValues();
-                this.calcMaterialValues();
-                this.calcTotalValues();
-                this.calcSummaryValues();
+                    this.calcResourceValues();
+                    this.calcMaterialValues();
+                    this.calcTotalValues();
+                    this.calcSummaryValues();
                 break;
                 default:
                     this.logService.log(`UpdateTable Error: unable to determine which data set to refresh`, this.utilsService.errorStatus, false);
@@ -1358,6 +1361,7 @@ emitValues(listArray:Array<string>): Observable<any>{
             try {
                 switch (listName) {
                     case this.utilsService.financeAppResourceData:
+                        console.log(this._ResourceData)
                         this.resourceDataStream.next(this._ResourceData);
                     break;
                     case this.utilsService.financeAppMaterialData:
@@ -1371,6 +1375,9 @@ emitValues(listArray:Array<string>): Observable<any>{
                     break;
                     case this.utilsService.financeAppWorkingDaysData:
                         this.workingdayDataStream.next(this._WorkdayData);
+                        this.resourceDataStream.next(this._ResourceData);
+                        this.materialDataStream.next(this._MaterialData);
+                        this.summaryDataStream.next(this._SummaryData)
                     break;
                     default:
                         let _msg = `UpdateTable Error: unable to determine which data set to refresh`
@@ -1719,13 +1726,23 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
 
         this.resetHighlights(this._ResourceDataName);
 
-        let filteredResourceYearData
+        let filteredResourceYearData, filteredYearWorkdaysData
 
         //filter on current year and delete
         try {
             filteredResourceYearData = this._ResourceData.filter((row)=>{
                 return row.Year === this.settingsService.year && row.State !== this.utilsService.deleteState;
             })
+        } catch (e) {
+            this.logService.log(e, this.utilsService.errorStatus, false);
+        }
+
+        //filter on current year and delete
+        try {
+            filteredYearWorkdaysData = this._WorkdayData.filter((row)=>{
+                return row.Year === this.settingsService.year;
+            })
+
         } catch (e) {
             this.logService.log(e, this.utilsService.errorStatus, false);
         }
@@ -1740,46 +1757,46 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
                 // let indexValue = this.findResourceIndex(rowItem.ID);
                 let indexValue = this.getItemIndex(rowItem.ID, this._ResourceDataName);
                 //PUForecast
-                let updatedPUForecast = this.dataCalcService.puForecast(rowItem);
+                let updatedPUForecast = this.dataCalcService.puForecast(rowItem, filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PUForecast',updatedPUForecast, indexValue);
                 //AHTotalHours
                 let updatedAHTotalHours = this.dataCalcService.ahTotalHours(rowItem);
                 this.checkCalcValue2(rowItem, 'AHTotalHours',updatedAHTotalHours, indexValue);
                 //UpdatedPRJan
-                let updatedPRJan = this.dataCalcService.prMonth(rowItem, 'January');
+                let updatedPRJan = this.dataCalcService.prMonth(rowItem, 'January', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRJan',updatedPRJan, indexValue);
                 //UpdatedPRFeb
-                let updatedPRFeb = this.dataCalcService.prMonth(rowItem, 'Febuary');
+                let updatedPRFeb = this.dataCalcService.prMonth(rowItem, 'Febuary', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRFeb',updatedPRFeb, indexValue);
                 //UpdatedPRMar
-                let updatedPRMar = this.dataCalcService.prMonth(rowItem, 'March');
+                let updatedPRMar = this.dataCalcService.prMonth(rowItem, 'March', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRMar',updatedPRMar, indexValue);
                 //UpdatedPRApr
-                let updatedPRApr = this.dataCalcService.prMonth(rowItem, 'April');
+                let updatedPRApr = this.dataCalcService.prMonth(rowItem, 'April', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRApr', updatedPRApr, indexValue);
                 //UpdatedPRMay
-                let updatedPRMay = this.dataCalcService.prMonth(rowItem, 'May');
+                let updatedPRMay = this.dataCalcService.prMonth(rowItem, 'May', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRMay', updatedPRMay, indexValue); 
                 //UpdatedPRJun
-                let updatedPRJun = this.dataCalcService.prMonth(rowItem, 'June');
+                let updatedPRJun = this.dataCalcService.prMonth(rowItem, 'June', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRJun', updatedPRJun, indexValue);
                 //UpdatedPRJul
-                let updatedPRJul = this.dataCalcService.prMonth(rowItem, 'July');
+                let updatedPRJul = this.dataCalcService.prMonth(rowItem, 'July', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRJul', updatedPRJul, indexValue);
                 //UpdatedPRAug
-                let updatedPRAug = this.dataCalcService.prMonth(rowItem, 'August');
+                let updatedPRAug = this.dataCalcService.prMonth(rowItem, 'August', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRAug', updatedPRAug, indexValue); 
                 //UpdatedPRSep
-                let updatedPRSep = this.dataCalcService.prMonth(rowItem, 'September');
+                let updatedPRSep = this.dataCalcService.prMonth(rowItem, 'September', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRSep', updatedPRSep, indexValue);
                 //UpdatedPROct
-                let updatedPROct = this.dataCalcService.prMonth(rowItem, 'October');
+                let updatedPROct = this.dataCalcService.prMonth(rowItem, 'October', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PROct', updatedPROct, indexValue);
                 //UpdatedPRNov
-                let updatedPRNov = this.dataCalcService.prMonth(rowItem, 'November');
+                let updatedPRNov = this.dataCalcService.prMonth(rowItem, 'November', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRNov', updatedPRNov, indexValue);
                 //UpdatedPRDec
-                let updatedPRDec = this.dataCalcService.prMonth(rowItem, 'December');
+                let updatedPRDec = this.dataCalcService.prMonth(rowItem, 'December', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'PRDec', updatedPRDec, indexValue);
                 //UpdatedPRDec
                 let updatedPRYtdTotal = this.dataCalcService.prYtdTotal(rowItem);
@@ -1794,41 +1811,41 @@ updateItemIdAfterAdd(itemId:string, ID:number, listName:string, tableName:string
                 let updatedPRForecastVarianceToBudget = this.dataCalcService.prForecastVarianceToBudget(rowItem);
                 this.checkCalcValue2(rowItem, 'PRForecastVarianceToBudget', updatedPRForecastVarianceToBudget, indexValue);
                 //TSJan
-                let updatedTSJan = this.dataCalcService.tsMonth(rowItem, 'January');
-                this.checkCalcValue2(rowItem, 'TSJan', updatedTSJan, indexValue);  
+                let updatedTSJan = this.dataCalcService.tsMonth(rowItem, 'January', filteredYearWorkdaysData[0]);
+                this.checkCalcValue2(rowItem, 'TSJan', updatedTSJan, indexValue);
                 //TSFeb
-                let updatedTSFeb = this.dataCalcService.tsMonth(rowItem, 'Febuary');
+                let updatedTSFeb = this.dataCalcService.tsMonth(rowItem, 'Febuary', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSFeb', updatedTSFeb, indexValue);
                 //TSMar
-                let updatedTSMar = this.dataCalcService.tsMonth(rowItem, 'March');
+                let updatedTSMar = this.dataCalcService.tsMonth(rowItem, 'March', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSMar', updatedTSMar, indexValue);
                 //TSApr
-                let updatedTSApr = this.dataCalcService.tsMonth(rowItem, 'April');
+                let updatedTSApr = this.dataCalcService.tsMonth(rowItem, 'April', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSApr', updatedTSApr, indexValue);
                 //TSMay
-                let updatedTSMay = this.dataCalcService.tsMonth(rowItem, 'May');
+                let updatedTSMay = this.dataCalcService.tsMonth(rowItem, 'May', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSMay', updatedTSMay, indexValue);
                 //TSJune
-                let updatedTSJun = this.dataCalcService.tsMonth(rowItem, 'June');
+                let updatedTSJun = this.dataCalcService.tsMonth(rowItem, 'June', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSJun', updatedTSJun, indexValue);
                 //TSJuly
-                let updatedTSJul = this.dataCalcService.tsMonth(rowItem, 'July');
+                let updatedTSJul = this.dataCalcService.tsMonth(rowItem, 'July', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSJul', updatedTSJul, indexValue);
                 //TSAugust
-                let updatedTSAug = this.dataCalcService.tsMonth(rowItem, 'August');
+                let updatedTSAug = this.dataCalcService.tsMonth(rowItem, 'August', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSAug', updatedTSAug, indexValue);
                 //TSSeptember
-                let updatedTSSep = this.dataCalcService.tsMonth(rowItem, 'September');
+                let updatedTSSep = this.dataCalcService.tsMonth(rowItem, 'September', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSSep', updatedTSSep, indexValue);
                 //TSOctober
-                let updatedTSOct = this.dataCalcService.tsMonth(rowItem, 'October');
+                let updatedTSOct = this.dataCalcService.tsMonth(rowItem, 'October', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSOct', updatedTSOct, indexValue);
                 //TSNovember
-                let updatedTSNov = this.dataCalcService.tsMonth(rowItem, 'November');
+                let updatedTSNov = this.dataCalcService.tsMonth(rowItem, 'November', filteredYearWorkdaysData[0]);
                 this.checkCalcValue2(rowItem, 'TSNov', updatedTSNov, indexValue);
                 //TSDecember
-                let updatedTSDec = this.dataCalcService.tsMonth(rowItem, 'December');
-                this.checkCalcValue2(rowItem, 'TSDec', updatedTSDec, indexValue);                        
+                let updatedTSDec = this.dataCalcService.tsMonth(rowItem, 'December', filteredYearWorkdaysData[0]);
+                this.checkCalcValue2(rowItem, 'TSDec', updatedTSDec, indexValue);
                 //TS Forecast
                 let updatedTSForecast = this.dataCalcService.tsForecast(rowItem);
                 this.checkCalcValue2(rowItem, 'TSForecast', updatedTSForecast, indexValue);

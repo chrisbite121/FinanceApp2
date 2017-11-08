@@ -4,3 +4,7 @@
     padding-right: 10px;
     height: 10px;
 }
+
+.toolbarButton{
+    min-width: 0px;
+}

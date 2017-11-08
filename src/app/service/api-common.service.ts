@@ -1524,6 +1524,7 @@ addField(listName:string, contextType:string, fieldDefinition:string, fieldType:
         this.logService.log('Update Item funtion called', this._info, true);
         this.logService.log(`listName parameter: ${listName}, contextType parameter: ${contextType}, ID parameter: ${ID}`)
         this.logService.log(`updaing field to list ${listName} with values...`, this._info, true)
+        console.error(itemValues)
         itemValues.forEach(element => {
             this.logService.log(String(element.fieldName) + ': ' + String(element.fieldValue), this._info, true);
         })

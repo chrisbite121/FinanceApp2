@@ -34,7 +34,7 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
     public tTableHeight: number = 30;
 
     //totals
-    public tTableWidth: number = 1901;
+    public tTableWidth: number = 1926;
 
     public uiState: any;
 
@@ -135,7 +135,7 @@ export class TotalComponent implements OnInit, OnDestroy, AfterContentChecked {
 
     resizeTables(noRows: number) {
         //Totals
-        this.tTableWidth = 2100;
+        this.tTableWidth = 2126;
     }
 
     getSubscriber() {

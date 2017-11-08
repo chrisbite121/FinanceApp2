@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observer } from 'rxjs/Observer';
 
-import { WorkdayService } from './workdays.service'
+// import { WorkdayService } from './workdays.service'
 import { SettingsService } from './settings.service'
 
 
 import { IResourceModel } from '../model/resource.model';
 import { IMatModel } from '../model/material.model';
 import { IDataModel } from '../model/data.model'
-import { IYear } from '../model/year.model'
+//import { IYear } from '../model/year.model'
+import { IWorkdayModel } from '../model/workday.model'
 import { ITotalModel } from '../model/total.model'
 
 @Injectable()
@@ -16,7 +17,8 @@ export class DataCalcService {
     private _workingHoursInDay: number
     private _TSWeighting: number
 
-    constructor(private workdayService:WorkdayService,
+    constructor(
+                // private workdayService:WorkdayService,
                 private settingsService:SettingsService) {
         this.init();
     }
@@ -26,22 +28,22 @@ export class DataCalcService {
         this._TSWeighting = this.settingsService.tsWeighting
     };
 
-    puForecast(row: IResourceModel): number{
+    puForecast(row: IResourceModel, workingDays: IWorkdayModel): number{
         let result = 0;
-        let _workingdays:IYear = this.workdayService.workingDays
-        if (_workingdays) {
-            result = ((row.PUJan * _workingdays.January) +
-                        (row.PUFeb * _workingdays.Febuary) +
-                        (row.PUMar * _workingdays.March) +
-                        (row.PUApr * _workingdays.April) +
-                        (row.PUMay * _workingdays.May) +
-                        (row.PUJun * _workingdays.June) +
-                        (row.PUJul * _workingdays.July) +
-                        (row.PUAug * _workingdays.August) +
-                        (row.PUSep * _workingdays.September) +
-                        (row.PUOct * _workingdays.October) +
-                        (row.PUNov * _workingdays.November) +
-                        (row.PUDec * _workingdays.December)) *
+        //let _workingdays:IWorkdayModel = this.workdayService.workingDays
+        if (workingDays) {
+            result = ((row.PUJan * workingDays.January) +
+                        (row.PUFeb * workingDays.Febuary) +
+                        (row.PUMar * workingDays.March) +
+                        (row.PUApr * workingDays.April) +
+                        (row.PUMay * workingDays.May) +
+                        (row.PUJun * workingDays.June) +
+                        (row.PUJul * workingDays.July) +
+                        (row.PUAug * workingDays.August) +
+                        (row.PUSep * workingDays.September) +
+                        (row.PUOct * workingDays.October) +
+                        (row.PUNov * workingDays.November) +
+                        (row.PUDec * workingDays.December)) *
                         row.PRDayRate
         }
         return this.mathRound(result)
@@ -66,27 +68,27 @@ export class DataCalcService {
         return this.mathRound(result)
     }
 
-    prMonth(row: IResourceModel, monthLong: string): number{
-        let _workingdays:IYear = this.workdayService.workingDays
+    prMonth(row: IResourceModel, monthLong: string, workingDays: IWorkdayModel): number{
+        // let _workingdays:IYear = this.workdayService.workingDays
         let monthShort:string = this.getShortMonth(monthLong);
 
         if (monthShort === undefined) return 0;
         
         let result:number = 0;
         
-        if (_workingdays){
+        if (workingDays){
             let AHMonthValue = Number(row['AH' + monthShort])
             if (AHMonthValue !== 0){
                 let value1:number = 0
 
-                Number(AHMonthValue) > (Number(row.ContractedDayHours)*Number(_workingdays[monthLong])) ?
-                value1 = Number(row.ContractedDayHours) * Number(_workingdays[monthLong]) :
+                Number(AHMonthValue) > (Number(row.ContractedDayHours)*Number(workingDays[monthLong])) ?
+                value1 = Number(row.ContractedDayHours) * Number(workingDays[monthLong]) :
                 value1 = Number(AHMonthValue);
 
                 result =  value1 * (Number(row.ContractedDayHours)/Number(this._workingHoursInDay));
 
             } else {
-                result = Number(row.ContractedDayHours) * Number(_workingdays[monthLong]) * Number(row['PU'+monthShort]);
+                result = Number(row.ContractedDayHours) * Number(workingDays[monthLong]) * Number(row['PU'+monthShort]);
             }
         }
 
@@ -127,17 +129,17 @@ export class DataCalcService {
         return this.mathRound(result)
     }
 
-    tsMonth(row: IResourceModel, monthLong: string): number {
+    tsMonth(row: IResourceModel, monthLong: string, workingDays: IWorkdayModel): number {
         let result = 0;
         let monthShort = this.getShortMonth(monthLong);
-        let _workingdays:IYear = this.workdayService.workingDays
+        // let _workingdays:IYear = this.workdayService.workingDays
 
         if (monthShort === undefined) return 0;
 
         let PUMonthValue = Number(row['PU'+monthShort])
 
         if (PUMonthValue !== 0) {
-            result = row.TSDayRate * _workingdays[monthLong] * PUMonthValue * this._TSWeighting;
+            result = row.TSDayRate * workingDays[monthLong] * PUMonthValue * this._TSWeighting;
         } else {
             result = 0;
         }

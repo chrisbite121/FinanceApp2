@@ -9,7 +9,7 @@ import { AgEditorComponent } from 'ag-grid-angular/main';
 })
 export class NumericEditorComponent implements AgEditorComponent, AfterViewInit {
     private params: any;
-    public value: number;
+    public value: any;
     private cancelBeforeStart: boolean = false;
 
     @ViewChild('input', {read: ViewContainerRef}) public input;
@@ -25,7 +25,8 @@ export class NumericEditorComponent implements AgEditorComponent, AfterViewInit 
     }
 
     getValue(): any {
-        return this.value;
+        // return this.value;
+        return this.input.element.nativeElement.value;
     }
 
     isCancelBeforeStart(): boolean {
@@ -39,9 +40,14 @@ export class NumericEditorComponent implements AgEditorComponent, AfterViewInit 
     };
 
     onKeyDown(event): void {
-        if (!this.isKeyPressedNumeric(event)) {
+        if (!this.isKeyPressedValid(event)) {
             if (event.preventDefault) event.preventDefault();
         }
+
+        if (this.value === '') {
+            this.input.element.nativeElement.value = 0;
+        }
+        
     }
 
     // dont use afterGuiAttached for post gui events - hook into ngAfterViewInit instead for this
@@ -56,12 +62,18 @@ export class NumericEditorComponent implements AgEditorComponent, AfterViewInit 
     }
 
     private isCharNumeric(charStr): boolean {
-        return !!/\d/.test(charStr);
+        //either digit from top row, numberkey is represented by letters a-g, 0 on number key
+        //represented by `
+        return !!/(\d|[a-i]|`)/.test(charStr);
     }
 
-    private isKeyPressedNumeric(event): boolean {
+    private isCharBackspace(charCode): boolean {
+        return charCode === 8
+    }
+
+    private isKeyPressedValid(event): boolean {
         var charCode = this.getCharCodeFromEvent(event);
         var charStr = String.fromCharCode(charCode);
-        return this.isCharNumeric(charStr);
+        return this.isCharNumeric(charStr) || this.isCharBackspace(charCode);
     }
 }
