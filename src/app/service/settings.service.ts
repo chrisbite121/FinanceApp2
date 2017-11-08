@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { Observer } from 'rxjs/Observer';
 import { Subject } from 'rxjs/Subject';
-
+//delete me comment
 import { ISettings, ISettingsOptions, IAppSettings } from '../model/settings.model';
 
 import { IItemPropertyModel } from '../model/data-validation.model'
